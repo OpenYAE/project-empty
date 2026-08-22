@@ -35,7 +35,8 @@ bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor
 · `render` (GL4 renderer, shaders, post-process, decals) · `physics` (Jolt wrapper + coordinator, ragdoll)
 · `scripting` (Lua 5.4 bindings) · `ai` (combat loop, goals, perception) · `game` (GameRulesYAE facade +
 coordinators) · `assets` (`.ds2/.ds2md/.ds2cm/.ds2edf` parsers) · `audio` · `animation` · `navigation`
-· `ui` · `scene` · `resource` · `camera` · `input` · `platform`.
+· `ui` · `scene` · `resource` · `camera` · `input` · `platform` · `video` (AVI cutscenes:
+decoder backend + player + preset resolution).
 
 `GameRulesYAE` is the top-level facade; it delegates to coordinators (LevelLoader, WeaponCoordinator,
 DebugCoordinator, PhysicsCoordinator, GameLuaBinder, PlayerController, NPCSpawner). Put new subsystems in
