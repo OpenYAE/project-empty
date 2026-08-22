@@ -13,6 +13,11 @@ missing behaviour in engine code instead.
   engine/user configs, key binds + every authored cvar default, savegames, logs.
   **Read-only reference** — see `yae-engine/docs/UserFiles.md`.
 - `c-files/`, `programs_extracted/` — decompiled original DLLs, for RE reference.
+  **Not one build:** most are 2006-11-11, but `sv_game.dll`, `ds2kernel.dll`,
+  `ds2NavSystem.dll` and `you_are_empty.exe` are 2019 rebuilds — this is a *community*
+  release whose unofficial patches pulled in libraries from a later DS2 Engine version
+  (adapted for another game). Behaviour found only in those four files may never have
+  existed in the 2006 game — `engine.play_comics` is the known example.
 - `scripts/` — analysis notes (e.g. `YAE_Architecture_Review.md` — a Phase-10 snapshot, outdated).
 - `*.dll`, `*.exe` — original game binaries.
 
