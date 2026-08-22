@@ -9,6 +9,9 @@ missing behaviour in engine code instead.
 
 - `yae-engine/` — the new engine (C++20, SDL3, OpenGL 4.5, Jolt, Lua 5.4). Main work happens here.
 - `yae-game/gameres/` — original game assets (levels, models, scripts, textures). **Read-only.**
+- `yae-game/documents_my games/YaE/` — what the original game writes to *My Documents*:
+  engine/user configs, key binds + every authored cvar default, savegames, logs.
+  **Read-only reference** — see `yae-engine/docs/UserFiles.md`.
 - `c-files/`, `programs_extracted/` — decompiled original DLLs, for RE reference.
 - `scripts/` — analysis notes (e.g. `YAE_Architecture_Review.md` — a Phase-10 snapshot, outdated).
 - `*.dll`, `*.exe` — original game binaries.
@@ -46,6 +49,8 @@ a coordinator, not the facade.
 
 - `yae-engine/docs/Invariants.md` — coordinate systems, frame order, init/ownership, actor-activation rule. **Read this first.**
 - `yae-engine/docs/LevelTestMatrix.md` — which level is the golden test for which subsystem.
+- `yae-engine/docs/UserFiles.md` — the original's *My Documents* tree: configs, cvar defaults,
+  key binds, save format. Check it before inventing a tuning constant.
 - `yae-engine/docs/Phase29_Refactoring.md` — current refactoring status (supersedes `scripts/YAE_Architecture_Review.md`).
 - `yae-engine/docs/console/` — developer-console docs.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
