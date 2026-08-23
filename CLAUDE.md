@@ -27,7 +27,9 @@ missing behaviour in engine code instead.
 ```bash
 bash build.sh                       # cmake + ninja, RelWithDebInfo → yae-engine/build/yae-engine
                                     # (reconfigure with `cmake -B yae-engine/build ...` after adding new .cpp,
-                                    #  since sources come from CMake file(GLOB_RECURSE))
+                                    #  since sources come from CMake file(GLOB_RECURSE); tests/ is listed explicitly)
+bash build.sh --check               # build + gates: own-code warnings, self-tests, level smoke pass.
+                                    # ~27 s, stops at the first failure. Run it before committing.
 bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor, vdnh1, meat, …); tees to yae-engine.log
 ./yae-engine/build/yae-engine --level yae-game/gameres/maps/map10/med1.ds2 --root yae-game/gameres [--edf <f.ds2edf>]
 ./yae-engine/build/yae-engine --model <path.ds2md> --root yae-game/gameres   # single-model viewer
@@ -35,6 +37,9 @@ bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor
 
 - `--level <path>` uses direct/CLI load (`loadLevelDirect`); campaign/transitions use `loadLevel` (by-name).
 - Logs: `yae-engine.log` (run_level.sh tees), plus `yae-engine-test*.log`.
+- `bash build.sh --check` is the one command that answers "is the tree still good": it fails on a
+  warning in `src/`/`app/`/`tests/`, on a self-test failure, or on a level that stopped loading
+  cleanly. Without a display it runs the first two and says the third was skipped.
 - **Smoke test:** `bash scripts/smoke_levels.sh` (~27 s, needs a display) loads all 12 golden levels
   for 120 frames each and fails on any `[ERROR]` or on warnings that are new against
   `scripts/smoke_baseline.txt` (folded to message shape + count, since a lot of the originals'
