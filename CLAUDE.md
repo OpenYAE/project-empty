@@ -43,9 +43,11 @@ bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor
 - **Smoke test:** `bash scripts/smoke_levels.sh` (~27 s, needs a display) loads all 12 golden levels
   for 120 frames each and fails on any `[ERROR]` or on warnings that are new against
   `scripts/smoke_baseline.txt` (folded to message shape + count, since a lot of the originals'
-  warnings are legitimate and never reach zero). `--record` rewrites the baseline, `--frames N`
-  runs longer, and naming levels (`… med1 meat`) checks a subset. The engine flag behind it is
-  `--frames N`: run the real loop N times, then quit with 0, or 1 if anything logged `[ERROR]`.
+  warnings are legitimate and never reach zero). A count that grew is only a failure when it both
+  more than doubled and grew by 5+ — some warnings repeat on a timer, so ±1 between runs is noise.
+  `--record` rewrites the baseline, `--frames N` runs longer, and naming levels (`… med1 meat`)
+  checks a subset. The engine flag behind it is `--frames N`: run the real loop N times, then quit
+  with 0, or 1 if anything logged `[ERROR]`.
 - **Self-tests** run at startup (`runSelfTests()`, `yae-engine/tests/`) and print `PASS`/`FAIL` to the log —
   grep `self-test` after any run to confirm core subsystems (EntitySystem index, Lua, Jolt, parsers).
   The last line is a total (`self-test summary: N/M passed`).
@@ -64,6 +66,10 @@ bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor
 coordinators) · `assets` (`.ds2/.ds2md/.ds2cm/.ds2edf` parsers) · `audio` · `animation` · `navigation`
 · `ui` (also the comics player) · `scene` · `resource` · `camera` · `input` · `platform`
 · `video` (AVI cutscenes: decoder backend + player + preset resolution).
+
+Input routing: `app/AppEventRouter` owns the SDL event chain (console → video → comics →
+cutscene → ESC/pause → screenshot → frozen guard → debug → gameplay). **Order is the contract** —
+add a handler to that list, do not bury a new `if` inside one.
 
 `GameRulesYAE` is the top-level facade; it delegates to coordinators (LevelLoader, WeaponCoordinator,
 DebugCoordinator, PhysicsCoordinator, GameLuaBinder, PlayerController, NPCSpawner). Put new subsystems in
