@@ -37,8 +37,10 @@ bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor
 - Logs: `yae-engine.log` (run_level.sh tees), plus `yae-engine-test*.log`.
 - **Self-tests** run at startup (`runSelfTests()`, `yae-engine/tests/`) and print `PASS`/`FAIL` to the log —
   grep `self-test` after any run to confirm core subsystems (EntitySystem index, Lua, Jolt, parsers).
-  The last line is a total (`self-test summary: N/M passed`); one standing failure is known
-  (`Jolt Physics`, a raycast against a map in a neighbouring repo). Cases live one file per domain
+  The last line is a total (`self-test summary: N/M passed`).
+  `./yae-engine/build/yae-engine --self-test` runs the suite **as a gate**: no window, no GL, no
+  level, ~0.3 s, exit code 0/1 (`--root <gameres>` if not run from the repo root; the cases needing
+  a GPU report `SKIP`). Use it before committing. Cases live one file per domain
   (`CoreTests`, `EntityTests`, `UITests`, `AITests`, `RenderTests`, `LevelTests`, `PhysicsTests`);
   **run order is the explicit list in `tests/TestRegistry.cpp`** — some cases lean on state an
   earlier one left behind, so add new cases there as well as declaring them in `SelfTestCases.h`.
