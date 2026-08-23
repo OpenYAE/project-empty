@@ -8,6 +8,7 @@ missing behaviour in engine code instead.
 ## Layout
 
 - `yae-engine/` — the new engine (C++20, SDL3, OpenGL 4.5, Jolt, Lua 5.4). Main work happens here.
+  `src/` is the engine library, `app/` the thin executable, `tests/` the startup self-tests.
 - `yae-game/gameres/` — original game assets (levels, models, scripts, textures). **Read-only.**
 - `yae-game/documents_my games/YaE/` — what the original game writes to *My Documents*:
   engine/user configs, key binds + every authored cvar default, savegames, logs.
@@ -34,8 +35,13 @@ bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor
 
 - `--level <path>` uses direct/CLI load (`loadLevelDirect`); campaign/transitions use `loadLevel` (by-name).
 - Logs: `yae-engine.log` (run_level.sh tees), plus `yae-engine-test*.log`.
-- **Self-tests** run at startup (`runSelfTests()` in `app/main.cpp`) and print `PASS`/`FAIL` to the log —
+- **Self-tests** run at startup (`runSelfTests()`, `yae-engine/tests/`) and print `PASS`/`FAIL` to the log —
   grep `self-test` after any run to confirm core subsystems (EntitySystem index, Lua, Jolt, parsers).
+  The last line is a total (`self-test summary: N/M passed`); one standing failure is known
+  (`Jolt Physics`, a raycast against a map in a neighbouring repo). Cases live one file per domain
+  (`CoreTests`, `EntityTests`, `UITests`, `AITests`, `RenderTests`, `LevelTests`, `PhysicsTests`);
+  **run order is the explicit list in `tests/TestRegistry.cpp`** — some cases lean on state an
+  earlier one left behind, so add new cases there as well as declaring them in `SelfTestCases.h`.
 
 ## Engine source map (`yae-engine/src/`)
 
