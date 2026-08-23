@@ -87,6 +87,8 @@ a coordinator, not the facade.
   key binds, save format. Check it before inventing a tuning constant.
 - `yae-engine/docs/Phase31_Refactoring.md` — current refactoring status (supersedes Phase 25/29 docs
   and `scripts/YAE_Architecture_Review.md`).
+- `yae-engine/docs/Phase32_MenuSettingsSaves.md` — the plan in flight: menu/settings widgets, UI
+  sound, menu video, console chrome, and the save system.
 - `yae-engine/docs/console/` — developer-console docs.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
