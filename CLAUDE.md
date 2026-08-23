@@ -38,8 +38,10 @@ bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor
 - `--level <path>` uses direct/CLI load (`loadLevelDirect`); campaign/transitions use `loadLevel` (by-name).
 - Logs: `yae-engine.log` (run_level.sh tees), plus `yae-engine-test*.log`.
 - `bash build.sh --check` is the one command that answers "is the tree still good": it fails on a
-  warning in `src/`/`app/`/`tests/`, on a self-test failure, or on a level that stopped loading
-  cleanly. Without a display it runs the first two and says the third was skipped.
+  warning in `src/`/`app/`/`tests/`, on a self-test failure, on a file past its size budget
+  (`scripts/size_budget.sh` — raise a ceiling on purpose, never by accident), or on a level that
+  stopped loading cleanly. Without a display the smoke pass is reported as skipped, not silently
+  dropped.
 - **Smoke test:** `bash scripts/smoke_levels.sh` (~27 s, needs a display) loads all 12 golden levels
   for 120 frames each and fails on any `[ERROR]` or on warnings that are new against
   `scripts/smoke_baseline.txt` (folded to message shape + count, since a lot of the originals'
@@ -77,11 +79,14 @@ a coordinator, not the facade.
 
 ## Docs & skills
 
-- `yae-engine/docs/Invariants.md` — coordinate systems, frame order, init/ownership, actor-activation rule. **Read this first.**
+- `yae-engine/docs/Invariants.md` — coordinate systems, frame order, init/ownership, actor-activation
+  rule, and **state that outlives a level** (per-level state goes on its object and is cleared in
+  `unloadLevel()` — a function-local `static` can be neither reset nor saved). **Read this first.**
 - `yae-engine/docs/LevelTestMatrix.md` — which level is the golden test for which subsystem.
 - `yae-engine/docs/UserFiles.md` — the original's *My Documents* tree: configs, cvar defaults,
   key binds, save format. Check it before inventing a tuning constant.
-- `yae-engine/docs/Phase29_Refactoring.md` — current refactoring status (supersedes `scripts/YAE_Architecture_Review.md`).
+- `yae-engine/docs/Phase31_Refactoring.md` — current refactoring status (supersedes Phase 25/29 docs
+  and `scripts/YAE_Architecture_Review.md`).
 - `yae-engine/docs/console/` — developer-console docs.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
