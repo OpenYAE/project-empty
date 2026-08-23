@@ -42,6 +42,11 @@ bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor
   (`scripts/size_budget.sh` — raise a ceiling on purpose, never by accident), or on a level that
   stopped loading cleanly. Without a display the smoke pass is reported as skipped, not silently
   dropped.
+- **Menu/UI work:** `YAE_SKIP_INTRO=1` skips the 24 s logo so the main menu is up in ~4 s, and the
+  `ui` console command drives it: `ui list` (21 screens), `ui show <widget>` opens one without
+  clicking to it, `ui dump <widget>` prints the tree with config vs computed rects and `NO-MATERIAL`
+  flags, `ui trace on` logs hit-tests. `YAE_CONSOLE` works in the menu too (no level needed).
+  Reference shots of the original are in `yae-engine/tests/referenses-menu/`, ours in `ours/`.
 - **Smoke test:** `bash scripts/smoke_levels.sh` (~27 s, needs a display) loads all 12 golden levels
   for 120 frames each and fails on any `[ERROR]` or on warnings that are new against
   `scripts/smoke_baseline.txt` (folded to message shape + count, since a lot of the originals'
