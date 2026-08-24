@@ -13,6 +13,10 @@ missing behaviour in engine code instead.
 - `yae-game/documents_my games/YaE/` — what the original game writes to *My Documents*:
   engine/user configs, key binds + every authored cvar default, savegames, logs.
   **Read-only reference** — see `yae-engine/docs/UserFiles.md`.
+- `yae-game/ds2base.cfg` — the original's directory table (`game_save`, `screenshots`,
+  `configsuser`, …), read at startup since Phase 32.7.3b: it is what every `FS_PATH_*`
+  answer comes from. `$my_games$` resolves to `yae-game/my games/` (writable), never to
+  the read-only `documents_my games/`. Changing where saves go is one line in that file.
 - `c-files/`, `programs_extracted/` — decompiled original DLLs, for RE reference.
   **Not one build:** most are 2006-11-11, but `sv_game.dll`, `ds2kernel.dll`,
   `ds2NavSystem.dll` and `you_are_empty.exe` are 2019 rebuilds — this is a *community*
