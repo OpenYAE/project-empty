@@ -93,7 +93,10 @@ a coordinator, not the facade.
 - `yae-engine/docs/Phase31_Refactoring.md` — current refactoring status (supersedes Phase 25/29 docs
   and `scripts/YAE_Architecture_Review.md`).
 - `yae-engine/docs/Phase32_MenuSettingsSaves.md` — the plan in flight: menu/settings widgets, UI
-  sound, menu video, console chrome, and the save system.
+  sound, menu video, console chrome, and the save system. 32.0–32.6 are done; 32.7 (saves) is next.
+- `yae-engine/docs/SaveFormat.md` — the `.ds2gsf` savegame format, decoded and verified against the
+  ten reference slots. `scripts/gsf_dump.py` implements it.
+- `yae-engine/docs/Phase32_SaveAgentBrief.md` — the handoff brief for implementing the save system.
 - `yae-engine/docs/console/` — developer-console docs.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
