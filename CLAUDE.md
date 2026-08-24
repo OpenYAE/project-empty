@@ -96,8 +96,9 @@ a coordinator, not the facade.
   key binds, save format. Check it before inventing a tuning constant.
 - `yae-engine/docs/Phase31_Refactoring.md` — current refactoring status (supersedes Phase 25/29 docs
   and `scripts/YAE_Architecture_Review.md`).
-- `yae-engine/docs/Phase32_MenuSettingsSaves.md` — the plan in flight: menu/settings widgets, UI
-  sound, menu video, console chrome, and the save system. 32.0–32.6 are done; 32.7 (saves) is next.
+- `yae-engine/docs/Phase32_MenuSettingsSaves.md` — menu/settings widgets, UI sound, menu video,
+  console chrome, and the save system. 32.0–32.7 are done (saves: read the original's `.ds2gsf`,
+  write our own; console `save list|dump|write|load`, and the authored Save/Load screens).
 - `yae-engine/docs/SaveFormat.md` — the `.ds2gsf` savegame format, decoded and verified against the
   ten reference slots. `scripts/gsf_dump.py` implements it.
 - `yae-engine/docs/Phase32_SaveAgentBrief.md` — the handoff brief for implementing the save system.
