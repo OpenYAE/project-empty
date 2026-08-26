@@ -23,6 +23,11 @@ missing behaviour in engine code instead.
   release whose unofficial patches pulled in libraries from a later DS2 Engine version
   (adapted for another game). Behaviour found only in those four files may never have
   existed in the 2006 game — `engine.play_comics` is the known example.
+- `yae-materials/` — community PBR catalog over the original textures (neutral JSON records,
+  deterministic normal-map baking, exporters). Its `export/` and `baked/` are derived and
+  gitignored: `npm run bake -- --all && npm run export-engine` rebuilds them locally. The engine
+  auto-probes `<gameres>/../yae-materials/export/engine/catalog.yaemat`; `--no-materials-catalog`
+  or `mat_catalog 0` loads levels vanilla. See `yae-materials/PLAN.md`.
 - `scripts/` — analysis notes (e.g. `YAE_Architecture_Review.md` — a Phase-10 snapshot, outdated).
 - `*.dll`, `*.exe` — original game binaries.
 
@@ -103,6 +108,22 @@ a coordinator, not the facade.
   ten reference slots — including the per-object tail (entity I/O graph + each script's `io` table),
   which is what makes an original save **loadable** (Phase 32.7.6). `scripts/gsf_dump.py` implements it.
 - `yae-engine/docs/Phase32_SaveAgentBrief.md` — the handoff brief for implementing the save system.
+- `yae-engine/docs/MaterialSystem.md` — where materials are going: the engine does not parse the
+  original `.mat` at all (268 authored templates; `classifyDecalMaterial()` hand-transcribes ~22
+  name patterns and 19 of the 54 templates the golden levels use fall through to plain opaque).
+  Answers "legacy or new format" with **one runtime `Material`, two dialects of one grammar, four
+  override layers**, and explains why per-item uniforms — not `.mat`'s age — are what blocks
+  compute/RT. Its work plan is `Phase33_Graphics.md`. Settled decisions live here:
+  metal/rough (never spec/gloss), `metallic` is never inferred from `.mat`, and the shading-model
+  switch is `.mat`'s own `material` field rather than a new flag. Phase 33.1 is the cheapest visual win
+  available: SSAO is fully written and disabled only because scene shaders do not write MRT
+  attachment 1. Read before touching material handling or `render/MaterialCatalog.h`.
+- `yae-engine/docs/Phase33_Graphics.md` — the graphics work plan (33.1–33.9, five subphases before
+  the playable release). Several subsystems turn out to be written and switched off, or half-wired:
+  SSAO waits only on an MRT output, vertex colours are parsed and dropped, detail maps are parsed and
+  unused. **This is the current graphics tracker.**
+- `yae-engine/docs/RTGL1_Integration_Plan.md` — GL stays the shipping renderer; RT is a gated
+  experimental branch. Its Phase 1 (backend-neutral render scene) is what MaterialSystem.md builds.
 - `yae-engine/docs/console/` — developer-console docs.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
