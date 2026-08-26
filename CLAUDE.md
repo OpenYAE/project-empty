@@ -24,7 +24,9 @@ missing behaviour in engine code instead.
   (adapted for another game). Behaviour found only in those four files may never have
   existed in the 2006 game — `engine.play_comics` is the known example.
 - `yae-materials/` — community PBR catalog over the original textures (neutral JSON records,
-  deterministic normal-map baking, exporters). Its `export/` and `baked/` are derived and
+  deterministic normal-map baking, exporters). AI generation is a first-class backend, not a
+  late add-on — see `yae-materials/docs/GenerationPipeline.md` (one `MaterialGenerator`
+  interface, bundles rather than single maps, `recipe` vs `lock`, faithful-by-default). Its `export/` and `baked/` are derived and
   gitignored: `npm run bake -- --all && npm run export-engine` rebuilds them locally. The engine
   auto-probes `<gameres>/../yae-materials/export/engine/catalog.yaemat`; `--no-materials-catalog`
   or `mat_catalog 0` loads levels vanilla. See `yae-materials/PLAN.md`.
