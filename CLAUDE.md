@@ -117,13 +117,13 @@ a coordinator, not the facade.
   override layers**, and explains why per-item uniforms — not `.mat`'s age — are what blocks
   compute/RT. Its work plan is `Phase33_Graphics.md`. Settled decisions live here:
   metal/rough (never spec/gloss), `metallic` is never inferred from `.mat`, and the shading-model
-  switch is `.mat`'s own `material` field rather than a new flag. Phase 33.1 is the cheapest visual win
-  available: SSAO is fully written and disabled only because scene shaders do not write MRT
-  attachment 1. Read before touching material handling or `render/MaterialCatalog.h`.
+  switch is `.mat`'s own `material` field rather than a new flag. Phase 33.1 is **done**: the scene shaders now write MRT
+  attachment 1 (view normal + linear depth), SSAO is on, and the same buffer is what DoF was
+  missing. Read before touching material handling or `render/MaterialCatalog.h`.
 - `yae-engine/docs/Phase33_Graphics.md` — the graphics work plan (33.1–33.9, five subphases before
   the playable release). Several subsystems turn out to be written and switched off, or half-wired:
-  SSAO waits only on an MRT output, vertex colours are parsed and dropped, detail maps are parsed and
-  unused. **This is the current graphics tracker.**
+  vertex colours are parsed and dropped, detail maps are parsed and unused (SSAO was one of these
+  until 33.1 turned it on). **This is the current graphics tracker.**
 - `yae-engine/docs/RTGL1_Integration_Plan.md` — GL stays the shipping renderer; RT is a gated
   experimental branch. Its Phase 1 (backend-neutral render scene) is what MaterialSystem.md builds.
 - `yae-engine/docs/console/` — developer-console docs.
