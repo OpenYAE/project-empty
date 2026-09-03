@@ -126,6 +126,15 @@ a coordinator, not the facade.
   until 33.1 turned it on). **This is the current graphics tracker.**
 - `yae-engine/docs/RTGL1_Integration_Plan.md` — GL stays the shipping renderer; RT is a gated
   experimental branch. Its Phase 1 (backend-neutral render scene) is what MaterialSystem.md builds.
+- `yae-engine/docs/Phase34_FixMed1Map.md` — the twenty `med1` TODO items, one subphase each, with
+  the root, the A/B and the self-test for every one that is closed. **The per-level pattern**: the
+  campaign's remaining bugs are being worked level by level, and the entry point for a level is its
+  phase doc, not `TODO.md`. Several roots found there are campaign-wide (decal scale, `play_sound`
+  event-vs-state, authored command `parameters`, flare billboards, destroyed-entity models).
+- `yae-engine/docs/Phase35_FixKolhozMap.md` — the same for `kolhoz`, the next level. **This is the
+  current level tracker.** Its reconnaissance already names four campaign-wide channels that are
+  parsed and unused (`entities[…] = nil`, `on_damage_limit`, the weapon range window in metres,
+  the `_all_edf` resolver preference).
 - `yae-engine/docs/console/` — developer-console docs.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
