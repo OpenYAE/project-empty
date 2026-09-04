@@ -141,6 +141,12 @@ a coordinator, not the facade.
   Three reported items needed no fix at all and were closed by measurement; two plan hypotheses
   were built, measured and dropped. Both are the point: the phase docs record what was ruled out,
   not only what was changed.
+- `yae-engine/docs/Phase36_FixMeatMap.md` — the same for `meat`, the next level. **This is the
+  current level tracker.** Its reconnaissance is done and measured; the item list is not, because
+  `docs/TODO.md` has no `meat` section yet — those sections are play reports, not engine findings.
+  Two things are already named: rope textures never resolve anywhere in the game (the lookup skips
+  the `$dds` swap every other texture path makes, so all 104+ authored ropes draw white), and
+  `meat_part2` — half the level, both bosses — is in no smoke set.
 - `yae-engine/docs/console/` — developer-console docs.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
