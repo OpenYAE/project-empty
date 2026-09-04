@@ -131,10 +131,16 @@ a coordinator, not the facade.
   campaign's remaining bugs are being worked level by level, and the entry point for a level is its
   phase doc, not `TODO.md`. Several roots found there are campaign-wide (decal scale, `play_sound`
   event-vs-state, authored command `parameters`, flare billboards, destroyed-entity models).
-- `yae-engine/docs/Phase35_FixKolhozMap.md` — the same for `kolhoz`, the next level. **This is the
-  current level tracker.** Its reconnaissance already names four campaign-wide channels that are
-  parsed and unused (`entities[…] = nil`, `on_damage_limit`, the weapon range window in metres,
-  the `_all_edf` resolver preference).
+- `yae-engine/docs/Phase35_FixKolhozMap.md` — the same for `kolhoz` (both halves). **Done**: all
+  fourteen items closed, so this is the worked example of the per-level method rather than an open
+  tracker. Four of its roots were campaign-wide channels that were parsed and unused
+  (`entities[…] = nil`, `on_damage_limit`, the weapon range window in metres, the `_all_edf`
+  resolver preference); five more turned out to be engine-wide contracts nobody had stated — an
+  animation owns its body's *collision*, an authored placement is a facing as well as a pose, an
+  actor's idle pose can be authored per placement, and per-bone hitboxes have to follow the pose.
+  Three reported items needed no fix at all and were closed by measurement; two plan hypotheses
+  were built, measured and dropped. Both are the point: the phase docs record what was ruled out,
+  not only what was changed.
 - `yae-engine/docs/console/` — developer-console docs.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
