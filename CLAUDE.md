@@ -141,12 +141,16 @@ a coordinator, not the facade.
   Three reported items needed no fix at all and were closed by measurement; two plan hypotheses
   were built, measured and dropped. Both are the point: the phase docs record what was ruled out,
   not only what was changed.
-- `yae-engine/docs/Phase36_FixMeatMap.md` — the same for `meat`, the next level. **This is the
-  current level tracker.** Its reconnaissance is done and measured; the item list is not, because
-  `docs/TODO.md` has no `meat` section yet — those sections are play reports, not engine findings.
-  Two things are already named: rope textures never resolve anywhere in the game (the lookup skips
-  the `$dds` swap every other texture path makes, so all 104+ authored ropes draw white), and
-  `meat_part2` — half the level, both bosses — is in no smoke set.
+- `yae-engine/docs/Phase36_FixMeatMap.md` — the same for `meat`, the next level (13 items, 11
+  subphases). **This is the current level tracker.** Half its items are about *classes*, not about
+  the level — `Conveyor` (~50 placements), `AnimationObject` (153 across 13 levels), `Bomb`,
+  `LiftBase` (40), throwables, inventory across a transition — so most subphases carry a
+  campaign-wide count and an acceptance wider than one map. Three roots are already measured: a
+  conveyor pushes along local +Y while every authored belt is long in X; a lift gets the *first*
+  box of its model (a corner post on `elev_meat_final`, whose floor is the tenth); and
+  `AnimationObject` is spawned as a bare `VisualEntity` that reads none of its three authored
+  properties. Note the standing risk: `meat` is the golden physics reference the whole project
+  checks against, so a fix here moves the yardstick — 36.0 records the crane's numbers first.
 - `yae-engine/docs/console/` — developer-console docs.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
