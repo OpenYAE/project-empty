@@ -141,16 +141,23 @@ a coordinator, not the facade.
   Three reported items needed no fix at all and were closed by measurement; two plan hypotheses
   were built, measured and dropped. Both are the point: the phase docs record what was ruled out,
   not only what was changed.
-- `yae-engine/docs/Phase36_FixMeatMap.md` — the same for `meat`, the next level (13 items, 11
-  subphases). **This is the current level tracker.** Half its items are about *classes*, not about
-  the level — `Conveyor` (~50 placements), `AnimationObject` (153 across 13 levels), `Bomb`,
-  `LiftBase` (40), throwables, inventory across a transition — so most subphases carry a
-  campaign-wide count and an acceptance wider than one map. Three roots are already measured: a
-  conveyor pushes along local +Y while every authored belt is long in X; a lift gets the *first*
-  box of its model (a corner post on `elev_meat_final`, whose floor is the tenth); and
-  `AnimationObject` is spawned as a bare `VisualEntity` that reads none of its three authored
-  properties. Note the standing risk: `meat` is the golden physics reference the whole project
-  checks against, so a fix here moves the yardstick — 36.0 records the crane's numbers first.
+- `yae-engine/docs/Phase36_FixMeatMap.md` — the same for `meat` and `meat_part2` (13 items, 11
+  subphases). **Done** — eleven of the thirteen items closed with a named root, two measured and
+  handed to the graphics tracker. Half of them were about *classes*, not about the level, so the
+  fixes are campaign-wide: `Conveyor` pushes along its own local **X** (not +Y — and not because
+  the box is long in X; 42 moving belts split 21 X / 21 Y), `shape = "point"` means a lift's
+  collision comes from the whole model (`elev_meat_final` 10 of 11 boxes, not one corner post),
+  `AnimationObject` is a class with three authored properties nobody read (93 unique placements),
+  `BombEntity::postSpawn()` was a shadow of a non-virtual base method so **1910 bombs** never got
+  their authored numbers, a missile is a *thrown object* with fall, bounce and fuse, an actor has
+  four authored senses and the engine had two, and rope textures resolved nowhere in the game.
+  Two engine-wide contracts came out of it and live in `Invariants.md`: a class input **extends**
+  the base one rather than replacing it (`enable` was setting the class flag and losing
+  `setActive`), and `postSpawn()`/class consequences must be virtual. **`meat` is the project's
+  physics yardstick** (golden rule 4) and the phase deliberately did not move it: the crane reads
+  `bodyDist=197.9/197.4/197.9/197.3 hingeAngle=+6.1°` before 36.0 and after 36.10, unchanged.
+  What is still open is listed in `TODO.md` under `meat`, including eight defects the phase found
+  and deliberately did not fix.
 - `yae-engine/docs/console/` — developer-console docs.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
