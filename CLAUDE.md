@@ -159,15 +159,22 @@ a coordinator, not the facade.
   What is still open is listed in `TODO.md` under `meat`, including eight defects the phase found
   and deliberately did not fix.
 - `yae-engine/docs/Phase37_FixMainIssues.md` — the same method applied to the two level-independent
-  sections of `TODO.md` (`new issues`, `general`): 22 items, 13 subphases. **Not started** — reconnaissance
-  only (2026-09-07). Most roots are already named and are of one shape, *authored data the engine parses and
-  never reads*: a `type = 2` joint with all-zero limits is a **weld** in the original (ODE `LoStop == HiStop`)
-  and a free hinge in ours — 495 of 538 joints, every car window; `params.hitboxes[].damage_k` is read by
-  nobody, so a headshot is ×1.0; a `RigidBody`'s destruction `effect` (and its `sound_desc`) is only ever
-  played by `Bomb`; god rays are the one per-level setting `unloadLevel()` does not reset. One item (mobs
-  visible before activation: 243 actors authored `is_enabled=false, is_visible=true`) needs the user's
-  decision before any change. 37.1 rewrites joint semantics campaign-wide, so the `meat` crane numbers are
-  recorded in 37.0 before it and re-checked after 37.1, 37.3 and 37.10.
+  sections of `TODO.md` (`new issues`, `general`): 22 items, 14 subphases. **Done** — 18 items closed
+  (13, 14 by measurement; 4 handed to `Phase33_Graphics.md`; 17 by the user's decision), the remaining
+  four carried into Phase 38. Most roots were of one shape, *authored data the engine parses and never
+  reads*: a `type = 2` joint with all-zero limits is a **weld** in the original (ODE `LoStop == HiStop`)
+  and a free hinge in ours — 495 of 538 joints, every car window; `params.hitboxes[].damage_k` was read by
+  nobody, so a headshot was ×1.0; a `RigidBody`'s destruction `effect` (and its `sound_desc`) was only ever
+  played by `Bomb`; god rays were the one per-level setting `unloadLevel()` did not reset. 37.13 is the
+  one that reaches furthest: **a placement's forward is its `tm`'s local X, a character model's is its
+  own Y**, and the quarter turn between them belongs to the engine — see `Invariants.md`.
+- `yae-engine/docs/Phase38_ClosingPhase37.md` — Phase 37's tail: six items, six subphases. **Not
+  started.** Two of them start with RE rather than a run (actor collision/impulse sensors; whether DS2
+  spawns a `button` dynamic), one repeats a reverted fix by the approach already named (apply the EDF
+  *after* `on_init`, as the original does — do not restore values on top of it), one is the audit that
+  gates the rest: 11 files in the read-only `gameres/scripts` differ from the pristine tree in lines of
+  code, and until they match, any measurement may be measuring them. **This is the current tracker for
+  level-independent defects.**
 - `yae-engine/docs/console/` — developer-console docs.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
