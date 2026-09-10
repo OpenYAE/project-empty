@@ -175,6 +175,18 @@ a coordinator, not the facade.
   gates the rest: 11 files in the read-only `gameres/scripts` differ from the pristine tree in lines of
   code, and until they match, any measurement may be measuring them. **This is the current tracker for
   level-independent defects.**
+- `yae-engine/docs/OriginalScriptDefects.md` — defects in the **original** game scripts, found by
+  the Phase 38.0 audit and confirmed against two independent copies of the tree: an attack-selection
+  pass that indexes with `nil`, `on_update` calling `on_init`, a type guard placed after the
+  dereference it guards, `continue` and Lua-5.0 `for … in t do` (why the compat layer exists), and
+  authored fields nobody reads. `gameres/` stays read-only **until the first stable build ships** —
+  after that these become script fixes; until then they are compensated in the engine.
+- `yae-engine/docs/phase38_gameres_edits/` — the local edits that had been made to the read-only
+  `gameres/scripts` tree, saved as reversible diffs (`patch -R` reconstructs the original exactly).
+  10 of the 13 are removed; the 3 that remain name the subphase that owns them.
+  `bash scripts/compare_gameres_scripts.sh --list` is the live check — it compares the tree against
+  `scripts/gameres_scripts_manifest.txt` (491 sha256 hashes, checked in because the reference tree
+  lives outside this repo) and fails on any difference not on its ACCEPTED list.
 - `yae-engine/docs/console/` — developer-console docs.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
