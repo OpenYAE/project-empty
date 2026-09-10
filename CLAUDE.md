@@ -58,7 +58,7 @@ bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor
   clicking to it, `ui dump <widget>` prints the tree with config vs computed rects and `NO-MATERIAL`
   flags, `ui trace on` logs hit-tests. `YAE_CONSOLE` works in the menu too (no level needed).
   Reference shots of the original are in `yae-engine/tests/referenses-menu/`, ours in `ours/`.
-- **Smoke test:** `bash scripts/smoke_levels.sh` (~27 s, needs a display) loads all 12 golden levels
+- **Smoke test:** `bash scripts/smoke_levels.sh` (~30 s, needs a display) loads all 15 golden levels
   for 120 frames each and fails on any `[ERROR]` or on warnings that are new against
   `scripts/smoke_baseline.txt` (folded to message shape + count, since a lot of the originals'
   warnings are legitimate and never reach zero). A count that grew is only a failure when it both
