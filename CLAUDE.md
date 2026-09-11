@@ -53,6 +53,7 @@ bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor
 bash scripts/conformance.sh                                                   # our parsers vs the SDK's over the whole corpus (~60 s)
 ./yae-engine/build/yae-engine --level … --frames 240                          # 240 frames, then a `perf` summary of every stage and pass (Phase 39.0)
 bash scripts/smoke_levels.sh --shots [level…]                                 # the picture gate: fixed cameras vs local baselines (--record-shots makes them)
+bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  # Phase 40's four reference scenes (ward/shop/yard/tunnel) at 1440p
 ```
 
 - `--level <path>` uses direct/CLI load (`loadLevelDirect`); campaign/transitions use `loadLevel` (by-name).
@@ -106,6 +107,11 @@ bash scripts/smoke_levels.sh --shots [level…]                                 
   compiles keeps its old program). A smoke run (`--frames`) compiles every file first, so a broken
   shader is an `[ERROR]` even on a level that never reaches its pass. No GLSL in C++: the check is
   `grep -rl '^#version' yae-engine/src yae-engine/app` → nothing.
+- **Graphics work (Phase 40.0):** the four reference scenes (`scripts/reference_scenes.sh`,
+  `tests/referenses-scenes/README.md` — cameras, reference settings, the original's frames still to
+  capture) are the A/B for every shader change; `debug_view <albedo|normal|roughness|metallic|direct|
+  indirect|ao|lightmap>` in the console shows one quantity untonemapped (`--view <name>` shoots every
+  scene in it; not a saved setting). Budgets per scene are in `Phase40_GraphicsRealism.md`, 40.0.3.
 - **Perf (Phase 39.0):** `perf` in the console prints median/p95/max of every stage of `gameFrame()`
   and every pass of the frame over the last 240 frames (`perf gpu` the GPU side, `perf counters`
   draws/binds/uniform calls, `perf vram` the engine's own byte ledger); `--frames N` prints the same
