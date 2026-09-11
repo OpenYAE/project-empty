@@ -36,11 +36,15 @@ missing behaviour in engine code instead.
 ## Build & run
 
 ```bash
-bash build.sh                       # cmake + ninja, RelWithDebInfo → yae-engine/build/yae-engine
-                                    # (reconfigure with `cmake -B yae-engine/build ...` after adding new .cpp,
-                                    #  since sources come from CMake file(GLOB_RECURSE); tests/ is listed explicitly)
-bash build.sh --check               # build + gates: own-code warnings, self-tests, level smoke pass.
-                                    # ~27 s, stops at the first failure. Run it before committing.
+bash build.sh                       # the `dev` preset (RelWithDebInfo, YAE_DEV, self-tests) → yae-engine/build/yae-engine
+                                    # (a new .cpp is picked up by the next build — CONFIGURE_DEPENDS since 39.4.3;
+                                    #  tests/ is listed explicitly in CMakeLists.txt)
+bash build.sh --check               # build + gates: own-code warnings, self-tests, size budgets, gameres audit,
+                                    # SDK conformance, clang-format on changed lines, level smoke pass.
+                                    # ~30 s, stops at the first failure. Run it before committing.
+bash build.sh --asan                # the `asan` preset (Debug, ASan+UBSan) → yae-engine/build-asan; then --self-test,
+                                    # a parse of med1/meat/gor and, with a display, 60 offscreen frames of each (39.4.2)
+bash build.sh --release             # the `release` preset (no YAE_DEV, no self-tests linked) → yae-engine/build-release
 bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor, vdnh1, meat, …); tees to yae-engine.log
 ./yae-engine/build/yae-engine --level yae-game/gameres/maps/map10/med1.ds2 --root yae-game/gameres [--edf <f.ds2edf>]
 ./yae-engine/build/yae-engine --model <path.ds2md> --root yae-game/gameres   # single-model viewer
@@ -57,9 +61,25 @@ bash scripts/smoke_levels.sh --shots [level…]                                 
   (`scripts/size_budget.sh` — raise a ceiling on purpose, never by accident), on an edit to the
   read-only `gameres/scripts`, on a parser reading a file differently from the SDK's
   (`scripts/conformance.sh`; a difference is either fixed or recorded in
-  `scripts/conformance/accepted.txt` with its decision in `Invariants.md`), or on a level that
-  stopped loading cleanly. Without a display the smoke pass is reported as skipped, not silently
-  dropped; without the SDK tree next to the repo the conformance check says so and skips.
+  `scripts/conformance/accepted.txt` with its decision in `Invariants.md`), on a changed line that
+  is not clang-formatted (`scripts/format_check.sh` — changed *lines* only, against
+  `yae-engine/.clang-format`; `--fix` applies it), or on a level that stopped loading cleanly.
+  Without a display the smoke pass is reported as skipped, not silently dropped; without the SDK
+  tree next to the repo the conformance check says so and skips; without clang-format the format
+  gate does the same.
+- **CI (Phase 39.4.1):** `.github/workflows/ci.yml` runs the same gate on a clean Ubuntu runner —
+  configure + build of the `dev` preset, warnings, `--self-test`, size budgets, format of the
+  changed lines, the `release` preset builds — and a second job runs `--self-test` under
+  ASan+UBSan. `gameres` is never there (8.5 GB, outside git): the self-tests that parse it are
+  **SKIP by name** (`assetCase` in `tests/TestRegistry.cpp`; the summary line groups the skips by
+  reason), and the job summary lists what CI did *not* check. `.github/workflows/windows.yml` is
+  the Windows build (MSYS2 UCRT64 GCC, build + `--self-test`), a separate status on purpose.
+- **Presets** (`yae-engine/CMakePresets.json`): `dev` = what `build.sh` builds (`build/`),
+  `release` = `YAE_DEV=OFF`, `YAE_BUILD_TESTS=OFF` (`build-release/`; `--self-test` there says so
+  and exits 2), `asan` = Debug + `YAE_SANITIZE=address,undefined` (`build-asan/`).
+  `YAE_FETCH_DEPS=OFF` is a real branch now: `find_package` for SDL3, Jolt, glm and Lua 5.4, and
+  it fails by package name when one is missing. `scripts/tidy.sh [files]` runs clang-tidy with the
+  small `bugprone-*`/`performance-*` set in `yae-engine/.clang-tidy` — not a gate.
 - **Menu/UI work:** `YAE_SKIP_INTRO=1` skips the 24 s logo so the main menu is up in ~4 s, and the
   `ui` console command drives it: `ui list` (21 screens), `ui show <widget>` opens one without
   clicking to it, `ui dump <widget>` prints the tree with config vs computed rects and `NO-MATERIAL`
