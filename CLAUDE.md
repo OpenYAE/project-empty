@@ -36,23 +36,55 @@ missing behaviour in engine code instead.
 ## Build & run
 
 ```bash
-bash build.sh                       # cmake + ninja, RelWithDebInfo → yae-engine/build/yae-engine
-                                    # (reconfigure with `cmake -B yae-engine/build ...` after adding new .cpp,
-                                    #  since sources come from CMake file(GLOB_RECURSE); tests/ is listed explicitly)
-bash build.sh --check               # build + gates: own-code warnings, self-tests, level smoke pass.
-                                    # ~27 s, stops at the first failure. Run it before committing.
+bash build.sh                       # the `dev` preset (RelWithDebInfo, YAE_DEV, self-tests) → yae-engine/build/yae-engine
+                                    # (a new .cpp is picked up by the next build — CONFIGURE_DEPENDS since 39.4.3;
+                                    #  tests/ is listed explicitly in CMakeLists.txt)
+bash build.sh --check               # build + gates: own-code warnings, self-tests, size budgets, gameres audit,
+                                    # console reference up to date, SDK conformance, clang-format on changed
+                                    # lines, level smoke pass.
+                                    # ~30 s, stops at the first failure. Run it before committing.
+bash build.sh --asan                # the `asan` preset (Debug, ASan+UBSan) → yae-engine/build-asan; then --self-test,
+                                    # a parse of med1/meat/gor and, with a display, 60 offscreen frames of each (39.4.2)
+bash build.sh --release             # the `release` preset (no YAE_DEV, no self-tests linked) → yae-engine/build-release
 bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor, vdnh1, meat, …); tees to yae-engine.log
 ./yae-engine/build/yae-engine --level yae-game/gameres/maps/map10/med1.ds2 --root yae-game/gameres [--edf <f.ds2edf>]
 ./yae-engine/build/yae-engine --model <path.ds2md> --root yae-game/gameres   # single-model viewer
+./yae-engine/build/yae-engine --dump <asset> --root yae-game/gameres          # the parse as canonical JSON (Phase 39.1.5)
+bash scripts/conformance.sh                                                   # our parsers vs the SDK's over the whole corpus (~60 s)
+./yae-engine/build/yae-engine --level … --frames 240                          # 240 frames, then a `perf` summary of every stage and pass (Phase 39.0)
+bash scripts/smoke_levels.sh --shots [level…]                                 # the picture gate: fixed cameras vs local baselines (--record-shots makes them)
 ```
 
 - `--level <path>` uses direct/CLI load (`loadLevelDirect`); campaign/transitions use `loadLevel` (by-name).
 - Logs: `yae-engine.log` (run_level.sh tees), plus `yae-engine-test*.log`.
 - `bash build.sh --check` is the one command that answers "is the tree still good": it fails on a
   warning in `src/`/`app/`/`tests/`, on a self-test failure, on a file past its size budget
-  (`scripts/size_budget.sh` — raise a ceiling on purpose, never by accident), or on a level that
-  stopped loading cleanly. Without a display the smoke pass is reported as skipped, not silently
-  dropped.
+  (`scripts/size_budget.sh` — raise a ceiling on purpose, never by accident), on an edit to the
+  read-only `gameres/scripts`, on a parser reading a file differently from the SDK's
+  (`scripts/conformance.sh`; a difference is either fixed or recorded in
+  `scripts/conformance/accepted.txt` with its decision in `Invariants.md`), on a changed line that
+  is not clang-formatted (`scripts/format_check.sh` — changed *lines* only, against
+  `yae-engine/.clang-format`; `--fix` applies it), or on a level that stopped loading cleanly.
+  Without a display the smoke pass is reported as skipped, not silently dropped; without the SDK
+  tree next to the repo the conformance check says so and skips; without clang-format the format
+  gate does the same.
+- **CI (Phase 39.4.1):** `.github/workflows/ci.yml` runs the same gate on a clean Ubuntu runner —
+  configure + build of the `dev` preset, warnings, `--self-test`, size budgets, format of the
+  changed lines, the `release` preset builds — and a second job runs `--self-test` under
+  ASan+UBSan. `gameres` is never there (8.5 GB, outside git): the self-tests that parse it are
+  **SKIP by name** (`assetCase` in `tests/TestRegistry.cpp`; the summary line groups the skips by
+  reason), and the job summary lists what CI did *not* check. `.github/workflows/windows.yml` is
+  the Windows build (MSYS2 UCRT64 GCC, build + `--self-test`), a separate status on purpose.
+- **Presets** (`yae-engine/CMakePresets.json`): `dev` = what `build.sh` builds (`build/`),
+  `release` = `YAE_DEV=OFF`, `YAE_BUILD_TESTS=OFF` (`build-release/`; `--self-test` there says so
+  and exits 2), `asan` = Debug + `YAE_SANITIZE=address,undefined` (`build-asan/`).
+  `YAE_FETCH_DEPS=OFF` is a real branch now: `find_package` for SDL3, Jolt, glm and Lua 5.4, and
+  it fails by package name when one is missing. `mingw` cross-builds for Windows with llvm-mingw
+  from `~/opt` (no root) and wine runs the result — **`yae-engine/docs/WindowsBuild.md`** is the
+  instruction: which llvm-mingw release (LLVM 20; the 2026 ones break Jolt), the two wine runs
+  (`--root 'Z:\nonexistent'` is what the runner sees), what counts as passed, and the classes of
+  defect this build finds that GCC on Linux does not. `scripts/tidy.sh [files]` runs clang-tidy with the
+  small `bugprone-*`/`performance-*` set in `yae-engine/.clang-tidy` — not a gate.
 - **Menu/UI work:** `YAE_SKIP_INTRO=1` skips the 24 s logo so the main menu is up in ~4 s, and the
   `ui` console command drives it: `ui list` (21 screens), `ui show <widget>` opens one without
   clicking to it, `ui dump <widget>` prints the tree with config vs computed rects and `NO-MATERIAL`
@@ -66,6 +98,31 @@ bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor
   `--record` rewrites the baseline, `--frames N` runs longer, and naming levels (`… med1 meat`)
   checks a subset. The engine flag behind it is `--frames N`: run the real loop N times, then quit
   with 0, or 1 if anything logged `[ERROR]`.
+- **Shaders (Phase 39.2.3)** live in `yae-engine/shaders/` (`*.vert`, `*.frag`, `*.glsl` include
+  blocks) and are embedded at build time (`cmake/EmbedShaders.cmake` → `build/generated/`); a new
+  file is picked up by the next build, no reconfigure. `#include "x.glsl"` is resolved one level deep,
+  and a `Shader::createFromFiles(vert, frag, {"SKINNED"})` define list selects a variant. To work on
+  one: `--shader-dir yae-engine/shaders`, edit, `shader reload` in the console (a file that no longer
+  compiles keeps its old program). A smoke run (`--frames`) compiles every file first, so a broken
+  shader is an `[ERROR]` even on a level that never reaches its pass. No GLSL in C++: the check is
+  `grep -rl '^#version' yae-engine/src yae-engine/app` → nothing.
+- **Perf (Phase 39.0):** `perf` in the console prints median/p95/max of every stage of `gameFrame()`
+  and every pass of the frame over the last 240 frames (`perf gpu` the GPU side, `perf counters`
+  draws/binds/uniform calls, `perf vram` the engine's own byte ledger); `--frames N` prints the same
+  block at exit and the smoke pass keeps it as `build/smoke/<level>.perf`. Measure before and after;
+  the doc that closes a perf item quotes both numbers. On `med1` (offscreen 3440×1440) the frame is
+  now ~3.7 ms: ~7 700 shadow draws after the per-light caster cull (39.3.4; it was 156 000) and
+  3 500 world draws at 0.7 ms — `perf counters` prints "shadow casters N of M".
+- **Picture gate (Phase 39.0.4):** `bash scripts/smoke_levels.sh --shots` shoots each golden level at
+  frame 240 from a fixed camera (`--fixed-dt`, so two runs are pixel-identical) in a hidden window
+  of the baseline's size (`--offscreen WxH` — no fullscreen, no focus, so the desk being in use, the
+  cursor's display and stray keystrokes cannot reach it) and compares 160-px tiles with
+  `tests/referenses-<level>/ours/baseline.png`. A run that logs an `[ERROR]` or writes no shot is a
+  failure, never a comparison against the previous run's file. Baselines are local (`--record-shots`,
+  gitignored — they depend on this machine's resolution and gamma); a rendering refactor that must
+  not change the picture proves it with noise 0.000 here. The script restores `config/settings.cfg`
+  when it exits: an `r_cvar` set through `YAE_CONSOLE` is a saved setting and would otherwise leak
+  into every later run.
 - **Self-tests** run at startup (`runSelfTests()`, `yae-engine/tests/`) and print `PASS`/`FAIL` to the log —
   grep `self-test` after any run to confirm core subsystems (EntitySystem index, Lua, Jolt, parsers).
   The last line is a total (`self-test summary: N/M passed`).
@@ -78,10 +135,10 @@ bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor
 
 ## Engine source map (`yae-engine/src/`)
 
-`core` (Types/Logger/InterfaceServer) · `entity` (Entity, actors, doors, triggers, joints, ropes, FSM, I/O)
-· `render` (GL4 renderer, shaders, post-process, decals) · `physics` (Jolt wrapper + coordinator, ragdoll)
+`core` (Types/Logger/InterfaceServer/CoordConvert) · `entity` (Entity + `EntityKind`, actors, doors, triggers, joints, ropes, FSM, I/O; also the inventory container, the hitscan trace and the explosion sink — the primitives the game layer builds on)
+· `render` (GL4 renderer, shaders, post-process, decals, the physics debug renderer; the frame is a `RenderScene` filled by producers and drawn by `GLRenderer::submit` — Phase 39.2.2) · `physics` (Jolt wrapper, ragdoll; **no `game/` or `render/` includes** — Phase 39.5.1, see `Invariants.md`)
 · `scripting` (Lua 5.4 bindings) · `ai` (combat loop, goals, perception) · `game` (GameRulesYAE facade +
-coordinators) · `assets` (`.ds2/.ds2md/.ds2cm/.ds2edf` parsers) · `audio` · `animation` · `navigation`
+coordinators, `PhysicsCoordinator` among them since 39.5.1) · `assets` (`.ds2/.ds2md/.ds2cm/.ds2edf` parsers) · `audio` · `animation` · `navigation`
 · `ui` (also the comics player) · `scene` · `resource` · `camera` · `input` · `platform`
 · `video` (AVI cutscenes: decoder backend + player + preset resolution).
 
@@ -187,7 +244,34 @@ a coordinator, not the facade.
   `bash scripts/compare_gameres_scripts.sh --list` is the live check — it compares the tree against
   `scripts/gameres_scripts_manifest.txt` (491 sha256 hashes, checked in because the reference tree
   lives outside this repo) and fails on any difference not on its ACCEPTED list.
-- `yae-engine/docs/console/` — developer-console docs.
+- `yae-engine/docs/Phase39_EngineHardening.md` — the engine-hardening plan (observability, lifetime,
+  the frame out of `main`, GPU-resident frame data, CI/sanitizers, layers, threads, docs). Renamed from
+  38 when the Phase 37 tail took that number. **39.1 is done** (2026-09-11): pending I/O holds its
+  activator by id, `BinaryReader` bounds checks cannot overflow, a save slot is written as a staged
+  set (temp + rename, all three files or none), the second pass over local statics (`stuck_recovery`
+  is the saved cvar `ai_stuck_recovery`), and **parser conformance with the SDK** —
+  `scripts/conformance.sh` runs our parsers and the SDK's over every asset (1 947 files), diffs the
+  canonical dumps, and is the fifth gate of `build.sh --check`. Its first run found three engine bugs
+  (nav-portal links, EDF last-definition-wins, keyed `.rds` parts), two SDK bugs and a `gameres`
+  tree defect (~20 case-variant EDF pairs from unpacked base + patch paks); the decisions are in
+  `Invariants.md`, "Parser conformance with the SDK". **39.0, 39.2 and 39.3 are done** too: `perf`
+  timers/counters/VRAM ledger and the offscreen picture gate; the frame out of `main`
+  (`app/FramePipeline`), the `RenderScene` + `SceneResources` registry, shaders as files; the
+  per-frame UBO, the material SSBO, bindless textures and the per-light shadow-caster cull — on
+  `med1` the world pass went 1.96 → 0.71 ms CPU, the shadow pass 11.7 → 1.0 ms (156 000 → 7 700
+  draws) and the frame 22 → 3.7 ms, with the picture unchanged on all 15 golden levels.
+  **39.4–39.7 are done too** (2026-09-11): CI + presets + ASan + format gate (39.4), the layer
+  inversions and `Entity::kind()` (39.5), buffered Jolt contacts with the thread pool and async
+  textures *declined by measurement* (39.6), `Invariants.md` with a `Verified by` line per section,
+  phase docs stamped as history, `scripts/stats.sh`, the generated console reference (39.7).
+  **Phase 39 is closed**; what it left open is on the runner (first push) and in 39.4.1 (two Windows
+  path failures with assets).
+- `yae-engine/docs/Phase40_GraphicsRealism.md` — the second graphics plan (linear light, material
+  data, environment, baked GI), renamed from 39 with the above. Depends on Phase 39's 39.0/39.2/39.3.
+  **Not started.**
+- `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
+  command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
+  (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
 ## Golden rules
