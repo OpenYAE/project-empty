@@ -44,15 +44,20 @@ bash build.sh --check               # build + gates: own-code warnings, self-tes
 bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor, vdnh1, meat, …); tees to yae-engine.log
 ./yae-engine/build/yae-engine --level yae-game/gameres/maps/map10/med1.ds2 --root yae-game/gameres [--edf <f.ds2edf>]
 ./yae-engine/build/yae-engine --model <path.ds2md> --root yae-game/gameres   # single-model viewer
+./yae-engine/build/yae-engine --dump <asset> --root yae-game/gameres          # the parse as canonical JSON (Phase 39.1.5)
+bash scripts/conformance.sh                                                   # our parsers vs the SDK's over the whole corpus (~60 s)
 ```
 
 - `--level <path>` uses direct/CLI load (`loadLevelDirect`); campaign/transitions use `loadLevel` (by-name).
 - Logs: `yae-engine.log` (run_level.sh tees), plus `yae-engine-test*.log`.
 - `bash build.sh --check` is the one command that answers "is the tree still good": it fails on a
   warning in `src/`/`app/`/`tests/`, on a self-test failure, on a file past its size budget
-  (`scripts/size_budget.sh` — raise a ceiling on purpose, never by accident), or on a level that
+  (`scripts/size_budget.sh` — raise a ceiling on purpose, never by accident), on an edit to the
+  read-only `gameres/scripts`, on a parser reading a file differently from the SDK's
+  (`scripts/conformance.sh`; a difference is either fixed or recorded in
+  `scripts/conformance/accepted.txt` with its decision in `Invariants.md`), or on a level that
   stopped loading cleanly. Without a display the smoke pass is reported as skipped, not silently
-  dropped.
+  dropped; without the SDK tree next to the repo the conformance check says so and skips.
 - **Menu/UI work:** `YAE_SKIP_INTRO=1` skips the 24 s logo so the main menu is up in ~4 s, and the
   `ui` console command drives it: `ui list` (21 screens), `ui show <widget>` opens one without
   clicking to it, `ui dump <widget>` prints the tree with config vs computed rects and `NO-MATERIAL`
@@ -187,6 +192,20 @@ a coordinator, not the facade.
   `bash scripts/compare_gameres_scripts.sh --list` is the live check — it compares the tree against
   `scripts/gameres_scripts_manifest.txt` (491 sha256 hashes, checked in because the reference tree
   lives outside this repo) and fails on any difference not on its ACCEPTED list.
+- `yae-engine/docs/Phase39_EngineHardening.md` — the engine-hardening plan (observability, lifetime,
+  the frame out of `main`, GPU-resident frame data, CI/sanitizers, layers, threads, docs). Renamed from
+  38 when the Phase 37 tail took that number. **39.1 is done** (2026-09-11): pending I/O holds its
+  activator by id, `BinaryReader` bounds checks cannot overflow, a save slot is written as a staged
+  set (temp + rename, all three files or none), the second pass over local statics (`stuck_recovery`
+  is the saved cvar `ai_stuck_recovery`), and **parser conformance with the SDK** —
+  `scripts/conformance.sh` runs our parsers and the SDK's over every asset (1 947 files), diffs the
+  canonical dumps, and is the fifth gate of `build.sh --check`. Its first run found three engine bugs
+  (nav-portal links, EDF last-definition-wins, keyed `.rds` parts), two SDK bugs and a `gameres`
+  tree defect (~20 case-variant EDF pairs from unpacked base + patch paks); the decisions are in
+  `Invariants.md`, "Parser conformance with the SDK". The rest of the phase is not started.
+- `yae-engine/docs/Phase40_GraphicsRealism.md` — the second graphics plan (linear light, material
+  data, environment, baked GI), renamed from 39 with the above. Depends on Phase 39's 39.0/39.2/39.3.
+  **Not started.**
 - `yae-engine/docs/console/` — developer-console docs.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
