@@ -112,6 +112,15 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   capture) are the A/B for every shader change; `debug_view <albedo|normal|roughness|metallic|direct|
   indirect|ao|lightmap>` in the console shows one quantity untonemapped (`--view <name>` shoots every
   scene in it; not a saved setting). Budgets per scene are in `Phase40_GraphicsRealism.md`, 40.0.3.
+  `--console "cmd; cmd"` runs console commands into every shot, `--tag name` names the output,
+  `--no-post` drops the composite, `--args "--flag"` passes engine flags — an A/B is two such runs.
+  **Colour pipeline (40.1):** `r_cvar r_color_pipeline 1` is the linear profile (live, no reload;
+  `legacy` = 0 stays the default), `r_light_falloff 1` the physical inverse-square falloff with the
+  level's coefficient (`lights calibrate [target]` prints it; `yae-overlay/authored/levels/<stem>/lights.yae`
+  stores it, the exposure and per-lamp overrides), `r_auto_exposure` (off) a histogram exposure.
+  The contract — pure γ 2.2 decode in the shader, multipliers to the γ, lerps in display space, one
+  encode — is `Invariants.md`, "Colour space of authored data"; the identity criterion is
+  `reference_scenes.sh --no-post --console "use_lights off"` legacy vs linear at 0.000.
 - **Perf (Phase 39.0):** `perf` in the console prints median/p95/max of every stage of `gameFrame()`
   and every pass of the frame over the last 240 frames (`perf gpu` the GPU side, `perf counters`
   draws/binds/uniform calls, `perf vram` the engine's own byte ledger); `--frames N` prints the same
@@ -128,7 +137,9 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   gitignored — they depend on this machine's resolution and gamma); a rendering refactor that must
   not change the picture proves it with noise 0.000 here. The script restores `config/settings.cfg`
   when it exits: an `r_cvar` set through `YAE_CONSOLE` is a saved setting and would otherwise leak
-  into every later run.
+  into every later run. `--fixed-dt` also puts **sound playback on the game clock** (40.1.5): an NPC's
+  voice line ends after its length in frames, not in milliseconds — the AI combat loop waits on it, and
+  without this `gor`/`metro` at frame 240 depended on how long the level took to load.
 - **Self-tests** run at startup (`runSelfTests()`, `yae-engine/tests/`) and print `PASS`/`FAIL` to the log —
   grep `self-test` after any run to confirm core subsystems (EntitySystem index, Lua, Jolt, parsers).
   The last line is a total (`self-test summary: N/M passed`).
@@ -274,7 +285,13 @@ a coordinator, not the facade.
   path failures with assets).
 - `yae-engine/docs/Phase40_GraphicsRealism.md` — the second graphics plan (linear light, material
   data, environment, baked GI), renamed from 39 with the above. Depends on Phase 39's 39.0/39.2/39.3.
-  **Not started.**
+  **40.0 and 40.1 are done** (2026-09-12): the four reference scenes, `debug_view`, per-scene
+  budgets; then the linear colour pipeline as a live profile beside `legacy` — pure-power decode in
+  the shader (the identity `diffuse × lightmap × 2` holds to 0.000 on all four scenes with lights and
+  composite off), the composite in linear (AO on the indirect share, exposure, bloom, tone map, one
+  OETF), physical falloff with a per-level coefficient and exposure both anchored to the legacy
+  picture (`lights calibrate`, `lights.yae`), and three GL/CPU self-tests. `legacy` remains the
+  default until the originals are eyeballed. 40.2 is next.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
