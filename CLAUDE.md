@@ -79,9 +79,10 @@ bash scripts/smoke_levels.sh --shots [level…]                                 
   and exits 2), `asan` = Debug + `YAE_SANITIZE=address,undefined` (`build-asan/`).
   `YAE_FETCH_DEPS=OFF` is a real branch now: `find_package` for SDL3, Jolt, glm and Lua 5.4, and
   it fails by package name when one is missing. `mingw` cross-builds for Windows with llvm-mingw
-  from `~/opt` (no root; `cmake/toolchain-llvm-mingw.cmake`; LLVM 20 — the 2026 releases' libc++
-  dropped `std::is_trivial`, which Jolt 5.3 uses) and `wine build-mingw/yae-engine.exe --self-test`
-  runs it. `scripts/tidy.sh [files]` runs clang-tidy with the
+  from `~/opt` (no root) and wine runs the result — **`yae-engine/docs/WindowsBuild.md`** is the
+  instruction: which llvm-mingw release (LLVM 20; the 2026 ones break Jolt), the two wine runs
+  (`--root 'Z:\nonexistent'` is what the runner sees), what counts as passed, and the classes of
+  defect this build finds that GCC on Linux does not. `scripts/tidy.sh [files]` runs clang-tidy with the
   small `bugprone-*`/`performance-*` set in `yae-engine/.clang-tidy` — not a gate.
 - **Menu/UI work:** `YAE_SKIP_INTRO=1` skips the 24 s logo so the main menu is up in ~4 s, and the
   `ui` console command drives it: `ui list` (21 screens), `ui show <widget>` opens one without
