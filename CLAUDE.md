@@ -78,7 +78,10 @@ bash scripts/smoke_levels.sh --shots [level…]                                 
   `release` = `YAE_DEV=OFF`, `YAE_BUILD_TESTS=OFF` (`build-release/`; `--self-test` there says so
   and exits 2), `asan` = Debug + `YAE_SANITIZE=address,undefined` (`build-asan/`).
   `YAE_FETCH_DEPS=OFF` is a real branch now: `find_package` for SDL3, Jolt, glm and Lua 5.4, and
-  it fails by package name when one is missing. `scripts/tidy.sh [files]` runs clang-tidy with the
+  it fails by package name when one is missing. `mingw` cross-builds for Windows with llvm-mingw
+  from `~/opt` (no root; `cmake/toolchain-llvm-mingw.cmake`; LLVM 20 — the 2026 releases' libc++
+  dropped `std::is_trivial`, which Jolt 5.3 uses) and `wine build-mingw/yae-engine.exe --self-test`
+  runs it. `scripts/tidy.sh [files]` runs clang-tidy with the
   small `bugprone-*`/`performance-*` set in `yae-engine/.clang-tidy` — not a gate.
 - **Menu/UI work:** `YAE_SKIP_INTRO=1` skips the 24 s logo so the main menu is up in ~4 s, and the
   `ui` console command drives it: `ui list` (21 screens), `ui show <widget>` opens one without
@@ -130,10 +133,10 @@ bash scripts/smoke_levels.sh --shots [level…]                                 
 
 ## Engine source map (`yae-engine/src/`)
 
-`core` (Types/Logger/InterfaceServer) · `entity` (Entity, actors, doors, triggers, joints, ropes, FSM, I/O)
-· `render` (GL4 renderer, shaders, post-process, decals; the frame is a `RenderScene` filled by producers and drawn by `GLRenderer::submit` — Phase 39.2.2) · `physics` (Jolt wrapper + coordinator, ragdoll)
+`core` (Types/Logger/InterfaceServer/CoordConvert) · `entity` (Entity + `EntityKind`, actors, doors, triggers, joints, ropes, FSM, I/O; also the inventory container, the hitscan trace and the explosion sink — the primitives the game layer builds on)
+· `render` (GL4 renderer, shaders, post-process, decals, the physics debug renderer; the frame is a `RenderScene` filled by producers and drawn by `GLRenderer::submit` — Phase 39.2.2) · `physics` (Jolt wrapper, ragdoll; **no `game/` or `render/` includes** — Phase 39.5.1, see `Invariants.md`)
 · `scripting` (Lua 5.4 bindings) · `ai` (combat loop, goals, perception) · `game` (GameRulesYAE facade +
-coordinators) · `assets` (`.ds2/.ds2md/.ds2cm/.ds2edf` parsers) · `audio` · `animation` · `navigation`
+coordinators, `PhysicsCoordinator` among them since 39.5.1) · `assets` (`.ds2/.ds2md/.ds2cm/.ds2edf` parsers) · `audio` · `animation` · `navigation`
 · `ui` (also the comics player) · `scene` · `resource` · `camera` · `input` · `platform`
 · `video` (AVI cutscenes: decoder backend + player + preset resolution).
 
