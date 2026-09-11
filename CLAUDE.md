@@ -40,7 +40,8 @@ bash build.sh                       # the `dev` preset (RelWithDebInfo, YAE_DEV,
                                     # (a new .cpp is picked up by the next build — CONFIGURE_DEPENDS since 39.4.3;
                                     #  tests/ is listed explicitly in CMakeLists.txt)
 bash build.sh --check               # build + gates: own-code warnings, self-tests, size budgets, gameres audit,
-                                    # SDK conformance, clang-format on changed lines, level smoke pass.
+                                    # console reference up to date, SDK conformance, clang-format on changed
+                                    # lines, level smoke pass.
                                     # ~30 s, stops at the first failure. Run it before committing.
 bash build.sh --asan                # the `asan` preset (Debug, ASan+UBSan) → yae-engine/build-asan; then --self-test,
                                     # a parse of med1/meat/gor and, with a display, 60 offscreen frames of each (39.4.2)
@@ -258,12 +259,19 @@ a coordinator, not the facade.
   (`app/FramePipeline`), the `RenderScene` + `SceneResources` registry, shaders as files; the
   per-frame UBO, the material SSBO, bindless textures and the per-light shadow-caster cull — on
   `med1` the world pass went 1.96 → 0.71 ms CPU, the shadow pass 11.7 → 1.0 ms (156 000 → 7 700
-  draws) and the frame 22 → 3.7 ms, with the picture unchanged on all 15 golden levels. 39.4–39.7
-  are not started.
+  draws) and the frame 22 → 3.7 ms, with the picture unchanged on all 15 golden levels.
+  **39.4–39.7 are done too** (2026-09-11): CI + presets + ASan + format gate (39.4), the layer
+  inversions and `Entity::kind()` (39.5), buffered Jolt contacts with the thread pool and async
+  textures *declined by measurement* (39.6), `Invariants.md` with a `Verified by` line per section,
+  phase docs stamped as history, `scripts/stats.sh`, the generated console reference (39.7).
+  **Phase 39 is closed**; what it left open is on the runner (first push) and in 39.4.1 (two Windows
+  path failures with assets).
 - `yae-engine/docs/Phase40_GraphicsRealism.md` — the second graphics plan (linear light, material
   data, environment, baked GI), renamed from 39 with the above. Depends on Phase 39's 39.0/39.2/39.3.
   **Not started.**
-- `yae-engine/docs/console/` — developer-console docs.
+- `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
+  command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
+  (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
 - Skills `yae-codeguide` (auto-invoked when editing C++/Lua) and `yae-review` encode conventions & anti-patterns.
 
 ## Golden rules
