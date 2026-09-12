@@ -53,6 +53,7 @@ bash run_level.sh -map med1         # run a level by stem or map dir (map10, gor
 bash scripts/conformance.sh                                                   # our parsers vs the SDK's over the whole corpus (~60 s)
 ./yae-engine/build/yae-engine --level … --frames 240                          # 240 frames, then a `perf` summary of every stage and pass (Phase 39.0)
 bash scripts/smoke_levels.sh --shots [level…]                                 # the picture gate: fixed cameras vs local baselines (--record-shots makes them)
+bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  # Phase 40's four reference scenes (ward/shop/yard/tunnel) at 1440p
 ```
 
 - `--level <path>` uses direct/CLI load (`loadLevelDirect`); campaign/transitions use `loadLevel` (by-name).
@@ -70,7 +71,8 @@ bash scripts/smoke_levels.sh --shots [level…]                                 
   gate does the same.
 - **CI (Phase 39.4.1):** `.github/workflows/ci.yml` runs the same gate on a clean Ubuntu runner —
   configure + build of the `dev` preset, warnings, `--self-test`, size budgets, format of the
-  changed lines, the `release` preset builds — and a second job runs `--self-test` under
+  changed lines (with clang-format **19.1.7** from PyPI in a venv — the one version the gate is;
+  apt's 18.x reads `AlignTrailingComments: Leave` differently and failed lines 19 had formatted), the `release` preset builds — and a second job runs `--self-test` under
   ASan+UBSan. `gameres` is never there (8.5 GB, outside git): the self-tests that parse it are
   **SKIP by name** (`assetCase` in `tests/TestRegistry.cpp`; the summary line groups the skips by
   reason), and the job summary lists what CI did *not* check. `.github/workflows/windows.yml` is
@@ -106,6 +108,22 @@ bash scripts/smoke_levels.sh --shots [level…]                                 
   compiles keeps its old program). A smoke run (`--frames`) compiles every file first, so a broken
   shader is an `[ERROR]` even on a level that never reaches its pass. No GLSL in C++: the check is
   `grep -rl '^#version' yae-engine/src yae-engine/app` → nothing.
+- **Graphics work (Phase 40.0):** the four reference scenes (`scripts/reference_scenes.sh`,
+  `tests/referenses-scenes/README.md` — cameras, reference settings, the original's frames still to
+  capture) are the A/B for every shader change; `debug_view <albedo|normal|roughness|metallic|direct|
+  indirect|ao|lightmap>` in the console shows one quantity untonemapped (`--view <name>` shoots every
+  scene in it; not a saved setting). Budgets per scene are in `Phase40_GraphicsRealism.md`, 40.0.3.
+  `--console "cmd; cmd"` runs console commands into every shot, `--tag name` names the output,
+  `--no-post` drops the composite, `--args "--flag"` passes engine flags — an A/B is two such runs.
+  **Colour pipeline (40.1):** `r_cvar r_color_pipeline 1` is the linear profile (live, no reload;
+  `legacy` = 0 stays the default), `r_light_falloff 1` the physical inverse-square falloff with the
+  level's coefficient (`lights calibrate [target]` prints it; `yae-overlay/authored/levels/<stem>/lights.yae`
+  stores it, the exposure and per-lamp overrides), `r_auto_exposure` (off) a histogram exposure,
+  `r_shadow_alpha` (on) alpha-tested shadow casters (40.2.2: a grate shadows its texels; `perf counters`
+  prints how many casters bound a texture for it).
+  The contract — pure γ 2.2 decode in the shader, multipliers to the γ, lerps in display space, one
+  encode — is `Invariants.md`, "Colour space of authored data"; the identity criterion is
+  `reference_scenes.sh --no-post --console "use_lights off"` legacy vs linear at 0.000.
 - **Perf (Phase 39.0):** `perf` in the console prints median/p95/max of every stage of `gameFrame()`
   and every pass of the frame over the last 240 frames (`perf gpu` the GPU side, `perf counters`
   draws/binds/uniform calls, `perf vram` the engine's own byte ledger); `--frames N` prints the same
@@ -122,7 +140,13 @@ bash scripts/smoke_levels.sh --shots [level…]                                 
   gitignored — they depend on this machine's resolution and gamma); a rendering refactor that must
   not change the picture proves it with noise 0.000 here. The script restores `config/settings.cfg`
   when it exits: an `r_cvar` set through `YAE_CONSOLE` is a saved setting and would otherwise leak
-  into every later run.
+  into every later run. `--fixed-dt` also makes the run **deterministic** (Invariants.md, "A
+  `--fixed-dt` run is the same run every time"): sound playback state on the game clock (40.1.5),
+  gameplay chance from `core/Random.h` with a fixed seed, and the bundled Lua's string hash pinned
+  (40.2.2 — as a raw `-D` option: CMake drops a function-style compile definition silently, and
+  the pin was missing until the `wall` follow-up caught `gor` flipping again; self-test `luaHashSeed`; Lua's `math.random` seeded and `engine.get_system_time()` on game time under
+  `rng::harness()`, self-test `luaHarnessRandom`) — each was a gate flipping between two pictures. A new wall-clock or `random_device` user
+  in gameplay breaks the gate on `gor`/`metro` first.
 - **Self-tests** run at startup (`runSelfTests()`, `yae-engine/tests/`) and print `PASS`/`FAIL` to the log —
   grep `self-test` after any run to confirm core subsystems (EntitySystem index, Lua, Jolt, parsers).
   The last line is a total (`self-test summary: N/M passed`).
@@ -268,7 +292,25 @@ a coordinator, not the facade.
   path failures with assets).
 - `yae-engine/docs/Phase40_GraphicsRealism.md` — the second graphics plan (linear light, material
   data, environment, baked GI), renamed from 39 with the above. Depends on Phase 39's 39.0/39.2/39.3.
-  **Not started.**
+  **40.0 and 40.1 are done** (2026-09-12): the four reference scenes, `debug_view`, per-scene
+  budgets; then the linear colour pipeline as a live profile beside `legacy` — pure-power decode in
+  the shader (the identity `diffuse × lightmap × 2` holds to 0.000 on all four scenes with lights and
+  composite off), the composite in linear (AO on the indirect share, exposure, bloom, tone map, one
+  OETF), physical falloff with a per-level coefficient and exposure both anchored to the legacy
+  picture (`lights calibrate`, `lights.yae`), and three GL/CPU self-tests. `legacy` remains the
+  default until the originals are eyeballed. **40.2 is done too**: the render queue draws in four
+  layers (opaque, masked, opaque decal, blended by `sort_value` then far-to-near), alpha-tested
+  shadow casters (`r_shadow_alpha`), horizon-based AO with bilateral blur and upsample on the
+  geometric G-buffer normal, the catalog's lightmap-as-AO gain retired. The pre-release part of
+  Phase 40 is complete; 40.3+ waits for the playable build.
+- `yae-engine/docs/Phase41_FixMed1KolhozGor.md` — the per-level method again, for the leftovers of
+  `med1`/`kolhoz` and the first pass over `gor` (`gor_part_2`) and `gorkonec`: ten items, eleven
+  subphases. **Not started** (reconnaissance 2026-09-12). Three roots are already named there —
+  `gorkonec`'s lightmaps never load (`gorKonec_lm_*` in the `.ds2` vs `gorkonec_lm_*.tga` on disk;
+  the original ran on a case-insensitive FS), god rays pass through the viewmodel because the scene
+  depth is captured before the FP pass, and the ZIL scene crash reproduces with one console command
+  (`fire_io TRG_zil_anim execute`, dies in Jolt's broadphase). Neither `gor_part_2` nor `gorkonec`
+  is in the smoke/picture gate yet — 41.0 adds them.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
