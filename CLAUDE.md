@@ -92,7 +92,7 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   clicking to it, `ui dump <widget>` prints the tree with config vs computed rects and `NO-MATERIAL`
   flags, `ui trace on` logs hit-tests. `YAE_CONSOLE` works in the menu too (no level needed).
   Reference shots of the original are in `yae-engine/tests/referenses-menu/`, ours in `ours/`.
-- **Smoke test:** `bash scripts/smoke_levels.sh` (~30 s, needs a display) loads all 15 golden levels
+- **Smoke test:** `bash scripts/smoke_levels.sh` (~35 s, needs a display) loads all 17 golden levels
   for 120 frames each and fails on any `[ERROR]` or on warnings that are new against
   `scripts/smoke_baseline.txt` (folded to message shape + count, since a lot of the originals'
   warnings are legitimate and never reach zero). A count that grew is only a failure when it both
@@ -305,12 +305,17 @@ a coordinator, not the facade.
   Phase 40 is complete; 40.3+ waits for the playable build.
 - `yae-engine/docs/Phase41_FixMed1KolhozGor.md` — the per-level method again, for the leftovers of
   `med1`/`kolhoz` and the first pass over `gor` (`gor_part_2`) and `gorkonec`: ten items, eleven
-  subphases. **Not started** (reconnaissance 2026-09-12). Three roots are already named there —
-  `gorkonec`'s lightmaps never load (`gorKonec_lm_*` in the `.ds2` vs `gorkonec_lm_*.tga` on disk;
-  the original ran on a case-insensitive FS), god rays pass through the viewmodel because the scene
-  depth is captured before the FP pass, and the ZIL scene crash reproduces with one console command
-  (`fire_io TRG_zil_anim execute`, dies in Jolt's broadphase). Neither `gor_part_2` nor `gorkonec`
-  is in the smoke/picture gate yet — 41.0 adds them.
+  subphases. **41.0 is done** (2026-09-12): `gor_part_2` and `gorkonec` are in the smoke and
+  picture gate (17 levels), `Lightmaps: N/M loaded` with pages missing is a WARN naming them, every
+  item has a verified recipe in its subphase, and the `meat` crane numbers are recorded. Three roots
+  were already named by the reconnaissance — `gorkonec`'s lightmaps never load (`gorKonec_lm_*` in
+  the `.ds2` vs `gorkonec_lm_*.tga` on disk; the original ran on a case-insensitive FS), god rays
+  pass through the viewmodel because the scene depth is captured before the FP pass, and the ZIL
+  scene crash reproduces with one console command (`fire_io TRG_zil_anim execute`, dies in Jolt's
+  broadphase; also by spawning inside `TRG_zil_anim`). 41.0 added two that change items: **the
+  zeppelin is not on the shipped `gor` at all** (only in the `gor_karma`/`gor_cars_lastscene`
+  editor dumps no EDF includes — item 7 needs `--edf gor_karma.ds2edf` and a decision), and
+  **`props` does not list doors** (41.5/41.10 start with a `door:` diagnostic).
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
