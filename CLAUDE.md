@@ -305,11 +305,16 @@ a coordinator, not the facade.
   Phase 40 is complete; 40.3+ waits for the playable build.
 - `yae-engine/docs/Phase41_FixMed1KolhozGor.md` — the per-level method again, for the leftovers of
   `med1`/`kolhoz` and the first pass over `gor` (`gor_part_2`) and `gorkonec`: ten items, eleven
-  subphases. **41.0 is done** (2026-09-12): `gor_part_2` and `gorkonec` are in the smoke and
-  picture gate (17 levels), `Lightmaps: N/M loaded` with pages missing is a WARN naming them, every
-  item has a verified recipe in its subphase, and the `meat` crane numbers are recorded. Three roots
-  were already named by the reconnaissance — `gorkonec`'s lightmaps never load (`gorKonec_lm_*` in
-  the `.ds2` vs `gorkonec_lm_*.tga` on disk; the original ran on a case-insensitive FS), god rays
+  subphases. **41.0 and 41.1 are done** (2026-09-12/13): `gor_part_2` and `gorkonec` are in the
+  smoke and picture gate (17 levels), `Lightmaps: N/M loaded` with pages missing is a WARN naming
+  them, every item has a verified recipe in its subphase, the `meat` crane numbers are recorded;
+  then `FileSystem::resolvePath()` matches a name case-insensitively when the exact spelling names
+  nothing (one cached listing per directory, one log line per name — `Invariants.md`, "An asset
+  name is matched without regard to case"; self-test `CaseInsensitivePath`), and `gorkonec` reads
+  `Lightmaps: 2/2 loaded` — across the campaign those two pages were the only names that needed
+  it. Three roots were already named by the reconnaissance — `gorkonec`'s lightmaps never loaded
+  (`gorKonec_lm_*` in the `.ds2` vs `gorkonec_lm_*.tga` on disk; the original ran on a
+  case-insensitive FS — closed in 41.1), god rays
   pass through the viewmodel because the scene depth is captured before the FP pass, and the ZIL
   scene crash reproduces with one console command (`fire_io TRG_zil_anim execute`, dies in Jolt's
   broadphase; also by spawning inside `TRG_zil_anim`). 41.0 added two that change items: **the
