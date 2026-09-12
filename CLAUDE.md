@@ -79,7 +79,9 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   the Windows build (MSYS2 UCRT64 GCC, build + `--self-test`), a separate status on purpose.
 - **Presets** (`yae-engine/CMakePresets.json`): `dev` = what `build.sh` builds (`build/`),
   `release` = `YAE_DEV=OFF`, `YAE_BUILD_TESTS=OFF` (`build-release/`; `--self-test` there says so
-  and exits 2), `asan` = Debug + `YAE_SANITIZE=address,undefined` (`build-asan/`).
+  and exits 2), `asan` = RelWithDebInfo + `YAE_SANITIZE=address,undefined` + Jolt's `USE_ASSERTS`
+  (`build-asan/`; a Jolt assert is logged as `[ERROR]` and the run continues — 41.3; the one
+  accepted assert, equal hinge limits, is logged once as INFO).
   `YAE_FETCH_DEPS=OFF` is a real branch now: `find_package` for SDL3, Jolt, glm and Lua 5.4, and
   it fails by package name when one is missing. `mingw` cross-builds for Windows with llvm-mingw
   from `~/opt` (no root) and wine runs the result — **`yae-engine/docs/WindowsBuild.md`** is the
@@ -305,7 +307,7 @@ a coordinator, not the facade.
   Phase 40 is complete; 40.3+ waits for the playable build.
 - `yae-engine/docs/Phase41_FixMed1KolhozGor.md` — the per-level method again, for the leftovers of
   `med1`/`kolhoz` and the first pass over `gor` (`gor_part_2`) and `gorkonec`: ten items, eleven
-  subphases. **41.0–41.2 are done** (2026-09-12/13): `gor_part_2` and `gorkonec` are in the
+  subphases. **41.0–41.3 are done** (2026-09-12/13): `gor_part_2` and `gorkonec` are in the
   smoke and picture gate (17 levels), `Lightmaps: N/M loaded` with pages missing is a WARN naming
   them, every item has a verified recipe in its subphase, the `meat` crane numbers are recorded;
   `FileSystem::resolvePath()` matches a name case-insensitively when the exact spelling names
@@ -316,13 +318,23 @@ a coordinator, not the facade.
   `GLRenderer::kViewmodelDepthRange`) instead of after a depth clear, so the live depth is world +
   weapon, the god-ray mask sees the gun as an occluder and 32.8.1's depth snapshot (a full-res
   blit per frame) is gone — `Invariants.md`, "The viewmodel is in front by depth range";
-  GL self-test `God-ray viewmodel mask`. Three roots were already named by the reconnaissance —
+  GL self-test `God-ray viewmodel mask`; the ZIL crash is closed by the original's own rule, read
+  in the decompiled ODE 0.5: **a body entering the physics world brings in the dormant bodies its
+  joints tie it to** (`PhysicsWorld::addBodyToWorld`; a leaving body parks its constraints; hidden
+  and `shapes_enabled = false` bodies are kept out — `Invariants.md`, "A joint brings its dormant
+  end into the world"), plus two campaign-wide motor roots — the authored `x_F`/`x_V` hinge motor
+  nobody read and `set_velocity` on a hinge being **degrees per second** — self-test `Joint to
+  dormant body`, `props` prints `motion:`/`shape:`/`com`, `joints` prints `motor`, and
+  `physics_debug` is a console command. The truck now drives instead of crashing but stops short
+  of the scene's stop trigger — an open, measured item under `gorkonec` in `TODO.md`. Three roots
+  were already named by the reconnaissance —
   `gorkonec`'s lightmaps never loaded (`gorKonec_lm_*` in the `.ds2` vs `gorkonec_lm_*.tga` on
   disk; the original ran on a case-insensitive FS — closed in 41.1), god rays
   passed through the viewmodel because the scene depth was captured before the FP pass (closed in
   41.2), and the ZIL
-  scene crash reproduces with one console command (`fire_io TRG_zil_anim execute`, dies in Jolt's
-  broadphase; also by spawning inside `TRG_zil_anim`). 41.0 added two that change items: **the
+  scene crash reproduced with one console command (`fire_io TRG_zil_anim execute`, died in Jolt's
+  broadphase; also by spawning inside `TRG_zil_anim` — closed in 41.3). 41.0 added two that
+  change items: **the
   zeppelin is not on the shipped `gor` at all** (only in the `gor_karma`/`gor_cars_lastscene`
   editor dumps no EDF includes — item 7 needs `--edf gor_karma.ds2edf` and a decision), and
   **`props` does not list doors** (41.5/41.10 start with a `door:` diagnostic).
