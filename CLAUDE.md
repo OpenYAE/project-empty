@@ -71,7 +71,8 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   gate does the same.
 - **CI (Phase 39.4.1):** `.github/workflows/ci.yml` runs the same gate on a clean Ubuntu runner —
   configure + build of the `dev` preset, warnings, `--self-test`, size budgets, format of the
-  changed lines, the `release` preset builds — and a second job runs `--self-test` under
+  changed lines (with clang-format **19.1.7** from PyPI in a venv — the one version the gate is;
+  apt's 18.x reads `AlignTrailingComments: Leave` differently and failed lines 19 had formatted), the `release` preset builds — and a second job runs `--self-test` under
   ASan+UBSan. `gameres` is never there (8.5 GB, outside git): the self-tests that parse it are
   **SKIP by name** (`assetCase` in `tests/TestRegistry.cpp`; the summary line groups the skips by
   reason), and the job summary lists what CI did *not* check. `.github/workflows/windows.yml` is
@@ -302,6 +303,14 @@ a coordinator, not the facade.
   shadow casters (`r_shadow_alpha`), horizon-based AO with bilateral blur and upsample on the
   geometric G-buffer normal, the catalog's lightmap-as-AO gain retired. The pre-release part of
   Phase 40 is complete; 40.3+ waits for the playable build.
+- `yae-engine/docs/Phase41_FixMed1KolhozGor.md` — the per-level method again, for the leftovers of
+  `med1`/`kolhoz` and the first pass over `gor` (`gor_part_2`) and `gorkonec`: ten items, eleven
+  subphases. **Not started** (reconnaissance 2026-09-12). Three roots are already named there —
+  `gorkonec`'s lightmaps never load (`gorKonec_lm_*` in the `.ds2` vs `gorkonec_lm_*.tga` on disk;
+  the original ran on a case-insensitive FS), god rays pass through the viewmodel because the scene
+  depth is captured before the FP pass, and the ZIL scene crash reproduces with one console command
+  (`fire_io TRG_zil_anim execute`, dies in Jolt's broadphase). Neither `gor_part_2` nor `gorkonec`
+  is in the smoke/picture gate yet — 41.0 adds them.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
