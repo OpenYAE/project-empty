@@ -117,7 +117,9 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   **Colour pipeline (40.1):** `r_cvar r_color_pipeline 1` is the linear profile (live, no reload;
   `legacy` = 0 stays the default), `r_light_falloff 1` the physical inverse-square falloff with the
   level's coefficient (`lights calibrate [target]` prints it; `yae-overlay/authored/levels/<stem>/lights.yae`
-  stores it, the exposure and per-lamp overrides), `r_auto_exposure` (off) a histogram exposure.
+  stores it, the exposure and per-lamp overrides), `r_auto_exposure` (off) a histogram exposure,
+  `r_shadow_alpha` (on) alpha-tested shadow casters (40.2.2: a grate shadows its texels; `perf counters`
+  prints how many casters bound a texture for it).
   The contract — pure γ 2.2 decode in the shader, multipliers to the γ, lerps in display space, one
   encode — is `Invariants.md`, "Colour space of authored data"; the identity criterion is
   `reference_scenes.sh --no-post --console "use_lights off"` legacy vs linear at 0.000.
@@ -137,9 +139,11 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   gitignored — they depend on this machine's resolution and gamma); a rendering refactor that must
   not change the picture proves it with noise 0.000 here. The script restores `config/settings.cfg`
   when it exits: an `r_cvar` set through `YAE_CONSOLE` is a saved setting and would otherwise leak
-  into every later run. `--fixed-dt` also puts **sound playback on the game clock** (40.1.5): an NPC's
-  voice line ends after its length in frames, not in milliseconds — the AI combat loop waits on it, and
-  without this `gor`/`metro` at frame 240 depended on how long the level took to load.
+  into every later run. `--fixed-dt` also makes the run **deterministic** (Invariants.md, "A
+  `--fixed-dt` run is the same run every time"): sound playback state on the game clock (40.1.5),
+  gameplay chance from `core/Random.h` with a fixed seed, and the bundled Lua's string hash pinned
+  (40.2.2) — each was a gate flipping between two pictures. A new wall-clock or `random_device` user
+  in gameplay breaks the gate on `gor`/`metro` first.
 - **Self-tests** run at startup (`runSelfTests()`, `yae-engine/tests/`) and print `PASS`/`FAIL` to the log —
   grep `self-test` after any run to confirm core subsystems (EntitySystem index, Lua, Jolt, parsers).
   The last line is a total (`self-test summary: N/M passed`).
@@ -291,7 +295,11 @@ a coordinator, not the facade.
   composite off), the composite in linear (AO on the indirect share, exposure, bloom, tone map, one
   OETF), physical falloff with a per-level coefficient and exposure both anchored to the legacy
   picture (`lights calibrate`, `lights.yae`), and three GL/CPU self-tests. `legacy` remains the
-  default until the originals are eyeballed. 40.2 is next.
+  default until the originals are eyeballed. **40.2 is done too**: the render queue draws in four
+  layers (opaque, masked, opaque decal, blended by `sort_value` then far-to-near), alpha-tested
+  shadow casters (`r_shadow_alpha`), horizon-based AO with bilateral blur and upsample on the
+  geometric G-buffer normal, the catalog's lightmap-as-AO gain retired. The pre-release part of
+  Phase 40 is complete; 40.3+ waits for the playable build.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
