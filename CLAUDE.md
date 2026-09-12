@@ -142,7 +142,9 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   into every later run. `--fixed-dt` also makes the run **deterministic** (Invariants.md, "A
   `--fixed-dt` run is the same run every time"): sound playback state on the game clock (40.1.5),
   gameplay chance from `core/Random.h` with a fixed seed, and the bundled Lua's string hash pinned
-  (40.2.2) — each was a gate flipping between two pictures. A new wall-clock or `random_device` user
+  (40.2.2 — as a raw `-D` option: CMake drops a function-style compile definition silently, and
+  the pin was missing until the `wall` follow-up caught `gor` flipping again; self-test `luaHashSeed`; Lua's `math.random` seeded and `engine.get_system_time()` on game time under
+  `rng::harness()`, self-test `luaHarnessRandom`) — each was a gate flipping between two pictures. A new wall-clock or `random_device` user
   in gameplay breaks the gate on `gor`/`metro` first.
 - **Self-tests** run at startup (`runSelfTests()`, `yae-engine/tests/`) and print `PASS`/`FAIL` to the log —
   grep `self-test` after any run to confirm core subsystems (EntitySystem index, Lua, Jolt, parsers).
