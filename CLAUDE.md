@@ -309,7 +309,7 @@ a coordinator, not the facade.
   Phase 40 is complete; 40.3+ waits for the playable build.
 - `yae-engine/docs/Phase41_FixMed1KolhozGor.md` — the per-level method again, for the leftovers of
   `med1`/`kolhoz` and the first pass over `gor` (`gor_part_2`) and `gorkonec`: ten items, eleven
-  subphases (twelve with 41.12). **41.0–41.6 and 41.12 are done** (2026-09-12/13): `gor_part_2` and `gorkonec` are in the
+  subphases (twelve with 41.12). **41.0–41.7 and 41.12 are done** (2026-09-12/13): `gor_part_2` and `gorkonec` are in the
   smoke and picture gate (17 levels), `Lightmaps: N/M loaded` with pages missing is a WARN naming
   them, every item has a verified recipe in its subphase, the `meat` crane numbers are recorded;
   `FileSystem::resolvePath()` matches a name case-insensitively when the exact spelling names
@@ -365,7 +365,15 @@ a coordinator, not the facade.
   STATIC) — `Invariants.md`, "A door leaf does not collide with the level"; self-test `Door leaf
   ignores level`; `io <door>` prints `door:`/`hinge:`/`body:`, the console `use` presses both halves
   of the key. The other six doors are as authored (`_01` locked *and welded to each other*, `_05`
-  unlocked by its trigger). 41.12 drove the ZIL scene to its end on three roots, none of them the
+  unlocked by its trigger). 41.7 (the `med1` dog with no arrival sound) closed on our own rule: 34.6.2
+  had let a name in `react_objects` beat a side token in `skip_objects` so that `YAKOR_KONEC01`
+  would `destroy` the dog on arrival, but the original's filter (`sv_game.dll` `FUN_0f8a7940`)
+  tests the actor's side *after* the name and rejects on the skip regardless — that zone fires for
+  nobody, the dog reaches its anchor, goes `idle` and growls (`Dog_idle2/3`; `Dog_idle1` has no
+  file — `OriginalScriptDefects.md` C4). One `Trigger` and five unread `ai_anchor`s in the campaign
+  change; `Invariants.md`, "A side token in `skip_objects` wins"; self-test `Dog guard errand`.
+  Found and left in `TODO.md`: NPC run/walk sounds start twice (C++ `updateActorStateSounds` and
+  Lua `visualize_state`). 41.12 drove the ZIL scene to its end on three roots, none of them the
   plan's hypotheses, found with two new console probes — `trace x,y,z [dir] [len]` (a ray: what is
   there, whose) and `contacts <a[,b]> [all]` (a body's contacts as they happen): the truck sat its
   tail on the escort motorcyclist, because **an actor's inner body is infinitely massive to every
