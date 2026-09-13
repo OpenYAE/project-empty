@@ -79,7 +79,9 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   the Windows build (MSYS2 UCRT64 GCC, build + `--self-test`), a separate status on purpose.
 - **Presets** (`yae-engine/CMakePresets.json`): `dev` = what `build.sh` builds (`build/`),
   `release` = `YAE_DEV=OFF`, `YAE_BUILD_TESTS=OFF` (`build-release/`; `--self-test` there says so
-  and exits 2), `asan` = Debug + `YAE_SANITIZE=address,undefined` (`build-asan/`).
+  and exits 2), `asan` = RelWithDebInfo + `YAE_SANITIZE=address,undefined` + Jolt's `USE_ASSERTS`
+  (`build-asan/`; a Jolt assert is logged as `[ERROR]` and the run continues — 41.3; the one
+  accepted assert, equal hinge limits, is logged once as INFO).
   `YAE_FETCH_DEPS=OFF` is a real branch now: `find_package` for SDL3, Jolt, glm and Lua 5.4, and
   it fails by package name when one is missing. `mingw` cross-builds for Windows with llvm-mingw
   from `~/opt` (no root) and wine runs the result — **`yae-engine/docs/WindowsBuild.md`** is the
@@ -92,7 +94,7 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   clicking to it, `ui dump <widget>` prints the tree with config vs computed rects and `NO-MATERIAL`
   flags, `ui trace on` logs hit-tests. `YAE_CONSOLE` works in the menu too (no level needed).
   Reference shots of the original are in `yae-engine/tests/referenses-menu/`, ours in `ours/`.
-- **Smoke test:** `bash scripts/smoke_levels.sh` (~30 s, needs a display) loads all 15 golden levels
+- **Smoke test:** `bash scripts/smoke_levels.sh` (~35 s, needs a display) loads all 17 golden levels
   for 120 frames each and fails on any `[ERROR]` or on warnings that are new against
   `scripts/smoke_baseline.txt` (folded to message shape + count, since a lot of the originals'
   warnings are legitimate and never reach zero). A count that grew is only a failure when it both
@@ -138,7 +140,9 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   `tests/referenses-<level>/ours/baseline.png`. A run that logs an `[ERROR]` or writes no shot is a
   failure, never a comparison against the previous run's file. Baselines are local (`--record-shots`,
   gitignored — they depend on this machine's resolution and gamma); a rendering refactor that must
-  not change the picture proves it with noise 0.000 here. The script restores `config/settings.cfg`
+  not change the picture proves it with noise 0.000 here. The baselines were last re-recorded in
+  41.6, when the authored fog first reached the renderer (`lastzlo` again in 41.12, when the invented
+  prop damping went). The script restores `config/settings.cfg`
   when it exits: an `r_cvar` set through `YAE_CONSOLE` is a saved setting and would otherwise leak
   into every later run. `--fixed-dt` also makes the run **deterministic** (Invariants.md, "A
   `--fixed-dt` run is the same run every time"): sound playback state on the game clock (40.1.5),
@@ -305,12 +309,123 @@ a coordinator, not the facade.
   Phase 40 is complete; 40.3+ waits for the playable build.
 - `yae-engine/docs/Phase41_FixMed1KolhozGor.md` — the per-level method again, for the leftovers of
   `med1`/`kolhoz` and the first pass over `gor` (`gor_part_2`) and `gorkonec`: ten items, eleven
-  subphases. **Not started** (reconnaissance 2026-09-12). Three roots are already named there —
-  `gorkonec`'s lightmaps never load (`gorKonec_lm_*` in the `.ds2` vs `gorkonec_lm_*.tga` on disk;
-  the original ran on a case-insensitive FS), god rays pass through the viewmodel because the scene
-  depth is captured before the FP pass, and the ZIL scene crash reproduces with one console command
-  (`fire_io TRG_zil_anim execute`, dies in Jolt's broadphase). Neither `gor_part_2` nor `gorkonec`
-  is in the smoke/picture gate yet — 41.0 adds them.
+  subphases (twelve with 41.12). **Phase 41 is closed — 41.0–41.12 done** (2026-09-12/13). 41.9 (the
+  cabinet bottle standing through its shelf) closed on a root outside its plan: the authored pose is
+  impossible (a 23.2-unit box in an 18.1-unit compartment) and **Jolt resolves it in its position
+  phase** — no velocity, mirror-image manifolds from shelf and floor, zero torque — where ODE 0.5
+  resolves it as a real velocity with per-triangle contacts, so the original's bottle tips over.
+  `physics/JammedPlacement.h` states the outcome: a dynamic *pickup* born jammed (a two-probe test
+  with back faces — `medkit06`'s centre sits inside the shelf board) is laid on its side before its
+  first step where it fits; props are left as authored. 5 pickups across the campaign (all in
+  `med1`/`med2` wall cabinets), 27 jammed props untouched, picture gate 17/17 unchanged —
+  `Invariants.md`, "A pickup born where it does not fit lies down"; self-test `Tall item topples`;
+  `PhysicsWorld::overlapsAt`/`boundsAt`; `contacts <e> all` now really prints persisted contacts
+  of the named bodies. 41.10 closed by measurement on `Door_Aptechka00` (`io` + `trace`: kinematic
+  box swings with the leaf, the ray crosses the opening to the medkit). Note for harness runs:
+  `--fixed-dt` takes a value (`--fixed-dt 0.0166667`); `--fixed-dt --offscreen …` silently runs
+  on real time and eats the next flag. Before that: `gor_part_2` and `gorkonec` are in the
+  smoke and picture gate (17 levels), `Lightmaps: N/M loaded` with pages missing is a WARN naming
+  them, every item has a verified recipe in its subphase, the `meat` crane numbers are recorded;
+  `FileSystem::resolvePath()` matches a name case-insensitively when the exact spelling names
+  nothing (one cached listing per directory, one log line per name — `Invariants.md`, "An asset
+  name is matched without regard to case"; self-test `CaseInsensitivePath`), and `gorkonec` reads
+  `Lightmaps: 2/2 loaded` — across the campaign those two pages were the only names that needed
+  it; the viewmodel is drawn into the front depth band (`glDepthRange(0, 0.01)`,
+  `GLRenderer::kViewmodelDepthRange`) instead of after a depth clear, so the live depth is world +
+  weapon, the god-ray mask sees the gun as an occluder and 32.8.1's depth snapshot (a full-res
+  blit per frame) is gone — `Invariants.md`, "The viewmodel is in front by depth range";
+  GL self-test `God-ray viewmodel mask`; the ZIL crash is closed by the original's own rule, read
+  in the decompiled ODE 0.5: **a body entering the physics world brings in the dormant bodies its
+  joints tie it to** (`PhysicsWorld::addBodyToWorld`; a leaving body parks its constraints; hidden
+  and `shapes_enabled = false` bodies are kept out — `Invariants.md`, "A joint brings its dormant
+  end into the world"), plus two campaign-wide motor roots — the authored `x_F`/`x_V` hinge motor
+  nobody read and `set_velocity` on a hinge being **degrees per second** — self-test `Joint to
+  dormant body`, `props` prints `motion:`/`shape:`/`com`, `joints` prints `motor`, and
+  `physics_debug` is a console command. The truck now drives instead of crashing but stops short
+  of the scene's stop trigger — an open, measured item under `gorkonec` in `TODO.md`, planned as
+  41.12 (runs before 41.11). 41.4 answered what a disabled `RigidBody` *is* by reading the ODE 0.5
+  in `ds2physics.dll`: **frozen and solid** — `Enable(false)` is `dBodyDisable` and nothing else,
+  only `Hide` drops the geoms, and `AddForce`/`SetLinearVelocity`/the island walk all re-enable it.
+  A dormant body is now a kinematic body in the world, woken by `enable`, a joint, a live body's
+  or a moving lift's contact, a character's touch, or a push (`PhysicsWorld::setBodyDormant`/
+  `wakeDormant`; `RigidBodyEntity::syncBodyToState()` is the one function behind
+  `show`/`hide`/`enable`/`disable`/`*_shapes`; hidden bodies stay out); measured across the
+  campaign's load path: 174 such props, 18 only ever shown, 57 never enabled by anything — all
+  walk-through until now. A joint to a dormant end is built (it used to be skipped as
+  "non-dynamic", which is why the ZIL lost its wheels' joints), the blast recognises a dormant body
+  by its mark, `props` prints `kinem dormant` — `Invariants.md`, "A disabled body is solid";
+  self-test `Dormant body is solid`. 41.6 (the zeppelin that "disappears and returns") closed on a
+  root outside its plan: **the authored fog had never been applied on any level since Phase 24.1**
+  — `parseEntities()` moves its definitions out and `extractFogSettings()` read the emptied member;
+  the airship popped in and out at `camera_zfar = 15000` as a hard silhouette where the authors
+  end the fog at exactly 15 000 to hide that cut. Both plan hypotheses were ruled out by
+  measurement (no model culling exists in the main pass; the clip joint is one held-pose frame),
+  the fix is one call site, the picture changed on 16 of 17 gate levels and all four reference
+  scenes (baselines re-recorded, ≤ 2.2/255 mean; the 40.1.2 legacy/linear identity holds with fog
+  at 0.000), and the four passes that still ignore fog (decal, water, particle, rope) are handed to
+  40.6.4 with numbers — `Invariants.md`, "The authored fog is applied, and it ends where the camera
+  does"; self-test `EDF fog reaches the renderer`; console `screenshot [file]` (a frame series
+  from one run with `wait`). The user then checked the retail game: the *shipped* airship is
+  `DEREJOBA` on `gor_part_2` (not the karma dump's), it hovers and **leaves by its arrival clip
+  played at `speed = -0.6`** — and our `anim_play` dropped the sign, so it jumped away and arrived
+  again; a negative speed now plays a clip backwards from its end and `speed = 0` keeps the speed
+  it had (8 authored reversed plays, 20 EDFs with `0`) — `Invariants.md`, "A negative animation
+  speed plays the clip backwards"; self-test `Animation plays backwards`; `fire_io <entity>
+  <output>` fires an authored output by name (`fire_io TRG_Derej on_enter`), `YAE_DUMP_FRAMES=1
+  --dump` prints a clip's keys. 41.5 (the `gor_part_2` doors): only the physics pair `_02` was
+  stuck, and by its own frame — the hinge is authored inside the door post, and a leaf that
+  collides with the level jams on a hard hinge where the original's `BhvDoor::DontCollideWithStatic`
+  drops the world bit; a `fixing = false` leaf is now on `PhysLayers::DOOR_LEAF` (no pair with
+  STATIC) — `Invariants.md`, "A door leaf does not collide with the level"; self-test `Door leaf
+  ignores level`; `io <door>` prints `door:`/`hinge:`/`body:`, the console `use` presses both halves
+  of the key. The other six doors are as authored (`_01` locked *and welded to each other*, `_05`
+  unlocked by its trigger). 41.7 (the `med1` dog with no arrival sound) closed on our own rule: 34.6.2
+  had let a name in `react_objects` beat a side token in `skip_objects` so that `YAKOR_KONEC01`
+  would `destroy` the dog on arrival, but the original's filter (`sv_game.dll` `FUN_0f8a7940`)
+  tests the actor's side *after* the name and rejects on the skip regardless — that zone fires for
+  nobody, the dog reaches its anchor, goes `idle` and growls (`Dog_idle2/3`; `Dog_idle1` has no
+  file — `OriginalScriptDefects.md` C4). One `Trigger` and five unread `ai_anchor`s in the campaign
+  change; `Invariants.md`, "A side token in `skip_objects` wins"; self-test `Dog guard errand`.
+  Found and left in `TODO.md`: NPC run/walk sounds start twice (C++ `updateActorStateSounds` and
+  Lua `visualize_state`). 41.8 (`legs_fsm` re-entered 18×/s) was our binding, not the original's
+  design: `get_fsm_state` returned a fresh table where `add_fsm_state`/`get_cur_fsm_state` return
+  the name, so the authored `if(cur_legs_state ~= fsm_move_state)` never held (all three hand out
+  the name now, unknown → `nil`). Reading the original's FSM on the way (`sv_game.dll`
+  `FUN_0f829500`/`FUN_0f829600`) replaced two invented rules in `FSM.h` with its contract: **no
+  same-state guard, and a non-forced `change_fsm_state` waits for the state's `is_finished`**
+  (pending, applied after the update tick that ends the state; `force` defaults to `true`;
+  `is_finished` is called as a method) — `Invariants.md`, "FSM self-transitions"; self-tests `FSM
+  loop restart` (rewritten), `FSM handle identity`; a torso visual with the overlay off is dropped
+  while the legs own the base track instead of being taken back by the next tick's re-assert.
+  Consequence recorded for a retail check in `TODO.md`: every actor now enters `empty` at `on_init`
+  as the script says (idle frame 1 + its idle sound), so `med1`'s start has two hidden actors in
+  earshot; `krovli`'s picture baseline re-recorded (a shifted RNG draw picked another weapon
+  idle clip), `smoke_baseline.txt` refreshed for `dog_idle1`. 41.12 drove the ZIL scene to its end on three roots, none of them the
+  plan's hypotheses, found with two new console probes — `trace x,y,z [dir] [len]` (a ray: what is
+  there, whose) and `contacts <a[,b]> [all]` (a body's contacts as they happen): the truck sat its
+  tail on the escort motorcyclist, because **an actor's inner body is infinitely massive to every
+  prop** while the original gives it its authored mass (now a contact with a heavier dynamic body is
+  a sensor contact and the character's own recovery is the shove); the gate-breaking trigger saw the
+  truck 140 units late, because `TriggerZone` added the entity's world-aligned box to the zone's
+  *local* axes — wrong by a quarter turn for a zone authored across the road (now the OBB is
+  projected onto the trigger's axes); and the curb was cleared only on rounding luck, because
+  `MaterialScriptLoader` had **invented 0.06–0.65/s of damping for every dynamic prop** since Phase
+  24 while ODE 0.5 has none (now zero; doors/debris/`.phs` props keep their explicit values) —
+  `Invariants.md`, "A heavier body shoves an actor", "A trigger meets an entity's box along its own
+  axes", "A body has no damping of its own"; self-tests `Heavy body shoves actor`, `Trigger rotated
+  box sees length`; `lastzlo`'s baseline re-recorded (its start lift is a passive dynamic body the
+  damping had been holding up — `TODO.md`). Three roots
+  were already named by the reconnaissance —
+  `gorkonec`'s lightmaps never loaded (`gorKonec_lm_*` in the `.ds2` vs `gorkonec_lm_*.tga` on
+  disk; the original ran on a case-insensitive FS — closed in 41.1), god rays
+  passed through the viewmodel because the scene depth was captured before the FP pass (closed in
+  41.2), and the ZIL
+  scene crash reproduced with one console command (`fire_io TRG_zil_anim execute`, died in Jolt's
+  broadphase; also by spawning inside `TRG_zil_anim` — closed in 41.3). 41.0 added two that
+  change items: **the
+  zeppelin is not on the shipped `gor` at all** (only in the `gor_karma`/`gor_cars_lastscene`
+  editor dumps no EDF includes — item 7 needs `--edf gor_karma.ds2edf` and a decision), and
+  **`props` does not list doors** (41.5/41.10 start with a `door:` diagnostic).
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
