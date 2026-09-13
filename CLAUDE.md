@@ -94,7 +94,7 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   clicking to it, `ui dump <widget>` prints the tree with config vs computed rects and `NO-MATERIAL`
   flags, `ui trace on` logs hit-tests. `YAE_CONSOLE` works in the menu too (no level needed).
   Reference shots of the original are in `yae-engine/tests/referenses-menu/`, ours in `ours/`.
-- **Smoke test:** `bash scripts/smoke_levels.sh` (~35 s, needs a display) loads all 17 golden levels
+- **Smoke test:** `bash scripts/smoke_levels.sh` (~35 s, needs a display) loads all 18 golden levels
   for 120 frames each and fails on any `[ERROR]` or on warnings that are new against
   `scripts/smoke_baseline.txt` (folded to message shape + count, since a lot of the originals'
   warnings are legitimate and never reach zero). A count that grew is only a failure when it both
@@ -141,8 +141,13 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   failure, never a comparison against the previous run's file. Baselines are local (`--record-shots`,
   gitignored — they depend on this machine's resolution and gamma); a rendering refactor that must
   not change the picture proves it with noise 0.000 here. The baselines were last re-recorded in
-  41.6, when the authored fog first reached the renderer (`lastzlo` again in 41.12, when the invented
-  prop damping went). The script restores `config/settings.cfg`
+  42.0 (all 18, after the 2026-09-13 renderer commits `4363d82`/`cdddbfd`; before that in 41.6 for the
+  authored fog and `lastzlo` in 41.12). **Since 42.0 a gate run is pinned:** every engine invocation
+  gets `--materials-catalog yae-materials/export/engine/catalog.yaemat` (the Workbench pointer
+  `yae-materials/.yae/workbench/exports/current.json` otherwise overrides it silently — 1119 matched
+  meshes on `kolhoz` instead of 9014, and 14 levels "failed"), and the `cvar.*` lines of
+  `config/settings.cfg` are set aside for the run so the engine shoots on its code defaults
+  (`r_lm_relief_gain=16` had leaked in). The script restores `config/settings.cfg`
   when it exits: an `r_cvar` set through `YAE_CONSOLE` is a saved setting and would otherwise leak
   into every later run. `--fixed-dt` also makes the run **deterministic** (Invariants.md, "A
   `--fixed-dt` run is the same run every time"): sound playback state on the game clock (40.1.5),
@@ -428,7 +433,16 @@ a coordinator, not the facade.
   **`props` does not list doors** (41.5/41.10 start with a `door:` diagnostic).
 - `yae-engine/docs/Phase42_FixMeatWallGrsvt.md` — the per-level method for the leftovers of `meat`
   (Phase 36's eight deliberately unfixed defects) and the first pass over `wall` and `grsvt`
-  (gorsovet): 14 items, 13 subphases. **Not started**; reconnaissance 2026-09-13. Five roots are
+  (gorsovet): 14 items, 13 subphases. **42.0 done** (2026-09-13): `grsvt` is the 18th level of the
+  smoke and picture gate (camera on the gallery looking at `RIGID_lustra`'s twelve mirrored
+  plafons), the crane numbers are recorded, the three recipes that needed a spawn have one (the
+  `wall` final door, `TRIGGER_backshot`, the `meat_part2` hatch — which turns out to be the
+  **`meat_part2 → wall`** exit: a manhole over a shaft with `THE_END` inside it). 42.0 also found the
+  picture gate red on 14 of the 17 older levels before any Phase 42 change — the renderer commits
+  of 2026-09-13 (`4363d82`, `cdddbfd`) after the 03:55 baselines plus the Workbench catalog
+  pointer (`yae-materials/.yae/workbench/exports/current.json` overrides `export/engine/`), measured
+  in the doc; by the user's decision the gate is now pinned to `export/engine` and default cvars, and
+  all 18 baselines were re-recorded. 42.1+ not started. Five roots are
   read in code before the work begins and every one is a class, not a level: `object_counter`
   parses its `add` parameter with `std::stoi` and counts to zero (three campaign scenes gated —
   the Beria door, `meat`'s second Karlson, `theatre`'s doors); a `Barrier` gets **no body** (the
