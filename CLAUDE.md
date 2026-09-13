@@ -426,6 +426,24 @@ a coordinator, not the facade.
   zeppelin is not on the shipped `gor` at all** (only in the `gor_karma`/`gor_cars_lastscene`
   editor dumps no EDF includes — item 7 needs `--edf gor_karma.ds2edf` and a decision), and
   **`props` does not list doors** (41.5/41.10 start with a `door:` diagnostic).
+- `yae-engine/docs/Phase42_FixMeatWallGrsvt.md` — the per-level method for the leftovers of `meat`
+  (Phase 36's eight deliberately unfixed defects) and the first pass over `wall` and `grsvt`
+  (gorsovet): 14 items, 13 subphases. **Not started**; reconnaissance 2026-09-13. Five roots are
+  read in code before the work begins and every one is a class, not a level: `object_counter`
+  parses its `add` parameter with `std::stoi` and counts to zero (three campaign scenes gated —
+  the Beria door, `meat`'s second Karlson, `theatre`'s doors); a `Barrier` gets **no body** (the
+  `model.empty()` skip precedes the `isBarrier` branch — ~600 authored invisible walls are
+  walk-through, `sv_game.dll.c:102860` builds `AddBox(size)`); `remove_actor_item_by_classname`
+  clears the C++ inventory while the player's items live in the Lua `__inventory`; every door
+  swings about the **world** vertical (`DoorEntity.h:746`) so `meat`'s flat hatch spins in the
+  floor plane (8 tilted door placements campaign-wide); a hidden body is out of the world since
+  41.4, so the wagon's welded wheel-knockers never ride and seven knock triggers never fire. The
+  conveyor finding unifies three items: the belt boxes **stand on the mesh** (their tops are the
+  authored riding surface, 40 units up; on the crest they float above the mesh) — the original's
+  belt is a body with surface motion, ours a bodiless zone pushing props with a force friction
+  eats. Two items start with RE: the FSM `on_update` cadence (Karlson's one-tick `jump_prepare`)
+  and the blank `react_objects` list (`wall`'s 700-hp `DAMAGE_backshot`). 48 mirrored placements
+  (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
