@@ -351,7 +351,14 @@ a coordinator, not the facade.
   at 0.000), and the four passes that still ignore fog (decal, water, particle, rope) are handed to
   40.6.4 with numbers — `Invariants.md`, "The authored fog is applied, and it ends where the camera
   does"; self-test `EDF fog reaches the renderer`; console `screenshot [file]` (a frame series
-  from one run with `wait`). 41.12 drove the ZIL scene to its end on three roots, none of them the
+  from one run with `wait`). The user then checked the retail game: the *shipped* airship is
+  `DEREJOBA` on `gor_part_2` (not the karma dump's), it hovers and **leaves by its arrival clip
+  played at `speed = -0.6`** — and our `anim_play` dropped the sign, so it jumped away and arrived
+  again; a negative speed now plays a clip backwards from its end and `speed = 0` keeps the speed
+  it had (8 authored reversed plays, 20 EDFs with `0`) — `Invariants.md`, "A negative animation
+  speed plays the clip backwards"; self-test `Animation plays backwards`; `fire_io <entity>
+  <output>` fires an authored output by name (`fire_io TRG_Derej on_enter`), `YAE_DUMP_FRAMES=1
+  --dump` prints a clip's keys. 41.12 drove the ZIL scene to its end on three roots, none of them the
   plan's hypotheses, found with two new console probes — `trace x,y,z [dir] [len]` (a ray: what is
   there, whose) and `contacts <a[,b]> [all]` (a body's contacts as they happen): the truck sat its
   tail on the escort motorcyclist, because **an actor's inner body is infinitely massive to every
