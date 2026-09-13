@@ -442,7 +442,13 @@ a coordinator, not the facade.
   of 2026-09-13 (`4363d82`, `cdddbfd`) after the 03:55 baselines plus the Workbench catalog
   pointer (`yae-materials/.yae/workbench/exports/current.json` overrides `export/engine/`), measured
   in the doc; by the user's decision the gate is now pinned to `export/engine` and default cvars, and
-  all 18 baselines were re-recorded. 42.1+ not started. Five roots are
+  all 18 baselines were re-recorded. **42.1 done** (2026-09-14): `CounterEntity` reads
+  `input_data.value` from the authored parameter table (`IOParams`; slot defaults as
+  `sv_object_counter` registers them; `check()` fires only `on_value_equal` at the reference) —
+  the Beria door opens, `meat`'s `karloson_02` and `theatre`'s `Counter_Doors` chains fire; self-test
+  `Counter reads param table`. Found on the way and left in `TODO.md` `general`: the authored
+  `damage` command (27 in the campaign, `{damage_type, hit, kill}`) is parsed the same wrong way and
+  always deals 100 — RE of `sv_game.dll`'s handler first. 42.2+ not started. Five roots are
   read in code before the work begins and every one is a class, not a level: `object_counter`
   parses its `add` parameter with `std::stoi` and counts to zero (three campaign scenes gated —
   the Beria door, `meat`'s second Karlson, `theatre`'s doors); a `Barrier` gets **no body** (the
