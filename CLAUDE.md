@@ -454,7 +454,10 @@ a coordinator, not the facade.
   `trace` sees them) — `grsvt`'s `BARRIER_08` stops the player at x 31.4; self-test `Barrier body
   from size`; new console `hold <cmd> [s]` (a held key for harness runs); `lastzlo`'s baseline
   re-recorded (its friction-held start lift settles differently with more bodies in the world).
-  42.3+ not started. Five roots are
+  **42.3 done** (2026-09-14): `remove_actor_item_by_classname` takes items out of the actor's Lua
+  `__inventory` through `WeaponCoordinator::removeInventoryItemsByClass` (entities destroyed, a held
+  weapon holstered and `select_weapon(BEST)` rerun, ammo recounted) — room 101 empties the hands;
+  self-test `Remove item by classname`. 42.4+ not started. Five roots are
   read in code before the work begins and every one is a class, not a level: `object_counter`
   parses its `add` parameter with `std::stoi` and counts to zero (three campaign scenes gated —
   the Beria door, `meat`'s second Karlson, `theatre`'s doors); a `Barrier` gets **no body** (the
