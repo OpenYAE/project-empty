@@ -140,7 +140,9 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   `tests/referenses-<level>/ours/baseline.png`. A run that logs an `[ERROR]` or writes no shot is a
   failure, never a comparison against the previous run's file. Baselines are local (`--record-shots`,
   gitignored — they depend on this machine's resolution and gamma); a rendering refactor that must
-  not change the picture proves it with noise 0.000 here. The script restores `config/settings.cfg`
+  not change the picture proves it with noise 0.000 here. The baselines were last re-recorded in
+  41.6, when the authored fog first reached the renderer (`lastzlo` again in 41.12, when the invented
+  prop damping went). The script restores `config/settings.cfg`
   when it exits: an `r_cvar` set through `YAE_CONSOLE` is a saved setting and would otherwise leak
   into every later run. `--fixed-dt` also makes the run **deterministic** (Invariants.md, "A
   `--fixed-dt` run is the same run every time"): sound playback state on the game clock (40.1.5),
@@ -307,7 +309,7 @@ a coordinator, not the facade.
   Phase 40 is complete; 40.3+ waits for the playable build.
 - `yae-engine/docs/Phase41_FixMed1KolhozGor.md` — the per-level method again, for the leftovers of
   `med1`/`kolhoz` and the first pass over `gor` (`gor_part_2`) and `gorkonec`: ten items, eleven
-  subphases (twelve with 41.12). **41.0–41.4 are done** (2026-09-12/13): `gor_part_2` and `gorkonec` are in the
+  subphases (twelve with 41.12). **41.0–41.4, 41.6 and 41.12 are done** (2026-09-12/13; 41.5 deferred by the user): `gor_part_2` and `gorkonec` are in the
   smoke and picture gate (17 levels), `Lightmaps: N/M loaded` with pages missing is a WARN naming
   them, every item has a verified recipe in its subphase, the `meat` crane numbers are recorded;
   `FileSystem::resolvePath()` matches a name case-insensitively when the exact spelling names
@@ -338,7 +340,32 @@ a coordinator, not the facade.
   walk-through until now. A joint to a dormant end is built (it used to be skipped as
   "non-dynamic", which is why the ZIL lost its wheels' joints), the blast recognises a dormant body
   by its mark, `props` prints `kinem dormant` — `Invariants.md`, "A disabled body is solid";
-  self-test `Dormant body is solid`. Three roots
+  self-test `Dormant body is solid`. 41.6 (the zeppelin that "disappears and returns") closed on a
+  root outside its plan: **the authored fog had never been applied on any level since Phase 24.1**
+  — `parseEntities()` moves its definitions out and `extractFogSettings()` read the emptied member;
+  the airship popped in and out at `camera_zfar = 15000` as a hard silhouette where the authors
+  end the fog at exactly 15 000 to hide that cut. Both plan hypotheses were ruled out by
+  measurement (no model culling exists in the main pass; the clip joint is one held-pose frame),
+  the fix is one call site, the picture changed on 16 of 17 gate levels and all four reference
+  scenes (baselines re-recorded, ≤ 2.2/255 mean; the 40.1.2 legacy/linear identity holds with fog
+  at 0.000), and the four passes that still ignore fog (decal, water, particle, rope) are handed to
+  40.6.4 with numbers — `Invariants.md`, "The authored fog is applied, and it ends where the camera
+  does"; self-test `EDF fog reaches the renderer`; console `screenshot [file]` (a frame series
+  from one run with `wait`). 41.12 drove the ZIL scene to its end on three roots, none of them the
+  plan's hypotheses, found with two new console probes — `trace x,y,z [dir] [len]` (a ray: what is
+  there, whose) and `contacts <a[,b]> [all]` (a body's contacts as they happen): the truck sat its
+  tail on the escort motorcyclist, because **an actor's inner body is infinitely massive to every
+  prop** while the original gives it its authored mass (now a contact with a heavier dynamic body is
+  a sensor contact and the character's own recovery is the shove); the gate-breaking trigger saw the
+  truck 140 units late, because `TriggerZone` added the entity's world-aligned box to the zone's
+  *local* axes — wrong by a quarter turn for a zone authored across the road (now the OBB is
+  projected onto the trigger's axes); and the curb was cleared only on rounding luck, because
+  `MaterialScriptLoader` had **invented 0.06–0.65/s of damping for every dynamic prop** since Phase
+  24 while ODE 0.5 has none (now zero; doors/debris/`.phs` props keep their explicit values) —
+  `Invariants.md`, "A heavier body shoves an actor", "A trigger meets an entity's box along its own
+  axes", "A body has no damping of its own"; self-tests `Heavy body shoves actor`, `Trigger rotated
+  box sees length`; `lastzlo`'s baseline re-recorded (its start lift is a passive dynamic body the
+  damping had been holding up — `TODO.md`). Three roots
   were already named by the reconnaissance —
   `gorkonec`'s lightmaps never loaded (`gorKonec_lm_*` in the `.ds2` vs `gorkonec_lm_*.tga` on
   disk; the original ran on a case-insensitive FS — closed in 41.1), god rays
