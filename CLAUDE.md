@@ -309,7 +309,21 @@ a coordinator, not the facade.
   Phase 40 is complete; 40.3+ waits for the playable build.
 - `yae-engine/docs/Phase41_FixMed1KolhozGor.md` — the per-level method again, for the leftovers of
   `med1`/`kolhoz` and the first pass over `gor` (`gor_part_2`) and `gorkonec`: ten items, eleven
-  subphases (twelve with 41.12). **41.0–41.8 and 41.12 are done** (2026-09-12/13): `gor_part_2` and `gorkonec` are in the
+  subphases (twelve with 41.12). **Phase 41 is closed — 41.0–41.12 done** (2026-09-12/13). 41.9 (the
+  cabinet bottle standing through its shelf) closed on a root outside its plan: the authored pose is
+  impossible (a 23.2-unit box in an 18.1-unit compartment) and **Jolt resolves it in its position
+  phase** — no velocity, mirror-image manifolds from shelf and floor, zero torque — where ODE 0.5
+  resolves it as a real velocity with per-triangle contacts, so the original's bottle tips over.
+  `physics/JammedPlacement.h` states the outcome: a dynamic *pickup* born jammed (a two-probe test
+  with back faces — `medkit06`'s centre sits inside the shelf board) is laid on its side before its
+  first step where it fits; props are left as authored. 5 pickups across the campaign (all in
+  `med1`/`med2` wall cabinets), 27 jammed props untouched, picture gate 17/17 unchanged —
+  `Invariants.md`, "A pickup born where it does not fit lies down"; self-test `Tall item topples`;
+  `PhysicsWorld::overlapsAt`/`boundsAt`; `contacts <e> all` now really prints persisted contacts
+  of the named bodies. 41.10 closed by measurement on `Door_Aptechka00` (`io` + `trace`: kinematic
+  box swings with the leaf, the ray crosses the opening to the medkit). Note for harness runs:
+  `--fixed-dt` takes a value (`--fixed-dt 0.0166667`); `--fixed-dt --offscreen …` silently runs
+  on real time and eats the next flag. Before that: `gor_part_2` and `gorkonec` are in the
   smoke and picture gate (17 levels), `Lightmaps: N/M loaded` with pages missing is a WARN naming
   them, every item has a verified recipe in its subphase, the `meat` crane numbers are recorded;
   `FileSystem::resolvePath()` matches a name case-insensitively when the exact spelling names
