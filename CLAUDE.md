@@ -307,7 +307,7 @@ a coordinator, not the facade.
   Phase 40 is complete; 40.3+ waits for the playable build.
 - `yae-engine/docs/Phase41_FixMed1KolhozGor.md` — the per-level method again, for the leftovers of
   `med1`/`kolhoz` and the first pass over `gor` (`gor_part_2`) and `gorkonec`: ten items, eleven
-  subphases. **41.0–41.3 are done** (2026-09-12/13): `gor_part_2` and `gorkonec` are in the
+  subphases (twelve with 41.12). **41.0–41.4 are done** (2026-09-12/13): `gor_part_2` and `gorkonec` are in the
   smoke and picture gate (17 levels), `Lightmaps: N/M loaded` with pages missing is a WARN naming
   them, every item has a verified recipe in its subphase, the `meat` crane numbers are recorded;
   `FileSystem::resolvePath()` matches a name case-insensitively when the exact spelling names
@@ -326,7 +326,19 @@ a coordinator, not the facade.
   nobody read and `set_velocity` on a hinge being **degrees per second** — self-test `Joint to
   dormant body`, `props` prints `motion:`/`shape:`/`com`, `joints` prints `motor`, and
   `physics_debug` is a console command. The truck now drives instead of crashing but stops short
-  of the scene's stop trigger — an open, measured item under `gorkonec` in `TODO.md`. Three roots
+  of the scene's stop trigger — an open, measured item under `gorkonec` in `TODO.md`, planned as
+  41.12 (runs before 41.11). 41.4 answered what a disabled `RigidBody` *is* by reading the ODE 0.5
+  in `ds2physics.dll`: **frozen and solid** — `Enable(false)` is `dBodyDisable` and nothing else,
+  only `Hide` drops the geoms, and `AddForce`/`SetLinearVelocity`/the island walk all re-enable it.
+  A dormant body is now a kinematic body in the world, woken by `enable`, a joint, a live body's
+  or a moving lift's contact, a character's touch, or a push (`PhysicsWorld::setBodyDormant`/
+  `wakeDormant`; `RigidBodyEntity::syncBodyToState()` is the one function behind
+  `show`/`hide`/`enable`/`disable`/`*_shapes`; hidden bodies stay out); measured across the
+  campaign's load path: 174 such props, 18 only ever shown, 57 never enabled by anything — all
+  walk-through until now. A joint to a dormant end is built (it used to be skipped as
+  "non-dynamic", which is why the ZIL lost its wheels' joints), the blast recognises a dormant body
+  by its mark, `props` prints `kinem dormant` — `Invariants.md`, "A disabled body is solid";
+  self-test `Dormant body is solid`. Three roots
   were already named by the reconnaissance —
   `gorkonec`'s lightmaps never loaded (`gorKonec_lm_*` in the `.ds2` vs `gorkonec_lm_*.tga` on
   disk; the original ran on a case-insensitive FS — closed in 41.1), god rays
