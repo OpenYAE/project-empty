@@ -309,7 +309,7 @@ a coordinator, not the facade.
   Phase 40 is complete; 40.3+ waits for the playable build.
 - `yae-engine/docs/Phase41_FixMed1KolhozGor.md` — the per-level method again, for the leftovers of
   `med1`/`kolhoz` and the first pass over `gor` (`gor_part_2`) and `gorkonec`: ten items, eleven
-  subphases (twelve with 41.12). **41.0–41.7 and 41.12 are done** (2026-09-12/13): `gor_part_2` and `gorkonec` are in the
+  subphases (twelve with 41.12). **41.0–41.8 and 41.12 are done** (2026-09-12/13): `gor_part_2` and `gorkonec` are in the
   smoke and picture gate (17 levels), `Lightmaps: N/M loaded` with pages missing is a WARN naming
   them, every item has a verified recipe in its subphase, the `meat` crane numbers are recorded;
   `FileSystem::resolvePath()` matches a name case-insensitively when the exact spelling names
@@ -373,7 +373,20 @@ a coordinator, not the facade.
   file — `OriginalScriptDefects.md` C4). One `Trigger` and five unread `ai_anchor`s in the campaign
   change; `Invariants.md`, "A side token in `skip_objects` wins"; self-test `Dog guard errand`.
   Found and left in `TODO.md`: NPC run/walk sounds start twice (C++ `updateActorStateSounds` and
-  Lua `visualize_state`). 41.12 drove the ZIL scene to its end on three roots, none of them the
+  Lua `visualize_state`). 41.8 (`legs_fsm` re-entered 18×/s) was our binding, not the original's
+  design: `get_fsm_state` returned a fresh table where `add_fsm_state`/`get_cur_fsm_state` return
+  the name, so the authored `if(cur_legs_state ~= fsm_move_state)` never held (all three hand out
+  the name now, unknown → `nil`). Reading the original's FSM on the way (`sv_game.dll`
+  `FUN_0f829500`/`FUN_0f829600`) replaced two invented rules in `FSM.h` with its contract: **no
+  same-state guard, and a non-forced `change_fsm_state` waits for the state's `is_finished`**
+  (pending, applied after the update tick that ends the state; `force` defaults to `true`;
+  `is_finished` is called as a method) — `Invariants.md`, "FSM self-transitions"; self-tests `FSM
+  loop restart` (rewritten), `FSM handle identity`; a torso visual with the overlay off is dropped
+  while the legs own the base track instead of being taken back by the next tick's re-assert.
+  Consequence recorded for a retail check in `TODO.md`: every actor now enters `empty` at `on_init`
+  as the script says (idle frame 1 + its idle sound), so `med1`'s start has two hidden actors in
+  earshot; `krovli`'s picture baseline re-recorded (a shifted RNG draw picked another weapon
+  idle clip), `smoke_baseline.txt` refreshed for `dog_idle1`. 41.12 drove the ZIL scene to its end on three roots, none of them the
   plan's hypotheses, found with two new console probes — `trace x,y,z [dir] [len]` (a ray: what is
   there, whose) and `contacts <a[,b]> [all]` (a body's contacts as they happen): the truck sat its
   tail on the escort motorcyclist, because **an actor's inner body is infinitely massive to every
