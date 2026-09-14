@@ -142,7 +142,8 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   gitignored — they depend on this machine's resolution and gamma); a rendering refactor that must
   not change the picture proves it with noise 0.000 here. The baselines were last re-recorded in
   42.0 (all 18, after the 2026-09-13 renderer commits `4363d82`/`cdddbfd`; before that in 41.6 for the
-  authored fog and `lastzlo` in 41.12). **Since 42.0 a gate run is pinned:** every engine invocation
+  authored fog and `lastzlo` in 41.12; since then single levels with a reason — `grsvt` 42.4,
+  `lastzlo` 42.2/42.7, `meat` 42.7). **Since 42.0 a gate run is pinned:** every engine invocation
   gets `--materials-catalog yae-materials/export/engine/catalog.yaemat` (the Workbench pointer
   `yae-materials/.yae/workbench/exports/current.json` otherwise overrides it silently — 1119 matched
   meshes on `kolhoz` instead of 9014, and 14 levels "failed"), and the `cvar.*` lines of
@@ -471,7 +472,15 @@ a coordinator, not the facade.
   hidden or `shapes_enabled = false` RigidBody is a ghost (`PhysLayers::GHOST` — no pairs, no rays,
   no pushes; frozen; woken only by a joint), as `ODE::Body::Hide` = `dBodyDisable` + `dGeomDisable`
   — meat's eight hidden wheel knockers ride the wagon's welds into the seven knock triggers (48
-  knocks a ride); self-test `Hidden body rides joint`. 42.7+ not started. Five roots are
+  knocks a ride); self-test `Hidden body rides joint`. **42.7 done** (2026-09-14): a `Conveyor` is
+  a static box of its authored `size` whose surface moves (`PhysicsWorld::setSurfaceMotion` →
+  `ContactSettings::mRelativeLinearSurfaceVelocity`, ODE's `dContactMotion1`; a character reads it
+  as its ground's velocity, projected onto the ground's tangent plane) — meat's m03 chain is ridden
+  on the belt tops at exactly 150/…/333 u/s to the authored lava trough, `M06_01` at 195.7/s for 24 s,
+  a canister rides belt 01 at 148 u/s; the character keeps the carry of its last ground in the air
+  (`airCarryVelocity_`), which also moved `lastzlo`'s friction-held lift (baseline re-recorded, as
+  was `meat`'s — its gate camera stands on `CONVEYOR_M06_01`); self-tests `Conveyor carries body`
+  / `Conveyor carries character`. 42.8+ not started. Five roots are
   read in code before the work begins and every one is a class, not a level: `object_counter`
   parses its `add` parameter with `std::stoi` and counts to zero (three campaign scenes gated —
   the Beria door, `meat`'s second Karlson, `theatre`'s doors); a `Barrier` gets **no body** (the
