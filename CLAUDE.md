@@ -480,7 +480,24 @@ a coordinator, not the facade.
   a canister rides belt 01 at 148 u/s; the character keeps the carry of its last ground in the air
   (`airCarryVelocity_`), which also moved `lastzlo`'s friction-held lift (baseline re-recorded, as
   was `meat`'s — its gate camera stands on `CONVEYOR_M06_01`); self-tests `Conveyor carries body`
-  / `Conveyor carries character`. 42.8+ not started. Five roots are
+  / `Conveyor carries character`. **42.8 done** (2026-09-14): the plan's hypothesis was refuted
+  by measurement — an actor rides a published carrier since 35.6 (`io <actor>` now prints its
+  ground body and carry, `io <lift>` the travel it publishes); meat's fireman was never *on* the
+  lift: `snapToNavGrid` pulled him 123 units down to the shaft's grid cell under the platform (and
+  its floor ray had never run at level load — gated on a body built one lifecycle step later; 191
+  actors started in the air). An actor now spawns on the floor under its placement, a kinematic
+  platform included, and a cell 30+ below that floor is refused — `Invariants.md`, "An actor
+  spawns on the floor under its placement"; self-test `Actor spawns on platform`; the authored
+  scene (sparks trigger → lift down scoops him off `BARRIER_AI_M12_01` → up to the
+  `blockmovement_off` trigger) runs end to end. **42.9 done** (2026-09-14): the FSM cadence
+  question answers itself in the scripts — `set_fsm_update_time` = the clip's length, honoured
+  since 37.8b (the Karlson's take-off `jump5_vzlet` runs its full 1567 ms) — and the jerk was
+  after the clip: `moveTo` under `block_movement` dropped the goal's order, so the unblocked
+  Karlson stood in `alert1_p1` for 200 ms until the chase goal's next 0.5 s repath (the original's
+  `"chase"` re-plans every 1–6 s, RE `FUN_0f8e47f0`, so its order must survive the block). A
+  refused order is now held and walked on the first tick after the block lifts — `Invariants.md`,
+  "A movement order outlives `block_movement`"; self-test `Pinned actor` (+`resumes`,
+  `stop_cancels`). 42.10+ not started. Five roots are
   read in code before the work begins and every one is a class, not a level: `object_counter`
   parses its `add` parameter with `std::stoi` and counts to zero (three campaign scenes gated —
   the Beria door, `meat`'s second Karlson, `theatre`'s doors); a `Barrier` gets **no body** (the
