@@ -467,7 +467,11 @@ a coordinator, not the facade.
   floor plane, poh's `Kachel` swings, andr's levers tilt; and a ladder climbs along its most
   vertical axis (meat's `Ladder_01` is authored along local −Y) — the `meat_part2 → wall` exit is
   walkable with `use` + `hold`; self-test `Door swings about its axis`. Found: `lastzlo`'s
-  picture flakes 1 run in 5 (the friction-held lift) — in `TODO.md`. 42.6+ not started. Five roots are
+  picture flakes 1 run in 5 (the friction-held lift) — in `TODO.md`. **42.6 done** (2026-09-14): a
+  hidden or `shapes_enabled = false` RigidBody is a ghost (`PhysLayers::GHOST` — no pairs, no rays,
+  no pushes; frozen; woken only by a joint), as `ODE::Body::Hide` = `dBodyDisable` + `dGeomDisable`
+  — meat's eight hidden wheel knockers ride the wagon's welds into the seven knock triggers (48
+  knocks a ride); self-test `Hidden body rides joint`. 42.7+ not started. Five roots are
   read in code before the work begins and every one is a class, not a level: `object_counter`
   parses its `add` parameter with `std::stoi` and counts to zero (three campaign scenes gated —
   the Beria door, `meat`'s second Karlson, `theatre`'s doors); a `Barrier` gets **no body** (the
