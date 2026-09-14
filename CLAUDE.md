@@ -497,7 +497,16 @@ a coordinator, not the facade.
   `"chase"` re-plans every 1–6 s, RE `FUN_0f8e47f0`, so its order must survive the block). A
   refused order is now held and walked on the first tick after the block lifts — `Invariants.md`,
   "A movement order outlives `block_movement`"; self-test `Pinned actor` (+`resumes`,
-  `stop_cancels`). 42.10+ not started. Five roots are
+  `stop_cancels`). **42.10 done** (2026-09-14): wall's death is the authored "shot in the back"
+  (`TRIGGER_backshot` → 730 ms → `DAMAGE_backshot`, 700 hp in a sphere the trigger lies in; the
+  ded's death — the canister beside him — destroys both), and the filter RE says a blank
+  `react_objects` reacts to the player in retail too (per-class fallbacks after parsing: all
+  for `Explosion`/`Bomb`, humans for `trigger_alive`; the `Trigger`'s own site unfound, "nobody"
+  ruled out by grsvt's blank exit trigger). Two class rules on the way: a trigger whose `shape`
+  is neither box nor sphere has no volume (the original adds nothing — wall's point-shaped steam
+  was charging 1 hp), and a numeric `damage_type` is GUNSHOT (the script's table miss) —
+  `Invariants.md`, "A trigger is a box or a sphere, or nothing"; self-test `Damage trigger`
+  (+`point`, `numeric_type`). 42.11+ not started. Five roots are
   read in code before the work begins and every one is a class, not a level: `object_counter`
   parses its `add` parameter with `std::stoi` and counts to zero (three campaign scenes gated —
   the Beria door, `meat`'s second Karlson, `theatre`'s doors); a `Barrier` gets **no body** (the
