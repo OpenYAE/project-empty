@@ -461,7 +461,13 @@ a coordinator, not the facade.
   plafons, the campaign's only ones) is split B = R·M in `Entity::adoptAuthoredTransform` — the body
   gets `properBasis()` (det +1, vertical kept), the render instance the body's pose times the
   mirror — the plafons stand on the chandelier rings; self-test `Mirrored placement keeps pose`,
-  `grsvt` baseline re-recorded. 42.5+ not started. Five roots are
+  `grsvt` baseline re-recorded. **42.5 done** (2026-09-14): a door turns about its placement's own
+  Z (`DoorEntity::hingeAxisZUp()` — leaf, kinematic body and hinge constraint alike; the original's
+  `AddHinge` axis is the `tm`'s third column) — meat's manhole lid lifts instead of spinning in the
+  floor plane, poh's `Kachel` swings, andr's levers tilt; and a ladder climbs along its most
+  vertical axis (meat's `Ladder_01` is authored along local −Y) — the `meat_part2 → wall` exit is
+  walkable with `use` + `hold`; self-test `Door swings about its axis`. Found: `lastzlo`'s
+  picture flakes 1 run in 5 (the friction-held lift) — in `TODO.md`. 42.6+ not started. Five roots are
   read in code before the work begins and every one is a class, not a level: `object_counter`
   parses its `add` parameter with `std::stoi` and counts to zero (three campaign scenes gated —
   the Beria door, `meat`'s second Karlson, `theatre`'s doors); a `Barrier` gets **no body** (the
