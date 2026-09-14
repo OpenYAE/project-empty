@@ -434,7 +434,9 @@ a coordinator, not the facade.
   **`props` does not list doors** (41.5/41.10 start with a `door:` diagnostic).
 - `yae-engine/docs/Phase42_FixMeatWallGrsvt.md` — the per-level method for the leftovers of `meat`
   (Phase 36's eight deliberately unfixed defects) and the first pass over `wall` and `grsvt`
-  (gorsovet): 14 items, 13 subphases. **42.0 done** (2026-09-13): `grsvt` is the 18th level of the
+  (gorsovet): 14 items, 13 subphases. **Phase 42 is closed — 42.0–42.12 done** (2026-09-13/14),
+  all 14 items marked with their subphase and root (three by measurement: meat's first-belt
+  damage, wall's back-shot, wall's final door). **42.0 done** (2026-09-13): `grsvt` is the 18th level of the
   smoke and picture gate (camera on the gallery looking at `RIGID_lustra`'s twelve mirrored
   plafons), the crane numbers are recorded, the three recipes that needed a spawn have one (the
   `wall` final door, `TRIGGER_backshot`, the `meat_part2` hatch — which turns out to be the
@@ -506,7 +508,19 @@ a coordinator, not the facade.
   is neither box nor sphere has no volume (the original adds nothing — wall's point-shaped steam
   was charging 1 hp), and a numeric `damage_type` is GUNSHOT (the script's table miss) —
   `Invariants.md`, "A trigger is a box or a sphere, or nothing"; self-test `Damage trigger`
-  (+`point`, `numeric_type`). 42.11+ not started. Five roots are
+  (+`point`, `numeric_type`). **42.11 done** (2026-09-14): wall's final door is walled in the
+  September collision mesh (`wall.ds2cm2` — two `mat_wood` faces in the leaf's plane; the May
+  `.ds2cm` had only the frame; `ICollisionSystem` loads the `2` and the physics trimesh comes
+  from it) and the level's exit trigger starts 19 units before it — the original's Field meets
+  the actor's *capsule*, ours tested its centre, which stops 17.5 units short. A trigger now meets
+  the player's capsule (and an NPC's) — `Invariants.md`, "A trigger meets an actor's capsule";
+  self-test `Trigger arming` (+`capsule`, `slab`); `trace` prints the mesh face's material.
+  **42.12 done — Phase 42 is closed** (2026-09-14): `--check` green, gate 18/18, the four
+  reference scenes re-recorded (the 09-13 renderer commits, as 42.0 found for the levels) and
+  `scripts/reference_scenes.sh` pinned to `export/engine` like the level gate, ASan on every
+  recipe, the crane unchanged after every physics subphase (197.4/197.3/197.9/197.9, +6.1°),
+  the chain `kolhoz → kolhoz_part2 → meat → meat_part2 → wall → gor` by name with 0 errors, the
+  Beria scene in one run. Five roots are
   read in code before the work begins and every one is a class, not a level: `object_counter`
   parses its `add` parameter with `std::stoi` and counts to zero (three campaign scenes gated —
   the Beria door, `meat`'s second Karlson, `theatre`'s doors); a `Barrier` gets **no body** (the
