@@ -457,7 +457,11 @@ a coordinator, not the facade.
   **42.3 done** (2026-09-14): `remove_actor_item_by_classname` takes items out of the actor's Lua
   `__inventory` through `WeaponCoordinator::removeInventoryItemsByClass` (entities destroyed, a held
   weapon holstered and `select_weapon(BEST)` rerun, ammo recounted) — room 101 empties the hands;
-  self-test `Remove item by classname`. 42.4+ not started. Five roots are
+  self-test `Remove item by classname`. **42.4 done** (2026-09-14): a `tm` with det < 0 (grsvt's 24
+  plafons, the campaign's only ones) is split B = R·M in `Entity::adoptAuthoredTransform` — the body
+  gets `properBasis()` (det +1, vertical kept), the render instance the body's pose times the
+  mirror — the plafons stand on the chandelier rings; self-test `Mirrored placement keeps pose`,
+  `grsvt` baseline re-recorded. 42.5+ not started. Five roots are
   read in code before the work begins and every one is a class, not a level: `object_counter`
   parses its `add` parameter with `std::stoi` and counts to zero (three campaign scenes gated —
   the Beria door, `meat`'s second Karlson, `theatre`'s doors); a `Barrier` gets **no body** (the
