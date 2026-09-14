@@ -94,7 +94,7 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   clicking to it, `ui dump <widget>` prints the tree with config vs computed rects and `NO-MATERIAL`
   flags, `ui trace on` logs hit-tests. `YAE_CONSOLE` works in the menu too (no level needed).
   Reference shots of the original are in `yae-engine/tests/referenses-menu/`, ours in `ours/`.
-- **Smoke test:** `bash scripts/smoke_levels.sh` (~35 s, needs a display) loads all 17 golden levels
+- **Smoke test:** `bash scripts/smoke_levels.sh` (~35 s, needs a display) loads all 18 golden levels
   for 120 frames each and fails on any `[ERROR]` or on warnings that are new against
   `scripts/smoke_baseline.txt` (folded to message shape + count, since a lot of the originals'
   warnings are legitimate and never reach zero). A count that grew is only a failure when it both
@@ -141,8 +141,14 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   failure, never a comparison against the previous run's file. Baselines are local (`--record-shots`,
   gitignored — they depend on this machine's resolution and gamma); a rendering refactor that must
   not change the picture proves it with noise 0.000 here. The baselines were last re-recorded in
-  41.6, when the authored fog first reached the renderer (`lastzlo` again in 41.12, when the invented
-  prop damping went). The script restores `config/settings.cfg`
+  42.0 (all 18, after the 2026-09-13 renderer commits `4363d82`/`cdddbfd`; before that in 41.6 for the
+  authored fog and `lastzlo` in 41.12; since then single levels with a reason — `grsvt` 42.4,
+  `lastzlo` 42.2/42.7, `meat` 42.7). **Since 42.0 a gate run is pinned:** every engine invocation
+  gets `--materials-catalog yae-materials/export/engine/catalog.yaemat` (the Workbench pointer
+  `yae-materials/.yae/workbench/exports/current.json` otherwise overrides it silently — 1119 matched
+  meshes on `kolhoz` instead of 9014, and 14 levels "failed"), and the `cvar.*` lines of
+  `config/settings.cfg` are set aside for the run so the engine shoots on its code defaults
+  (`r_lm_relief_gain=16` had leaked in). The script restores `config/settings.cfg`
   when it exits: an `r_cvar` set through `YAE_CONSOLE` is a saved setting and would otherwise leak
   into every later run. `--fixed-dt` also makes the run **deterministic** (Invariants.md, "A
   `--fixed-dt` run is the same run every time"): sound playback state on the game clock (40.1.5),
@@ -428,7 +434,93 @@ a coordinator, not the facade.
   **`props` does not list doors** (41.5/41.10 start with a `door:` diagnostic).
 - `yae-engine/docs/Phase42_FixMeatWallGrsvt.md` — the per-level method for the leftovers of `meat`
   (Phase 36's eight deliberately unfixed defects) and the first pass over `wall` and `grsvt`
-  (gorsovet): 14 items, 13 subphases. **Not started**; reconnaissance 2026-09-13. Five roots are
+  (gorsovet): 14 items, 13 subphases. **Phase 42 is closed — 42.0–42.12 done** (2026-09-13/14),
+  all 14 items marked with their subphase and root (three by measurement: meat's first-belt
+  damage, wall's back-shot, wall's final door). **42.0 done** (2026-09-13): `grsvt` is the 18th level of the
+  smoke and picture gate (camera on the gallery looking at `RIGID_lustra`'s twelve mirrored
+  plafons), the crane numbers are recorded, the three recipes that needed a spawn have one (the
+  `wall` final door, `TRIGGER_backshot`, the `meat_part2` hatch — which turns out to be the
+  **`meat_part2 → wall`** exit: a manhole over a shaft with `THE_END` inside it). 42.0 also found the
+  picture gate red on 14 of the 17 older levels before any Phase 42 change — the renderer commits
+  of 2026-09-13 (`4363d82`, `cdddbfd`) after the 03:55 baselines plus the Workbench catalog
+  pointer (`yae-materials/.yae/workbench/exports/current.json` overrides `export/engine/`), measured
+  in the doc; by the user's decision the gate is now pinned to `export/engine` and default cvars, and
+  all 18 baselines were re-recorded. **42.1 done** (2026-09-14): `CounterEntity` reads
+  `input_data.value` from the authored parameter table (`IOParams`; slot defaults as
+  `sv_object_counter` registers them; `check()` fires only `on_value_equal` at the reference) —
+  the Beria door opens, `meat`'s `karloson_02` and `theatre`'s `Counter_Doors` chains fire; self-test
+  `Counter reads param table`. Found on the way and left in `TODO.md` `general`: the authored
+  `damage` command (27 in the campaign, `{damage_type, hit, kill}`) is parsed the same wrong way and
+  always deals 100 — RE of `sv_game.dll`'s handler first. **42.2 done** (2026-09-14): `Barrier`/
+  `BarrierAI` are `BarrierEntity` with a static body of the authored size on `PhysLayers::BARRIER`/
+  `AI_BARRIER` (characters only; the player filters `AI_BARRIER` out; gameplay rays skip both,
+  `trace` sees them) — `grsvt`'s `BARRIER_08` stops the player at x 31.4; self-test `Barrier body
+  from size`; new console `hold <cmd> [s]` (a held key for harness runs); `lastzlo`'s baseline
+  re-recorded (its friction-held start lift settles differently with more bodies in the world).
+  **42.3 done** (2026-09-14): `remove_actor_item_by_classname` takes items out of the actor's Lua
+  `__inventory` through `WeaponCoordinator::removeInventoryItemsByClass` (entities destroyed, a held
+  weapon holstered and `select_weapon(BEST)` rerun, ammo recounted) — room 101 empties the hands;
+  self-test `Remove item by classname`. **42.4 done** (2026-09-14): a `tm` with det < 0 (grsvt's 24
+  plafons, the campaign's only ones) is split B = R·M in `Entity::adoptAuthoredTransform` — the body
+  gets `properBasis()` (det +1, vertical kept), the render instance the body's pose times the
+  mirror — the plafons stand on the chandelier rings; self-test `Mirrored placement keeps pose`,
+  `grsvt` baseline re-recorded. **42.5 done** (2026-09-14): a door turns about its placement's own
+  Z (`DoorEntity::hingeAxisZUp()` — leaf, kinematic body and hinge constraint alike; the original's
+  `AddHinge` axis is the `tm`'s third column) — meat's manhole lid lifts instead of spinning in the
+  floor plane, poh's `Kachel` swings, andr's levers tilt; and a ladder climbs along its most
+  vertical axis (meat's `Ladder_01` is authored along local −Y) — the `meat_part2 → wall` exit is
+  walkable with `use` + `hold`; self-test `Door swings about its axis`. Found: `lastzlo`'s
+  picture flakes 1 run in 5 (the friction-held lift) — in `TODO.md`. **42.6 done** (2026-09-14): a
+  hidden or `shapes_enabled = false` RigidBody is a ghost (`PhysLayers::GHOST` — no pairs, no rays,
+  no pushes; frozen; woken only by a joint), as `ODE::Body::Hide` = `dBodyDisable` + `dGeomDisable`
+  — meat's eight hidden wheel knockers ride the wagon's welds into the seven knock triggers (48
+  knocks a ride); self-test `Hidden body rides joint`. **42.7 done** (2026-09-14): a `Conveyor` is
+  a static box of its authored `size` whose surface moves (`PhysicsWorld::setSurfaceMotion` →
+  `ContactSettings::mRelativeLinearSurfaceVelocity`, ODE's `dContactMotion1`; a character reads it
+  as its ground's velocity, projected onto the ground's tangent plane) — meat's m03 chain is ridden
+  on the belt tops at exactly 150/…/333 u/s to the authored lava trough, `M06_01` at 195.7/s for 24 s,
+  a canister rides belt 01 at 148 u/s; the character keeps the carry of its last ground in the air
+  (`airCarryVelocity_`), which also moved `lastzlo`'s friction-held lift (baseline re-recorded, as
+  was `meat`'s — its gate camera stands on `CONVEYOR_M06_01`); self-tests `Conveyor carries body`
+  / `Conveyor carries character`. **42.8 done** (2026-09-14): the plan's hypothesis was refuted
+  by measurement — an actor rides a published carrier since 35.6 (`io <actor>` now prints its
+  ground body and carry, `io <lift>` the travel it publishes); meat's fireman was never *on* the
+  lift: `snapToNavGrid` pulled him 123 units down to the shaft's grid cell under the platform (and
+  its floor ray had never run at level load — gated on a body built one lifecycle step later; 191
+  actors started in the air). An actor now spawns on the floor under its placement, a kinematic
+  platform included, and a cell 30+ below that floor is refused — `Invariants.md`, "An actor
+  spawns on the floor under its placement"; self-test `Actor spawns on platform`; the authored
+  scene (sparks trigger → lift down scoops him off `BARRIER_AI_M12_01` → up to the
+  `blockmovement_off` trigger) runs end to end. **42.9 done** (2026-09-14): the FSM cadence
+  question answers itself in the scripts — `set_fsm_update_time` = the clip's length, honoured
+  since 37.8b (the Karlson's take-off `jump5_vzlet` runs its full 1567 ms) — and the jerk was
+  after the clip: `moveTo` under `block_movement` dropped the goal's order, so the unblocked
+  Karlson stood in `alert1_p1` for 200 ms until the chase goal's next 0.5 s repath (the original's
+  `"chase"` re-plans every 1–6 s, RE `FUN_0f8e47f0`, so its order must survive the block). A
+  refused order is now held and walked on the first tick after the block lifts — `Invariants.md`,
+  "A movement order outlives `block_movement`"; self-test `Pinned actor` (+`resumes`,
+  `stop_cancels`). **42.10 done** (2026-09-14): wall's death is the authored "shot in the back"
+  (`TRIGGER_backshot` → 730 ms → `DAMAGE_backshot`, 700 hp in a sphere the trigger lies in; the
+  ded's death — the canister beside him — destroys both), and the filter RE says a blank
+  `react_objects` reacts to the player in retail too (per-class fallbacks after parsing: all
+  for `Explosion`/`Bomb`, humans for `trigger_alive`; the `Trigger`'s own site unfound, "nobody"
+  ruled out by grsvt's blank exit trigger). Two class rules on the way: a trigger whose `shape`
+  is neither box nor sphere has no volume (the original adds nothing — wall's point-shaped steam
+  was charging 1 hp), and a numeric `damage_type` is GUNSHOT (the script's table miss) —
+  `Invariants.md`, "A trigger is a box or a sphere, or nothing"; self-test `Damage trigger`
+  (+`point`, `numeric_type`). **42.11 done** (2026-09-14): wall's final door is walled in the
+  September collision mesh (`wall.ds2cm2` — two `mat_wood` faces in the leaf's plane; the May
+  `.ds2cm` had only the frame; `ICollisionSystem` loads the `2` and the physics trimesh comes
+  from it) and the level's exit trigger starts 19 units before it — the original's Field meets
+  the actor's *capsule*, ours tested its centre, which stops 17.5 units short. A trigger now meets
+  the player's capsule (and an NPC's) — `Invariants.md`, "A trigger meets an actor's capsule";
+  self-test `Trigger arming` (+`capsule`, `slab`); `trace` prints the mesh face's material.
+  **42.12 done — Phase 42 is closed** (2026-09-14): `--check` green, gate 18/18, the four
+  reference scenes re-recorded (the 09-13 renderer commits, as 42.0 found for the levels) and
+  `scripts/reference_scenes.sh` pinned to `export/engine` like the level gate, ASan on every
+  recipe, the crane unchanged after every physics subphase (197.4/197.3/197.9/197.9, +6.1°),
+  the chain `kolhoz → kolhoz_part2 → meat → meat_part2 → wall → gor` by name with 0 errors, the
+  Beria scene in one run. Five roots are
   read in code before the work begins and every one is a class, not a level: `object_counter`
   parses its `add` parameter with `std::stoi` and counts to zero (three campaign scenes gated —
   the Beria door, `meat`'s second Karlson, `theatre`'s doors); a `Barrier` gets **no body** (the
