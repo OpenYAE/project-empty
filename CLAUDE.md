@@ -543,7 +543,7 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **43.0–43.2 done** (2026-09-15), 43.3–43.13 not started (reconnaissance 2026-09-15).
+  14 subphases. **43.0–43.3 done** (2026-09-15), 43.4–43.13 not started (reconnaissance 2026-09-15).
   Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
   (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
   43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
@@ -575,7 +575,12 @@ a coordinator, not the facade.
   side`). Read on the way: the original loads `<stem>_rebuilded.ds2aim` first when a map ships one
   (six do: `alla`, `grsvt`, `kolhoz`, `meat`, `med1`, `theatre`; `LevelResolver::pickNavInDir`), the dancer dances `progon` for 22.4 s before
   he runs, and the dressing-room door is a pair whose key unlocks both leaves — a recipe that fires
-  `on_open` by hand leaves the left leaf shut. Five roots are read in the data before the work
+  `on_open` by hand leaves the left leaf shut. **43.3**: a hidden door is a ghost like a hidden
+  `RigidBody` (42.6 — the original's door is a RigidBody, `Hide` = `dGeomDisable`):
+  `DoorEntity::syncBodyGhost()` from `setVisible` and at body creation, `show` gives the layer
+  back; krovli's four hidden physical leaves (38 hidden doors campaign-wide) no longer stand in
+  their doorways as solid bodies, `io <door>`/`trace` print `ghost`, self-test `Hidden body rides
+  joint` extended. Five roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
   the actor's *side*, which is how the gas-mask soldier comes to shoot him; `poh`'s "unkillable"
