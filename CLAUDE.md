@@ -543,7 +543,7 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **43.0 done** (2026-09-15), 43.1–43.13 not started (reconnaissance 2026-09-15).
+  14 subphases. **43.0–43.1 done** (2026-09-15), 43.2–43.13 not started (reconnaissance 2026-09-15).
   Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
   (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
   43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
@@ -553,7 +553,19 @@ a coordinator, not the facade.
   share the name) — `kinostreet2` spawns two `TRG_Spric26`, and a name alone can only reach the
   first. Also recorded: `kinostreetKINO.DS2EDF` (2006-10-09) is the one that loads (newest of the
   case pair); the older `kinostreetkino.ds2edf` differs only by a cut hidden `AI_dedaa` and one
-  `show` link to it. Five roots are read in the data before the work
+  `show` link to it. **43.1** closed both `metro` escalator items: item 11 by measurement (the
+  `Barrier` holds the player at the foot until the switch, the running belt is a headwind, and
+  the 343-tall `TRANSP01` box's top face is the riding surface — 21.5 above the level's own
+  smooth 30° collision ramp, as the original's capsule rides its `AddBox(size)` geom; 42.7 holds
+  for belt volumes, `conveyorCarriesCharacter` now has the 30° ramp), item 12 on a **class**
+  root: `ButtonEntity` never read the authored `switch_state` — `BUT_ESKolator` ships `true`
+  (the escalator runs) and the first press was a no-op `on_switch_on`; now a `button` is
+  `button.lua`'s two-state switch (born in its authored state, `use` toggles, `switch_on`/
+  `switch_off` set, outputs emitted after the `turn_on`/`turn_off` clip) — `Invariants.md`, "A
+  switch is born in its authored state"; self-test `Switch state`; parall's "conveyor does not
+  switch off" (`TRG_konvstop`) closed by the same root. Harness on the way: `trace … skip=<entity>`
+  (the mesh under a body), and `hold use`/`jump`/`fire` now register as a press (the console ran
+  after the frame had read the input). Five roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
   the actor's *side*, which is how the gas-mask soldier comes to shoot him; `poh`'s "unkillable"
