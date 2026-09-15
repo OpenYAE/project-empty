@@ -543,7 +543,7 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **43.0–43.10 done** (2026-09-15/16), 43.11–43.13 not started (reconnaissance 2026-09-15).
+  14 subphases. **43.0–43.11 done** (2026-09-15/16), 43.12–43.13 not started (reconnaissance 2026-09-15).
   Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
   (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
   43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
@@ -687,7 +687,19 @@ a coordinator, not the facade.
   player under it is pushed aside unhurt, the shut panel blocks, `BUT_ESKolator01` raises it
   by the backwards play (41.6) — every hypothesis of the reconnaissance refuted; the plan's
   spawn `"-3963,-2541,224"` stood *inside* the trigger and dropped it at load (recipe in
-  `LevelTestMatrix.md`, metro). Five
+  `LevelTestMatrix.md`, metro). **43.11** closed met6's air tube on three roots, none of them
+  the buoyancy curve: the density-1 column `WOLTER_veter` filling the whole shaft is authored
+  `is_enabled = false` and enabled by nothing, and the original never switches a Water's field
+  off (RE: its class vtable keeps the base game-object enable; `ODE::Field::Enable` has one
+  caller, referenced from the trigger's vtable) — ours had it off, so a step off the −594
+  platform was a 14.8 m fall to the funnel floor while the density-2 stream began at −423 ("the
+  tube does not pick him up"); the "water effect" was 30.7.5's own green-blue wash (the client's
+  Water class draws and tints nothing) — removed; and weightless in density 1 there was no way
+  up — the original's carrier off the ground pushes along its 3D look (`Update_Fall`), so in
+  water forward is now where the eye looks, capped at the swim speed. Console `look <yaw>
+  [pitch]` beside `hold`; self-tests `Water field always on` (37.10's rewritten), `Character
+  swims`; `Invariants.md`, "A Water's field is always on", "A character swims where it looks";
+  `LevelTestMatrix.md` gained a met6 row. Five
   roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
