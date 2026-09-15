@@ -541,6 +541,33 @@ a coordinator, not the facade.
   eats. Two items start with RE: the FSM `on_update` cadence (Karlson's one-tick `jump_prepare`)
   and the blank `react_objects` list (`wall`'s 700-hp `DAMAGE_backshot`). 48 mirrored placements
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
+- `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
+  pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
+  14 subphases. **Not started** (reconnaissance 2026-09-15). Two of the levels are not in the gate
+  yet — `theatre` (`maps/map15`) and `kinostreet2` (`kinostreet2.ds2edf` on `map04`, like
+  `kolhoz_part2`) — so 43.0 adds both (20 levels). Five roots are read in the data before the work
+  begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
+  campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
+  the actor's *side*, which is how the gas-mask soldier comes to shoot him; `poh`'s "unkillable"
+  old man is authored so (`health = 50000`) and leaves by an anchor that is `enable`d at runtime
+  with `on_occupy → destroy` (the open `ai_anchor` questions of 41.7); `krovli`'s locked room doors
+  are `fixing = false` doors that are **hidden** until a trigger shows them (42.6's ghost rule was
+  written for `RigidBody`, not `DoorEntity`); a `Ladder`'s top exit; and `metro`'s two escalator
+  items were filed when a `Barrier` had no body and a `Conveyor` was a zone — today the barrier
+  holds the player at the foot (measured) and the belt tops ride ~21 above the step mesh, so 43.1
+  is a **check of 42.2/42.7 on a new level** (a 343-high belt box: is its top the surface?) before
+  anything is built on them. Two more are read in code: `kinostreet`'s lift "stopped working"
+  because its call button `Lift_Box73` is an authored **hidden `RigidBody`** with `on_use` —
+  since 41.4/42.6 a hidden body is out of every ray and `PlayerController::tryUse()` is a ray
+  (34 such never-shown invisible use boxes in the campaign, `meat`'s `RIG_crane1_fork_open` and
+  the `grsvt`/`theatre` piano keys among them); and `kinostreet2` spawns **two** triggers named
+  `TRG_Spric26` from two included files (the runtime name is the block's `name`, the file prefix
+  lives only in the key) while `wireIOConnections` resolves a target to the first spawned — so
+  the sportsman trigger's `destroy` reaches the gas-mask trigger. The other items are animated
+  `RigidBody` platforms/decorations (`metro`'s `DOOR_BIG` with its box on a bone, the projector
+  lamp behind two invisible `button`s). Six TODO items in those sections are excluded by
+  the user's decision and listed in the doc. The 42.0 gate pin (`export/engine` catalog, default
+  cvars) stays.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
