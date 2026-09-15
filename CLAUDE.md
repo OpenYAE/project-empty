@@ -543,7 +543,7 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **43.0–43.5 done** (2026-09-15), 43.6–43.13 not started (reconnaissance 2026-09-15).
+  14 subphases. **43.0–43.6 done** (2026-09-15), 43.7–43.13 not started (reconnaissance 2026-09-15).
   Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
   (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
   43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
@@ -615,7 +615,31 @@ a coordinator, not the facade.
   `ANCHOR_Ded_01` (3D 32.2 vs range 32 — the capsule stops 3.9 off the wall the post is 5.6 from),
   a retail/physics question in `TODO.md`; smoke baseline and `vdnh1`'s picture re-recorded (its
   spawn is `nearestWalkable` of the grid centre, now half a cell over). Self-tests `Nav grid corner
-  model`, `Empty pickup procedure`, `dist_to_pos 3D`; six `Invariants.md` sections. Five
+  model`, `Empty pickup procedure`, `dist_to_pos 3D`; six `Invariants.md` sections.
+  **43.6** closed the kinostreet2 ladder on the class: the original's `Ladder` is a field that
+  meets the climber's **capsule** (RE `ds2physics.dll` `ODE::BhvCarrier::Update_Walk/Fall/Stand/
+  Climb/Begin_Jump`), ours was a point with the radius as a margin on every axis — the field was
+  left at `top + 25.6`, the fall put the feet back under it, and every overlap grabbed again
+  (2.5 s of hop-and-regrab). Now `LadderEntity::holdsCapsule` (feet below the top face, crown
+  above the bottom, within the radius across; feet level with the top = beside it), the face
+  normal is the box's **thin** side towards the climber (`surfaceNormal()` read local Y — the
+  thin axis is X on 22 of the 30 ladders), and the climb follows the carrier's rules: grab by
+  walking into the face or falling into the volume, the look decides the vertical (towards the
+  face: level or up climbs, 45° down holds; with the back to the rungs `forward` descends),
+  strafe along the face, a jump is a jump, on the floor pressing away walks off — and the one
+  rule added: **feet passing the top face while rising step over the edge** at the climb speed
+  (`CharacterController::launch()` keeps the horizontal part as the air carry;
+  `refreshContacts()` because a `setPosition()` climb leaves Jolt's ground state stale). The
+  original's own mechanism — the climb through the collision step with gravity cancelled — was
+  built and dropped by measurement: the shaft mouth is 64 wide with rungs 14 proud, 50 for a
+  51.2 capsule, and a rigid solver stops it where ODE's soft contacts squeeze through; the
+  kinematic climb keeps two rays (floor under the feet, ceiling over the crown). The plan's
+  reproduction spawn was **outside the map** behind the shaft's back wall; the real recipes are
+  in `LevelTestMatrix.md` (up from the pit: one grab, one exit, the floor beyond the wall). The
+  42.5 meat recipe descends with `hold forward 3` now (back to the rungs), `med1` has no
+  `Ladder` at all (its `BAR_Ladder_*` are `Barrier`s); self-test `Ladder top exit`;
+  `Invariants.md`, "A ladder holds a capsule, and is left over its top". Found: `krovli` under
+  the `asan` preset logs 1204 Jolt `IsNormalized` asserts at load (`TODO.md`). Five
   roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
