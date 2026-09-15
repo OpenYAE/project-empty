@@ -514,7 +514,12 @@ a coordinator, not the facade.
   from it) and the level's exit trigger starts 19 units before it — the original's Field meets
   the actor's *capsule*, ours tested its centre, which stops 17.5 units short. A trigger now meets
   the player's capsule (and an NPC's) — `Invariants.md`, "A trigger meets an actor's capsule";
-  self-test `Trigger arming` (+`capsule`, `slab`); `trace` prints the mesh face's material.
+  self-test `Trigger arming` (+`capsule`, `slab`); `trace` prints the mesh face's material. The
+  door the report meant was `DOOR_parad2_01`: its open leaf leaves 52.8 units, the original's
+  51.2 capsule passes, ours was 55.2 because Jolt's `mCharacterPadding` (2.0) sits *around* the
+  shape — the shape is now the authored radius less the padding, so a character is its authored
+  `body_radius` (`Invariants.md`, "A character is its authored radius"; self-test `Barrier body`
+  `radius`; five gate baselines re-recorded — the player stands 2 units closer to walls).
   **42.12 done — Phase 42 is closed** (2026-09-14): `--check` green, gate 18/18, the four
   reference scenes re-recorded (the 09-13 renderer commits, as 42.0 found for the levels) and
   `scripts/reference_scenes.sh` pinned to `export/engine` like the level gate, ASan on every
