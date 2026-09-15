@@ -543,7 +543,7 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **43.0–43.7 done** (2026-09-15), 43.8–43.13 not started (reconnaissance 2026-09-15).
+  14 subphases. **43.0–43.8 done** (2026-09-15), 43.9–43.13 not started (reconnaissance 2026-09-15).
   Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
   (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
   43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
@@ -654,7 +654,20 @@ a coordinator, not the facade.
   `TRIGGER_lift`/`BTN_octave_*`, poh's 12 sound-trigger pairs); the `matches multiple` smoke
   shape is gone from all 20 levels (baseline re-recorded, 69 shapes); self-test `I/O wired by
   include`; `Invariants.md`, "An events block belongs to the entity spawned from it". No
-  sportsman exists on `wall`/`grsvt` (the plan's acceptance line was a guess). Five
+  sportsman exists on `wall`/`grsvt` (the plan's acceptance line was a guess). **43.8** closed
+  kinostreet's lift and its doors, both classes named by the reconnaissance: the lift's call
+  button `Lift_Box73` is a never-shown hidden `RigidBody` with `on_use` (34 such in the
+  campaign — meat's crane fork, the grsvt/theatre piano keys), a ghost every ray steps over
+  since 41.4/42.6, and the original's Use is not a ray at all but the actor's `use_dist` 2.5 m /
+  `use_fov` 20° cone (RE `cl_game`/`sv_game` design registration) — now
+  `PhysicsWorld::raycastUse` meets a ghost whose entity has an authored `on_use` link and
+  steps over the rest (a hidden leaf in a doorway); `use` in the cabin → `Use → entity
+  'Lift_Box73'`, the ride up, `Lift_Box74` at `speed −0.6` brings it down. The doors
+  `Door_KinoInsidezR01/02` are authored `lo_limit 100, hi_limit 0`, and the original clamps
+  `lo ≤ 0 ≤ hi` before `AddHinge` — stops [0, 0], welded panels the level opens by hiding;
+  ours swung them 100° on `use`. `DoorEntity::postSpawn` clamps the same way (3 doors of 429
+  campaign-wide). Self-tests `Use ray hidden button`, `Door limits clamped`; `Invariants.md`,
+  "The Use ray meets a hidden button", "A door's limits are what the hinge takes". Five
   roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
