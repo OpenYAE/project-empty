@@ -543,7 +543,7 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **43.0–43.4 done** (2026-09-15), 43.5–43.13 not started (reconnaissance 2026-09-15).
+  14 subphases. **43.0–43.5 done** (2026-09-15), 43.6–43.13 not started (reconnaissance 2026-09-15).
   Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
   (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
   43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
@@ -593,7 +593,29 @@ a coordinator, not the facade.
   halfway to the second anchor. Console `anchors [<anchor>|<actor>]`, `anchor=` in `AI_TRACE`;
   self-test `Anchor enabled at runtime`; `Invariants.md`, "An anchor reaches the actors its filter
   accepts, and looks along its X"; `AnchorSystem.h` lost its unused `AnchorPoint` API. Found on the
-  way: `CALLBACK_NEED_TO_RELOAD` arrives with `nil` data on every reload (`TODO.md` `general`). Five
+  way: `CALLBACK_NEED_TO_RELOAD` arrives with `nil` data on every reload (`TODO.md` `general`).
+  **43.5** closed kinostreet2's runner scene and key on eight layers, none of them the scene: the
+  runner stood still because `Pathfinder` refused the pair silently (its one warning is capped at
+  five per process, spent by the startup self-tests) — the new console `nav <actor|x,y,z> [<to>]
+  [raw|los|smooth]` / `nav cells x,y,z [r] [nbrs]` then found, one under the other, that
+  `nearestWalkable` took the storey above the target (the original takes the floor beneath), that
+  the sight march folded a staircase into a segment through the slab (it never checked heights),
+  that its direction table was mirrored on all eight directions (the file's neighbour slots run
+  **clockwise from (−X,+Y)**), and that a cell's stored position is its **min corner**, not its
+  centre — every path smoothing and nav-blocked sight check of the campaign had run on that
+  mirror. Then: `dist_to_pos` is the original's **3D** distance from the feet (`FUN_0f8d7860`; the
+  saves put the player and a walked NPC at the floor), the 30.5.1 XY flattening dropped; the
+  pre-destroy hook now makes the AI forget a dying entity (`set_enemy` on a trigger the scene
+  destroys — use-after-free in the chase goal); every entity table carries the original's
+  `index_in_factory`/`name_in_factory` (the anchor code compares by them — without them any anchor
+  was "the current one"); a walker pressed against the wall its last waypoint lies behind has
+  arrived; and `PickupEntity` no longer refuses an item whose `pp_on_take` has nothing to give
+  (`add_armor` with 0 points is the editor's default on ~40 keys and notes) — the basement key is
+  taken and `DOOR_last` unlocks. Recorded as a consequence: poh's `AI_Ded_04` no longer seats
+  `ANCHOR_Ded_01` (3D 32.2 vs range 32 — the capsule stops 3.9 off the wall the post is 5.6 from),
+  a retail/physics question in `TODO.md`; smoke baseline and `vdnh1`'s picture re-recorded (its
+  spawn is `nearestWalkable` of the grid centre, now half a cell over). Self-tests `Nav grid corner
+  model`, `Empty pickup procedure`, `dist_to_pos 3D`; six `Invariants.md` sections. Five
   roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
