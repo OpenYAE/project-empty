@@ -543,7 +543,7 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **43.0–43.1 done** (2026-09-15), 43.2–43.13 not started (reconnaissance 2026-09-15).
+  14 subphases. **43.0–43.2 done** (2026-09-15), 43.3–43.13 not started (reconnaissance 2026-09-15).
   Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
   (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
   43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
@@ -565,7 +565,17 @@ a coordinator, not the facade.
   switch is born in its authored state"; self-test `Switch state`; parall's "conveyor does not
   switch off" (`TRG_konvstop`) closed by the same root. Harness on the way: `trace … skip=<entity>`
   (the mesh under a body), and `hold use`/`jump`/`fire` now register as a press (the console ran
-  after the frame had read the input). Five roots are read in the data before the work
+  after the frame had read the input). **43.2** made `human_friendly` a side: the original's one
+  react/skip filter reads `is_player_controlled || human_friendly` (`+0xa34`, `+0x186c`), for a
+  trigger's lists and for the actor's own `enemies_*` alike — `entity/ObjectFilter` is that filter
+  now, each NPC's perception candidates are the live actors its authored lists accept (it used to
+  be the player only), the load-time seed goes only where the filter accepts the player, and an
+  enemy in sight replaces one out of sight — theatre's gas-mask soldier now shoots the ballet
+  dancer as authored (`Invariants.md`, "`human_friendly` is a side…"; self-test `Human friendly
+  side`). Read on the way: the original loads `<stem>_rebuilded.ds2aim` first when a map ships one
+  (six do: `alla`, `grsvt`, `kolhoz`, `meat`, `med1`, `theatre`; `LevelResolver::pickNavInDir`), the dancer dances `progon` for 22.4 s before
+  he runs, and the dressing-room door is a pair whose key unlocks both leaves — a recipe that fires
+  `on_open` by hand leaves the left leaf shut. Five roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
   the actor's *side*, which is how the gas-mask soldier comes to shoot him; `poh`'s "unkillable"
