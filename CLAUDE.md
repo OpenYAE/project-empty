@@ -543,9 +543,17 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **Not started** (reconnaissance 2026-09-15). Two of the levels are not in the gate
-  yet — `theatre` (`maps/map15`) and `kinostreet2` (`kinostreet2.ds2edf` on `map04`, like
-  `kolhoz_part2`) — so 43.0 adds both (20 levels). Five roots are read in the data before the work
+  14 subphases. **43.0 done** (2026-09-15), 43.1–43.13 not started (reconnaissance 2026-09-15).
+  Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
+  (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
+  43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
+  cameras in `LevelTestMatrix.md`), the crane reads `197.4/197.3/197.9/197.9 +6.1°` before the
+  phase's first change, and `fire_io`/`io`/`props` take `#<id>` or the EDF table key beside the
+  name (`Entity::edfKey`, `EntitySystem::resolve`; `io <name>` prints the key when two entities
+  share the name) — `kinostreet2` spawns two `TRG_Spric26`, and a name alone can only reach the
+  first. Also recorded: `kinostreetKINO.DS2EDF` (2006-10-09) is the one that loads (newest of the
+  case pair); the older `kinostreetkino.ds2edf` differs only by a cut hidden `AI_dedaa` and one
+  `show` link to it. Five roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
   the actor's *side*, which is how the gas-mask soldier comes to shoot him; `poh`'s "unkillable"
