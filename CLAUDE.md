@@ -543,7 +543,7 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **43.0–43.3 done** (2026-09-15), 43.4–43.13 not started (reconnaissance 2026-09-15).
+  14 subphases. **43.0–43.4 done** (2026-09-15), 43.5–43.13 not started (reconnaissance 2026-09-15).
   Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
   (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
   43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
@@ -580,7 +580,21 @@ a coordinator, not the facade.
   `DoorEntity::syncBodyGhost()` from `setVisible` and at body creation, `show` gives the layer
   back; krovli's four hidden physical leaves (38 hidden doors campaign-wide) no longer stand in
   their doorways as solid bodies, `io <door>`/`trace` print `ghost`, self-test `Hidden body rides
-  joint` extended. Five roots are read in the data before the work
+  joint` extended. **43.4** closed poh's "unkillable old man" on three class roots, none of them the
+  anchor itself (`enable` on the fly, `on_occupy` and a name in `react_objects` all worked): an
+  `auto_activate` anchor's window (`is_in_fov`) was a yaw compared in the vertical plane with
+  cos(fov/2) where the original (`FUN_0f8d8c80`) takes the anchor's **local X**, the 3D distance and
+  cos(fov) — `fov_to_enemy = 90` is the front hemisphere (`ai::enemyInAnchorWindow`); an anchor
+  authored by `react_classes` (21 of 533, theatre's two `ANCHOR_balerun*` among them) was delivered
+  to nobody — delivery is the 43.2 filter now, so a name beside `skip_objects =
+  $ai_controlled_actors` (5 anchors) goes to nobody and the load log says so (retail question in
+  `TODO.md`); and the enemy memory was 5 s where the authored `forget_nonsensed_entity_time` is
+  **120 s** (`actor_basic.properties_design`; 30.5.8's open question) — the ded forgot the player
+  halfway to the second anchor. Console `anchors [<anchor>|<actor>]`, `anchor=` in `AI_TRACE`;
+  self-test `Anchor enabled at runtime`; `Invariants.md`, "An anchor reaches the actors its filter
+  accepts, and looks along its X"; `AnchorSystem.h` lost its unused `AnchorPoint` API. Found on the
+  way: `CALLBACK_NEED_TO_RELOAD` arrives with `nil` data on every reload (`TODO.md` `general`). Five
+  roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
   the actor's *side*, which is how the gas-mask soldier comes to shoot him; `poh`'s "unkillable"
