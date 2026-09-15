@@ -543,7 +543,7 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **43.0–43.9 done** (2026-09-15), 43.10–43.13 not started (reconnaissance 2026-09-15).
+  14 subphases. **43.0–43.10 done** (2026-09-15/16), 43.11–43.13 not started (reconnaissance 2026-09-15).
   Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
   (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
   43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
@@ -682,7 +682,12 @@ a coordinator, not the facade.
   the pre-destroy hook; an `AnimationObject`'s too), and only a dormant door refuses Use. The
   whole chain runs by hand (reel → lamp switch → the lamp → `video2.avi`). Self-test `Button
   collider lifecycle`; `Invariants.md`, "A button's collider follows its shapes and its
-  life". Five
+  life". **43.10** closed metro's falling partition **by measurement**: `DOOR_BIG`'s box on
+  its bone descends from `z[479.5..882.3]` to `[235.0..637.7]` in 2.5 s on `TRG_RRRTTT`, a
+  player under it is pushed aside unhurt, the shut panel blocks, `BUT_ESKolator01` raises it
+  by the backwards play (41.6) — every hypothesis of the reconnaissance refuted; the plan's
+  spawn `"-3963,-2541,224"` stood *inside* the trigger and dropped it at load (recipe in
+  `LevelTestMatrix.md`, metro). Five
   roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
