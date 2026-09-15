@@ -543,7 +543,7 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **43.0–43.6 done** (2026-09-15), 43.7–43.13 not started (reconnaissance 2026-09-15).
+  14 subphases. **43.0–43.7 done** (2026-09-15), 43.8–43.13 not started (reconnaissance 2026-09-15).
   Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
   (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
   43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
@@ -639,7 +639,22 @@ a coordinator, not the facade.
   42.5 meat recipe descends with `hold forward 3` now (back to the rungs), `med1` has no
   `Ladder` at all (its `BAR_Ladder_*` are `Barrier`s); self-test `Ladder top exit`;
   `Invariants.md`, "A ladder holds a capsule, and is left over its top". Found: `krovli` under
-  the `asan` preset logs 1204 Jolt `IsNormalized` asserts at load (`TODO.md`). Five
+  the `asan` preset logs 1204 Jolt `IsNormalized` asserts at load (`TODO.md`). **43.7** closed
+  the kinostreet2 sportsman on a loader root deeper than the reconnaissance named: not only the
+  `destroy` target but the sportsman trigger's **whole `events` block** was wired onto the
+  first entity of that short name — `NPCSpawner::wireIOConnections` resolved the *source* by
+  name too — so `kinostreetSPORT_TRG_Spric26` fired nothing and the gas-mask trigger 3.7 km
+  away fired both blocks. The original's loader (RE `sv_game.dll`, "loading entities") attaches
+  each record's `events` to the object it has just spawned and looks up only targets by name.
+  Now a block is wired by the record's key (`Entity::edfKey`) and a duplicated target name
+  resolves to the source's own include's copy first, first-spawned only when the include has
+  none (a data rule: all 165 such links in the campaign mean their own file's copy; the
+  original's by-name slot lives in the undecompiled 2019 exe). 70 duplicate-named sources
+  campaign-wide moved to their own entities (grsvt's `TRG_AI_06` pair, theatre's
+  `TRIGGER_lift`/`BTN_octave_*`, poh's 12 sound-trigger pairs); the `matches multiple` smoke
+  shape is gone from all 20 levels (baseline re-recorded, 69 shapes); self-test `I/O wired by
+  include`; `Invariants.md`, "An events block belongs to the entity spawned from it". No
+  sportsman exists on `wall`/`grsvt` (the plan's acceptance line was a guess). Five
   roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
