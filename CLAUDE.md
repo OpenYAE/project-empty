@@ -543,7 +543,7 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **43.0–43.8 done** (2026-09-15), 43.9–43.13 not started (reconnaissance 2026-09-15).
+  14 subphases. **43.0–43.9 done** (2026-09-15), 43.10–43.13 not started (reconnaissance 2026-09-15).
   Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
   (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
   43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
@@ -667,7 +667,22 @@ a coordinator, not the facade.
   `lo ≤ 0 ≤ hi` before `AddHinge` — stops [0, 0], welded panels the level opens by hiding;
   ours swung them 100° on `use`. `DoorEntity::postSpawn` clamps the same way (3 doors of 429
   campaign-wide). Self-tests `Use ray hidden button`, `Door limits clamped`; `Invariants.md`,
-  "The Use ray meets a hidden button", "A door's limits are what the hinge takes". Five
+  "The Use ray meets a hidden button", "A door's limits are what the hinge takes". **43.9**
+  closed the projector on three roots in the buttons' physics, none of them the
+  reconnaissance's questions (30.7.7 had answered those): a `button` had **two** bodies — a
+  static one from the "interactive" pass of `createEntityPhysicsBodies` that nothing
+  referenced or destroyed, and the 37.10 kinematic collider — so the reel switch
+  `RGB_Botton_Babina`, which destroys itself after the press, left a nameless body at the
+  placement it shares with the lamp switch `RGB_Botton_Lamp` and every Use ray stopped there;
+  the collider ignored `shapes_enabled` (the original's `false` is no geoms — the lamp switch
+  stood in front of the reel switch); and `tryUse` refused any `is_enabled = false` entity
+  where the original's Use checks only `is_locked` (`sv_button:on_use`) — the lamp
+  `RGB_LAMP_JIV` is authored disabled and enabled by nothing. Now a button has one collider,
+  a ghost while its shapes are off, released with its entity (`releaseModelCollider` from
+  the pre-destroy hook; an `AnimationObject`'s too), and only a dormant door refuses Use. The
+  whole chain runs by hand (reel → lamp switch → the lamp → `video2.avi`). Self-test `Button
+  collider lifecycle`; `Invariants.md`, "A button's collider follows its shapes and its
+  life". Five
   roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
