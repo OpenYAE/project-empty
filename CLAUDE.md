@@ -543,7 +543,9 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **43.0–43.11 done** (2026-09-15/16), 43.12–43.13 not started (reconnaissance 2026-09-15).
+  14 subphases. **Phase 43 is closed — 43.0–43.13 done** (2026-09-15/16; reconnaissance 2026-09-15),
+  all 15 items marked with their subphase and root (two by measurement: metro's partition and its
+  escalator barrier), the six "not now" items untouched.
   Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
   (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
   43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
@@ -639,7 +641,7 @@ a coordinator, not the facade.
   42.5 meat recipe descends with `hold forward 3` now (back to the rungs), `med1` has no
   `Ladder` at all (its `BAR_Ladder_*` are `Barrier`s); self-test `Ladder top exit`;
   `Invariants.md`, "A ladder holds a capsule, and is left over its top". Found: `krovli` under
-  the `asan` preset logs 1204 Jolt `IsNormalized` asserts at load (`TODO.md`). **43.7** closed
+  the `asan` preset logs 1204 Jolt `IsNormalized` asserts at load (closed in 43.13). **43.7** closed
   the kinostreet2 sportsman on a loader root deeper than the reconnaissance named: not only the
   `destroy` target but the sportsman trigger's **whole `events` block** was wired onto the
   first entity of that short name — `NPCSpawner::wireIOConnections` resolved the *source* by
@@ -699,7 +701,40 @@ a coordinator, not the facade.
   water forward is now where the eye looks, capped at the swim speed. Console `look <yaw>
   [pitch]` beside `hold`; self-tests `Water field always on` (37.10's rewritten), `Character
   swims`; `Invariants.md`, "A Water's field is always on", "A character swims where it looks";
-  `LevelTestMatrix.md` gained a met6 row. Five
+  `LevelTestMatrix.md` gained a met6 row. **43.12** — "the hands at the world origin on every
+  level" — was neither a renderer nor a test artefact but the **player's inventory**: the scripts
+  make every inventory item the same way (`spawn_entity`, `add_entity_to_world`,
+  `add_to_inventory` — the start kit, each NPC's `init_inventory`, `weapon_firearm:on_use`'s ammo
+  box), the middle step builds the item a model and a query-only body at (0,0,0), and ours left
+  both there (`add_to_inventory` only appended a Lua table; an item taken off the floor left the
+  world through `finalizeScriptPickup`, one made for the inventory never did) — and the weapon's
+  world model was its *hands*, because `add_model(name, true)` (the original's "load now,
+  instantiate first-person on the client at `on_take`"; an actor's body is `false`) had become
+  the entity's model regardless of the flag, animated by `play_animation` driving the world
+  instance beside the FP one. `theatre` had 19 such items at the origin (`trace 0,0,200 0,0,-1`
+  hit `weapon_bottle_421`). Now `PickupEntity::stowInInventory()` is the one place an item
+  leaves the world (both routes), a hidden model is never the world model (the weapon's is its
+  authored `model_name`, `ItemMauzer`…), and a weapon's clip lengths come from the FP weapon its
+  animation slot names, held or not — `visualize_state` times the leaving weapon's `hide` after
+  the next one is the holdable (`fsm weapon on` + the new `hold slot1..9` reads 333/267 ms,
+  not the 1000 ms default). Left as authored and recorded (`OriginalScriptDefects.md` C5): each
+  rat's explosion `Bomb` with the `rat` model, which `actor_rat:on_init` adds to the world
+  without the `hide`/`disable_shapes`/`set_pos` its own base class sends — 10 rat models at the
+  origin of `theatre`. Self-test `Item in inventory leaves world`; `Invariants.md`, "An item in
+  an inventory is not in the world, and a hidden model is not the world model"; picture gate
+  20/20 within noise (the world lost its origin bodies, `meat`'s belt rider stops a hair
+  differently). **43.13** closed the phase: `--check` green (192/192, smoke 20/20), gate 20/20 and
+  scenes 4/4 with the changed frames named (dynamic props settling within noise), `--asan` OK
+  plus the recipes of 43.1/43.8/43.10/43.12 under `build-asan` — which turned 43.6's krovli
+  finding into a root: the 1204 `IsNormalized` asserts are `DOOR_pod04` (`door_theat_pod`, in
+  both `theatre` and `krovli`) whose authored `tm` is **scaled 1.198**, and `quat_cast` of a
+  scaled matrix is a quaternion of |q|² = scale that Jolt rotated with as it was (a skewed,
+  larger body: a 1.2-scaled quarter turn puts a cube's faces at 70, not 50; five such placements
+  in the gate's EDFs, three metro `Barrier`s at 0.9 among them) — `PhysicsWorld::createBody`
+  normalizes now, self-test `Scaled placement body` (fails without it), `Invariants.md`, "A
+  body's rotation is a unit quaternion"; the crane `197.4/197.3/197.9/197.9 +6.1°` after every
+  subphase (a table in the doc); the chains `theatre → krovli → parall` (`TRIGGER_exit` by key)
+  and `kinostreet → kinostreet2` (`TRG_kino17`, the inventory carried) with 0 errors. Five
   roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
