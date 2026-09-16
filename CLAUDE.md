@@ -543,9 +543,199 @@ a coordinator, not the facade.
   (det < 0) exist in the campaign, all of them `grsvt`'s chandelier lamps.
 - `yae-engine/docs/Phase43_FixPohKinoMetroTheatreKrovli.md` — the per-level method for the first
   pass over `poh`, `kinostreet` (both halves), `metro`, `met6`, `theatre` and `krovli`: 15 items,
-  14 subphases. **Not started** (reconnaissance 2026-09-15). Two of the levels are not in the gate
-  yet — `theatre` (`maps/map15`) and `kinostreet2` (`kinostreet2.ds2edf` on `map04`, like
-  `kolhoz_part2`) — so 43.0 adds both (20 levels). Five roots are read in the data before the work
+  14 subphases. **Phase 43 is closed — 43.0–43.13 done** (2026-09-15/16; reconnaissance 2026-09-15),
+  all 15 items marked with their subphase and root (two by measurement: metro's partition and its
+  escalator barrier), the six "not now" items untouched.
+  Two of the levels were not in the gate — `theatre` (`maps/map15`) and `kinostreet2`
+  (`kinostreet2.ds2edf` on `map04`, like `kolhoz_part2`, but with a `PlayerSpawner` of its own) —
+  43.0 added both: **the smoke and picture gate are 20 levels** now (smoke baseline 78 shapes;
+  cameras in `LevelTestMatrix.md`), the crane reads `197.4/197.3/197.9/197.9 +6.1°` before the
+  phase's first change, and `fire_io`/`io`/`props` take `#<id>` or the EDF table key beside the
+  name (`Entity::edfKey`, `EntitySystem::resolve`; `io <name>` prints the key when two entities
+  share the name) — `kinostreet2` spawns two `TRG_Spric26`, and a name alone can only reach the
+  first. Also recorded: `kinostreetKINO.DS2EDF` (2006-10-09) is the one that loads (newest of the
+  case pair); the older `kinostreetkino.ds2edf` differs only by a cut hidden `AI_dedaa` and one
+  `show` link to it. **43.1** closed both `metro` escalator items: item 11 by measurement (the
+  `Barrier` holds the player at the foot until the switch, the running belt is a headwind, and
+  the 343-tall `TRANSP01` box's top face is the riding surface — 21.5 above the level's own
+  smooth 30° collision ramp, as the original's capsule rides its `AddBox(size)` geom; 42.7 holds
+  for belt volumes, `conveyorCarriesCharacter` now has the 30° ramp), item 12 on a **class**
+  root: `ButtonEntity` never read the authored `switch_state` — `BUT_ESKolator` ships `true`
+  (the escalator runs) and the first press was a no-op `on_switch_on`; now a `button` is
+  `button.lua`'s two-state switch (born in its authored state, `use` toggles, `switch_on`/
+  `switch_off` set, outputs emitted after the `turn_on`/`turn_off` clip) — `Invariants.md`, "A
+  switch is born in its authored state"; self-test `Switch state`; parall's "conveyor does not
+  switch off" (`TRG_konvstop`) closed by the same root. Harness on the way: `trace … skip=<entity>`
+  (the mesh under a body), and `hold use`/`jump`/`fire` now register as a press (the console ran
+  after the frame had read the input). **43.2** made `human_friendly` a side: the original's one
+  react/skip filter reads `is_player_controlled || human_friendly` (`+0xa34`, `+0x186c`), for a
+  trigger's lists and for the actor's own `enemies_*` alike — `entity/ObjectFilter` is that filter
+  now, each NPC's perception candidates are the live actors its authored lists accept (it used to
+  be the player only), the load-time seed goes only where the filter accepts the player, and an
+  enemy in sight replaces one out of sight — theatre's gas-mask soldier now shoots the ballet
+  dancer as authored (`Invariants.md`, "`human_friendly` is a side…"; self-test `Human friendly
+  side`). Read on the way: the original loads `<stem>_rebuilded.ds2aim` first when a map ships one
+  (six do: `alla`, `grsvt`, `kolhoz`, `meat`, `med1`, `theatre`; `LevelResolver::pickNavInDir`), the dancer dances `progon` for 22.4 s before
+  he runs, and the dressing-room door is a pair whose key unlocks both leaves — a recipe that fires
+  `on_open` by hand leaves the left leaf shut. **43.3**: a hidden door is a ghost like a hidden
+  `RigidBody` (42.6 — the original's door is a RigidBody, `Hide` = `dGeomDisable`):
+  `DoorEntity::syncBodyGhost()` from `setVisible` and at body creation, `show` gives the layer
+  back; krovli's four hidden physical leaves (38 hidden doors campaign-wide) no longer stand in
+  their doorways as solid bodies, `io <door>`/`trace` print `ghost`, self-test `Hidden body rides
+  joint` extended. **43.4** closed poh's "unkillable old man" on three class roots, none of them the
+  anchor itself (`enable` on the fly, `on_occupy` and a name in `react_objects` all worked): an
+  `auto_activate` anchor's window (`is_in_fov`) was a yaw compared in the vertical plane with
+  cos(fov/2) where the original (`FUN_0f8d8c80`) takes the anchor's **local X**, the 3D distance and
+  cos(fov) — `fov_to_enemy = 90` is the front hemisphere (`ai::enemyInAnchorWindow`); an anchor
+  authored by `react_classes` (21 of 533, theatre's two `ANCHOR_balerun*` among them) was delivered
+  to nobody — delivery is the 43.2 filter now, so a name beside `skip_objects =
+  $ai_controlled_actors` (5 anchors) goes to nobody and the load log says so (retail question in
+  `TODO.md`); and the enemy memory was 5 s where the authored `forget_nonsensed_entity_time` is
+  **120 s** (`actor_basic.properties_design`; 30.5.8's open question) — the ded forgot the player
+  halfway to the second anchor. Console `anchors [<anchor>|<actor>]`, `anchor=` in `AI_TRACE`;
+  self-test `Anchor enabled at runtime`; `Invariants.md`, "An anchor reaches the actors its filter
+  accepts, and looks along its X"; `AnchorSystem.h` lost its unused `AnchorPoint` API. Found on the
+  way: `CALLBACK_NEED_TO_RELOAD` arrives with `nil` data on every reload (`TODO.md` `general`).
+  **43.5** closed kinostreet2's runner scene and key on eight layers, none of them the scene: the
+  runner stood still because `Pathfinder` refused the pair silently (its one warning is capped at
+  five per process, spent by the startup self-tests) — the new console `nav <actor|x,y,z> [<to>]
+  [raw|los|smooth]` / `nav cells x,y,z [r] [nbrs]` then found, one under the other, that
+  `nearestWalkable` took the storey above the target (the original takes the floor beneath), that
+  the sight march folded a staircase into a segment through the slab (it never checked heights),
+  that its direction table was mirrored on all eight directions (the file's neighbour slots run
+  **clockwise from (−X,+Y)**), and that a cell's stored position is its **min corner**, not its
+  centre — every path smoothing and nav-blocked sight check of the campaign had run on that
+  mirror. Then: `dist_to_pos` is the original's **3D** distance from the feet (`FUN_0f8d7860`; the
+  saves put the player and a walked NPC at the floor), the 30.5.1 XY flattening dropped; the
+  pre-destroy hook now makes the AI forget a dying entity (`set_enemy` on a trigger the scene
+  destroys — use-after-free in the chase goal); every entity table carries the original's
+  `index_in_factory`/`name_in_factory` (the anchor code compares by them — without them any anchor
+  was "the current one"); a walker pressed against the wall its last waypoint lies behind has
+  arrived; and `PickupEntity` no longer refuses an item whose `pp_on_take` has nothing to give
+  (`add_armor` with 0 points is the editor's default on ~40 keys and notes) — the basement key is
+  taken and `DOOR_last` unlocks. Recorded as a consequence: poh's `AI_Ded_04` no longer seats
+  `ANCHOR_Ded_01` (3D 32.2 vs range 32 — the capsule stops 3.9 off the wall the post is 5.6 from),
+  a retail/physics question in `TODO.md`; smoke baseline and `vdnh1`'s picture re-recorded (its
+  spawn is `nearestWalkable` of the grid centre, now half a cell over). Self-tests `Nav grid corner
+  model`, `Empty pickup procedure`, `dist_to_pos 3D`; six `Invariants.md` sections.
+  **43.6** closed the kinostreet2 ladder on the class: the original's `Ladder` is a field that
+  meets the climber's **capsule** (RE `ds2physics.dll` `ODE::BhvCarrier::Update_Walk/Fall/Stand/
+  Climb/Begin_Jump`), ours was a point with the radius as a margin on every axis — the field was
+  left at `top + 25.6`, the fall put the feet back under it, and every overlap grabbed again
+  (2.5 s of hop-and-regrab). Now `LadderEntity::holdsCapsule` (feet below the top face, crown
+  above the bottom, within the radius across; feet level with the top = beside it), the face
+  normal is the box's **thin** side towards the climber (`surfaceNormal()` read local Y — the
+  thin axis is X on 22 of the 30 ladders), and the climb follows the carrier's rules: grab by
+  walking into the face or falling into the volume, the look decides the vertical (towards the
+  face: level or up climbs, 45° down holds; with the back to the rungs `forward` descends),
+  strafe along the face, a jump is a jump, on the floor pressing away walks off — and the one
+  rule added: **feet passing the top face while rising step over the edge** at the climb speed
+  (`CharacterController::launch()` keeps the horizontal part as the air carry;
+  `refreshContacts()` because a `setPosition()` climb leaves Jolt's ground state stale). The
+  original's own mechanism — the climb through the collision step with gravity cancelled — was
+  built and dropped by measurement: the shaft mouth is 64 wide with rungs 14 proud, 50 for a
+  51.2 capsule, and a rigid solver stops it where ODE's soft contacts squeeze through; the
+  kinematic climb keeps two rays (floor under the feet, ceiling over the crown). The plan's
+  reproduction spawn was **outside the map** behind the shaft's back wall; the real recipes are
+  in `LevelTestMatrix.md` (up from the pit: one grab, one exit, the floor beyond the wall). The
+  42.5 meat recipe descends with `hold forward 3` now (back to the rungs), `med1` has no
+  `Ladder` at all (its `BAR_Ladder_*` are `Barrier`s); self-test `Ladder top exit`;
+  `Invariants.md`, "A ladder holds a capsule, and is left over its top". Found: `krovli` under
+  the `asan` preset logs 1204 Jolt `IsNormalized` asserts at load (closed in 43.13). **43.7** closed
+  the kinostreet2 sportsman on a loader root deeper than the reconnaissance named: not only the
+  `destroy` target but the sportsman trigger's **whole `events` block** was wired onto the
+  first entity of that short name — `NPCSpawner::wireIOConnections` resolved the *source* by
+  name too — so `kinostreetSPORT_TRG_Spric26` fired nothing and the gas-mask trigger 3.7 km
+  away fired both blocks. The original's loader (RE `sv_game.dll`, "loading entities") attaches
+  each record's `events` to the object it has just spawned and looks up only targets by name.
+  Now a block is wired by the record's key (`Entity::edfKey`) and a duplicated target name
+  resolves to the source's own include's copy first, first-spawned only when the include has
+  none (a data rule: all 165 such links in the campaign mean their own file's copy; the
+  original's by-name slot lives in the undecompiled 2019 exe). 70 duplicate-named sources
+  campaign-wide moved to their own entities (grsvt's `TRG_AI_06` pair, theatre's
+  `TRIGGER_lift`/`BTN_octave_*`, poh's 12 sound-trigger pairs); the `matches multiple` smoke
+  shape is gone from all 20 levels (baseline re-recorded, 69 shapes); self-test `I/O wired by
+  include`; `Invariants.md`, "An events block belongs to the entity spawned from it". No
+  sportsman exists on `wall`/`grsvt` (the plan's acceptance line was a guess). **43.8** closed
+  kinostreet's lift and its doors, both classes named by the reconnaissance: the lift's call
+  button `Lift_Box73` is a never-shown hidden `RigidBody` with `on_use` (34 such in the
+  campaign — meat's crane fork, the grsvt/theatre piano keys), a ghost every ray steps over
+  since 41.4/42.6, and the original's Use is not a ray at all but the actor's `use_dist` 2.5 m /
+  `use_fov` 20° cone (RE `cl_game`/`sv_game` design registration) — now
+  `PhysicsWorld::raycastUse` meets a ghost whose entity has an authored `on_use` link and
+  steps over the rest (a hidden leaf in a doorway); `use` in the cabin → `Use → entity
+  'Lift_Box73'`, the ride up, `Lift_Box74` at `speed −0.6` brings it down. The doors
+  `Door_KinoInsidezR01/02` are authored `lo_limit 100, hi_limit 0`, and the original clamps
+  `lo ≤ 0 ≤ hi` before `AddHinge` — stops [0, 0], welded panels the level opens by hiding;
+  ours swung them 100° on `use`. `DoorEntity::postSpawn` clamps the same way (3 doors of 429
+  campaign-wide). Self-tests `Use ray hidden button`, `Door limits clamped`; `Invariants.md`,
+  "The Use ray meets a hidden button", "A door's limits are what the hinge takes". **43.9**
+  closed the projector on three roots in the buttons' physics, none of them the
+  reconnaissance's questions (30.7.7 had answered those): a `button` had **two** bodies — a
+  static one from the "interactive" pass of `createEntityPhysicsBodies` that nothing
+  referenced or destroyed, and the 37.10 kinematic collider — so the reel switch
+  `RGB_Botton_Babina`, which destroys itself after the press, left a nameless body at the
+  placement it shares with the lamp switch `RGB_Botton_Lamp` and every Use ray stopped there;
+  the collider ignored `shapes_enabled` (the original's `false` is no geoms — the lamp switch
+  stood in front of the reel switch); and `tryUse` refused any `is_enabled = false` entity
+  where the original's Use checks only `is_locked` (`sv_button:on_use`) — the lamp
+  `RGB_LAMP_JIV` is authored disabled and enabled by nothing. Now a button has one collider,
+  a ghost while its shapes are off, released with its entity (`releaseModelCollider` from
+  the pre-destroy hook; an `AnimationObject`'s too), and only a dormant door refuses Use. The
+  whole chain runs by hand (reel → lamp switch → the lamp → `video2.avi`). Self-test `Button
+  collider lifecycle`; `Invariants.md`, "A button's collider follows its shapes and its
+  life". **43.10** closed metro's falling partition **by measurement**: `DOOR_BIG`'s box on
+  its bone descends from `z[479.5..882.3]` to `[235.0..637.7]` in 2.5 s on `TRG_RRRTTT`, a
+  player under it is pushed aside unhurt, the shut panel blocks, `BUT_ESKolator01` raises it
+  by the backwards play (41.6) — every hypothesis of the reconnaissance refuted; the plan's
+  spawn `"-3963,-2541,224"` stood *inside* the trigger and dropped it at load (recipe in
+  `LevelTestMatrix.md`, metro). **43.11** closed met6's air tube on three roots, none of them
+  the buoyancy curve: the density-1 column `WOLTER_veter` filling the whole shaft is authored
+  `is_enabled = false` and enabled by nothing, and the original never switches a Water's field
+  off (RE: its class vtable keeps the base game-object enable; `ODE::Field::Enable` has one
+  caller, referenced from the trigger's vtable) — ours had it off, so a step off the −594
+  platform was a 14.8 m fall to the funnel floor while the density-2 stream began at −423 ("the
+  tube does not pick him up"); the "water effect" was 30.7.5's own green-blue wash (the client's
+  Water class draws and tints nothing) — removed; and weightless in density 1 there was no way
+  up — the original's carrier off the ground pushes along its 3D look (`Update_Fall`), so in
+  water forward is now where the eye looks, capped at the swim speed. Console `look <yaw>
+  [pitch]` beside `hold`; self-tests `Water field always on` (37.10's rewritten), `Character
+  swims`; `Invariants.md`, "A Water's field is always on", "A character swims where it looks";
+  `LevelTestMatrix.md` gained a met6 row. **43.12** — "the hands at the world origin on every
+  level" — was neither a renderer nor a test artefact but the **player's inventory**: the scripts
+  make every inventory item the same way (`spawn_entity`, `add_entity_to_world`,
+  `add_to_inventory` — the start kit, each NPC's `init_inventory`, `weapon_firearm:on_use`'s ammo
+  box), the middle step builds the item a model and a query-only body at (0,0,0), and ours left
+  both there (`add_to_inventory` only appended a Lua table; an item taken off the floor left the
+  world through `finalizeScriptPickup`, one made for the inventory never did) — and the weapon's
+  world model was its *hands*, because `add_model(name, true)` (the original's "load now,
+  instantiate first-person on the client at `on_take`"; an actor's body is `false`) had become
+  the entity's model regardless of the flag, animated by `play_animation` driving the world
+  instance beside the FP one. `theatre` had 19 such items at the origin (`trace 0,0,200 0,0,-1`
+  hit `weapon_bottle_421`). Now `PickupEntity::stowInInventory()` is the one place an item
+  leaves the world (both routes), a hidden model is never the world model (the weapon's is its
+  authored `model_name`, `ItemMauzer`…), and a weapon's clip lengths come from the FP weapon its
+  animation slot names, held or not — `visualize_state` times the leaving weapon's `hide` after
+  the next one is the holdable (`fsm weapon on` + the new `hold slot1..9` reads 333/267 ms,
+  not the 1000 ms default). Left as authored and recorded (`OriginalScriptDefects.md` C5): each
+  rat's explosion `Bomb` with the `rat` model, which `actor_rat:on_init` adds to the world
+  without the `hide`/`disable_shapes`/`set_pos` its own base class sends — 10 rat models at the
+  origin of `theatre`. Self-test `Item in inventory leaves world`; `Invariants.md`, "An item in
+  an inventory is not in the world, and a hidden model is not the world model"; picture gate
+  20/20 within noise (the world lost its origin bodies, `meat`'s belt rider stops a hair
+  differently). **43.13** closed the phase: `--check` green (192/192, smoke 20/20), gate 20/20 and
+  scenes 4/4 with the changed frames named (dynamic props settling within noise), `--asan` OK
+  plus the recipes of 43.1/43.8/43.10/43.12 under `build-asan` — which turned 43.6's krovli
+  finding into a root: the 1204 `IsNormalized` asserts are `DOOR_pod04` (`door_theat_pod`, in
+  both `theatre` and `krovli`) whose authored `tm` is **scaled 1.198**, and `quat_cast` of a
+  scaled matrix is a quaternion of |q|² = scale that Jolt rotated with as it was (a skewed,
+  larger body: a 1.2-scaled quarter turn puts a cube's faces at 70, not 50; five such placements
+  in the gate's EDFs, three metro `Barrier`s at 0.9 among them) — `PhysicsWorld::createBody`
+  normalizes now, self-test `Scaled placement body` (fails without it), `Invariants.md`, "A
+  body's rotation is a unit quaternion"; the crane `197.4/197.3/197.9/197.9 +6.1°` after every
+  subphase (a table in the doc); the chains `theatre → krovli → parall` (`TRIGGER_exit` by key)
+  and `kinostreet → kinostreet2` (`TRG_kino17`, the inventory carried) with 0 errors. Five
+  roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
   the actor's *side*, which is how the gas-mask soldier comes to shoot him; `poh`'s "unkillable"
