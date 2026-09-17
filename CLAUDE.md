@@ -810,6 +810,22 @@ a coordinator, not the facade.
   lamp behind two invisible `button`s). Six TODO items in those sections are excluded by
   the user's decision and listed in the doc. The 42.0 gate pin (`export/engine` catalog, default
   cvars) stays.
+- `yae-engine/docs/Phase44_FixParallLastlevelFuturLastzlo.md` — the per-level method for the last
+  four maps without a phase doc: `parall` (three halves), `lastlevel`, `futur`, `lastzlo` — 12
+  items, 12 subphases. **Not started** (reconnaissance 2026-09-17). Read in the data before the
+  work: five of the twelve items are one class — the player *riding* an animated `RigidBody` in
+  world coordinates (parall's wagon `LIFT_tapok` and turntable `LIFT_razvorot` with levers on
+  slider joints, futur's 57-second cart `RIG_vagon` and final lift `RIG_Lift02`, lastzlo's room
+  lift `RIGID_lift`), never measured for the player and never for a *rotating* platform (44.1
+  answers for all five); `lastlevel` includes FRODO **and** FUNI, which define 18 names twice
+  (two funicular wagons of mass 1000 in one spot, two `button_no_model` levers, a `TRIGGER_rub`
+  that plays the wagon backwards from its end) — 43.7's rule meets two *bodies* for the first
+  time; futur's generators get `play name = "default"` on a one-frame pose; the game's ending
+  is `g_world_props:signal("disconnect")`, which nothing in the engine receives (retail: outro →
+  credits → main menu). 44.0 puts `parall`/`parall_part2`/`parall_part3`/`lastlevel`/`futur` in
+  the gate (25 levels; the parall halves have no `PlayerSpawner` of their own). The `general`
+  tail (authored `damage` table, `ButtonEntity` save state, NPC move sound twice,
+  `CALLBACK_NEED_TO_RELOAD`, Use-grab of dynamic bodies) is left for Phase 45 and listed there.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
