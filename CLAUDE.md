@@ -837,7 +837,24 @@ a coordinator, not the facade.
   first by include order, and `Spaner` (GAME, 2006-10-24) on the deck of the `tapok` wagon the
   player arrives on; the original also takes the first, but from a `LuaTableIterator`
   (`lua_next`, Lua 5.0 hash order) over `entities` — 44.4 decides by simulating that order. The
-  levers of parall's platforms are welds, not sliders (`Joint01/02` limits [0, 0]). The `general`
+  levers of parall's platforms are welds, not sliders (`Joint01/02` limits [0, 0]). **44.1 is
+  done** (2026-09-18) on two engine roots, both classes: `PlayerController::update()` returned at
+  `frozen_` before the character step, so a locked player (`lock_players`, a death, a cutscene)
+  hung in the air while his platform left — now `updateFrozen()` steps the body with no input
+  (gravity, carry, landing, camera), as the original's ODE `BhvCarrier` is stepped whatever the
+  input lock; and a carrier published only its bone origin's velocity, nothing of its spin — now
+  it publishes the rigid motion between two poses (`PhysicsWorld::CarrierMotion`, `spinBetween`)
+  and a rider takes the surface velocity **at his feet** as the *chord* of the turn
+  (`carrierVelocityAt`; a tangent step spirals outward 6 %/s at 90 °/s, Jolt's
+  `GetGroundPosition()` is one frame behind and drifts 4 %/s). All three scenes run end to end
+  now (parall's wagon through the turntable's quarter turn, the lock and 13 s to `next_level
+  lastlevel`; lastzlo's plate to the boss; futur's lift to `TRG_End`); the two "defects" the
+  reconnaissance measured on the wagon were recipe artefacts (`Barrier_m03_03`, destroyed by
+  `TRG_AI_m03_22` on the authored path; the bridge not yet turned). `CharacterController::init()`
+  resets the air carry (it survived a level change). Self-tests `Turning platform carries rider`,
+  `Frozen player rides`; `Invariants.md` two sections; met6's baseline re-recorded (its start is a
+  ride on the metro wagon round a curve) and poh's (its gate camera stands in `TRG_Damage` — the
+  baseline is the death screen; the dead player now lands — `TODO.md`). The `general`
   tail (authored `damage` table, `ButtonEntity` save state, NPC move sound twice,
   `CALLBACK_NEED_TO_RELOAD`, Use-grab of dynamic bodies) is left for Phase 45 and listed there.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
