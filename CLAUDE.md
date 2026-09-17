@@ -812,18 +812,32 @@ a coordinator, not the facade.
   cvars) stays.
 - `yae-engine/docs/Phase44_FixParallLastlevelFuturLastzlo.md` — the per-level method for the last
   four maps without a phase doc: `parall` (three halves), `lastlevel`, `futur`, `lastzlo` — 12
-  items, 12 subphases. **Not started** (reconnaissance 2026-09-17). Read in the data before the
-  work: five of the twelve items are one class — the player *riding* an animated `RigidBody` in
-  world coordinates (parall's wagon `LIFT_tapok` and turntable `LIFT_razvorot` with levers on
-  slider joints, futur's 57-second cart `RIG_vagon` and final lift `RIG_Lift02`, lastzlo's room
-  lift `RIGID_lift`), never measured for the player and never for a *rotating* platform (44.1
-  answers for all five); `lastlevel` includes FRODO **and** FUNI, which define 18 names twice
-  (two funicular wagons of mass 1000 in one spot, two `button_no_model` levers, a `TRIGGER_rub`
-  that plays the wagon backwards from its end) — 43.7's rule meets two *bodies* for the first
-  time; futur's generators get `play name = "default"` on a one-frame pose; the game's ending
-  is `g_world_props:signal("disconnect")`, which nothing in the engine receives (retail: outro →
-  credits → main menu). 44.0 puts `parall`/`parall_part2`/`parall_part3`/`lastlevel`/`futur` in
-  the gate (25 levels; the parall halves have no `PlayerSpawner` of their own). The `general`
+  items, 12 subphases (reconnaissance 2026-09-17). **44.0 is done** (2026-09-18): `parall`,
+  `parall_part2`, `parall_part3`, `lastlevel` and `futur` are in the smoke and picture gate
+  (**25 levels**; smoke baseline 83 shapes, the 14 new ones theirs; cameras and every recipe in
+  `LevelTestMatrix.md`, which also gained a `lastzlo` row), the crane reads
+  `197.4/197.3/197.9/197.9 +6.1°` before the first change. Between the reconnaissance and 44.0
+  the user played the four maps and rewrote their `TODO.md` sections: six of the twelve items
+  are **closed by the user** (mob-on-mob damage, the shelves, the turntable, the funicular, the
+  cart, the environment animations), the flare colour is deferred, and the three reworded ones —
+  parall's wagon *at the end of the scene*, futur's final lift, lastzlo's room lift — are **one
+  class with one log line**: `I/O: lock_players → frozen=true`, after which the animated platform
+  under the player leaves (carrier velocity 75–306 u/s published) and the frozen player stays
+  (44.1; three verified recipes). 44.0 also measured the same wagon without the lock — the player
+  rides the first second and drops off the tail when the clip accelerates to 240–275 u/s — and
+  the turntable — 55° of its ≈90° at the edge, sliding inward; nothing at the centre — two more
+  defects of the class. The reconnaissance was wrong in three places, found by reading the
+  include trees the way the engine does (`--include_from_path` lines are skipped): `parall.ds2edf`
+  loads only part1 (`parallMAN` — wagon, turntable, levers — comes only with `parall_part3`),
+  `lastlevel` never loads FUNI (no 18 duplicate names, no second funicular), `futur` never loads
+  `futurLOW` (no `Lift_LOW` twin); the ending chain hangs on `TRG_THE_END`, not `TRG_Door_01`, and
+  `outro.avi` is 250 s with the credits inside (the user's item is now "no main menu after them").
+  New item from the user, root read in 44.0: `lastlevel` loads **two** `PlayerSpawner`s —
+  `SPAWN_Player` (MUSIC, 2006-08-17) 200 units *under* the tunnel floor, which the engine takes
+  first by include order, and `Spaner` (GAME, 2006-10-24) on the deck of the `tapok` wagon the
+  player arrives on; the original also takes the first, but from a `LuaTableIterator`
+  (`lua_next`, Lua 5.0 hash order) over `entities` — 44.4 decides by simulating that order. The
+  levers of parall's platforms are welds, not sliders (`Joint01/02` limits [0, 0]). The `general`
   tail (authored `damage` table, `ButtonEntity` save state, NPC move sound twice,
   `CALLBACK_NEED_TO_RELOAD`, Use-grab of dynamic bodies) is left for Phase 45 and listed there.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
