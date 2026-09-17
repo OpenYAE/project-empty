@@ -734,7 +734,59 @@ a coordinator, not the facade.
   normalizes now, self-test `Scaled placement body` (fails without it), `Invariants.md`, "A
   body's rotation is a unit quaternion"; the crane `197.4/197.3/197.9/197.9 +6.1°` after every
   subphase (a table in the doc); the chains `theatre → krovli → parall` (`TRIGGER_exit` by key)
-  and `kinostreet → kinostreet2` (`TRG_kino17`, the inventory carried) with 0 errors. Five
+  and `kinostreet → kinostreet2` (`TRG_kino17`, the inventory carried) with 0 errors. **43.14**
+  (the user's manual pass after the close): the lift's invisible exit barrier was the top-landing
+  panels `Door_KinoInsidezR01/02` — `Lift_Box73` destroys them, and a destroyed door left its
+  kinematic leaf body behind (a ghost while hidden, a wall once `TRG_kino08` upstairs had shown
+  them); `releaseModelCollider` takes a `DoorEntity`'s body and hinge now (15 authored door
+  destroys on the gate levels, the `DOOR_glavDok08..11` after the film among them); and "the
+  projector runs before the lamp is installed — one Use, reels and film, the cover gone" had two
+  roots. The user's log named the first: `Use → entity 'RGB_LAMP_JIV'` — the **hidden live lamp**
+  (`is_visible = false`, `shapes_enabled = false` until the lamp switch) is an animated RigidBody
+  whose collider rides a bone (35.6), and 42.6's ghost rule reached only `physicsBody_` while the
+  animated-platform branch never applied it at all, so the bone body was solid inside the
+  projector; a Use from the right angle played the hidden lamp's clip, `on_anim_start` destroyed
+  the broken lamp (the cover) and `on_anim_end` started the film. `syncBodyToState()` ghosts every
+  bone body with the entity now (self-test `Animated platform ghost`). The second was the HUD: no
+  `InventoryItem` pickup ever showed its backpack icon (only the classless static path did) and a
+  shown icon never went away, so the lamp — taken by touch, with a key's sound — was carried unseen
+  and consumed unseen. The backpack strip is the inventory now (`InventoryEntry::modelName`,
+  `PlayerHUDDriver::update`, a taken item destroyed by the level leaves the inventory in the
+  pre-destroy hook, the models travel in a trailing carry block — `game/InventoryCarry.h`;
+  self-test `Backpack follows inventory`). The projector's order is the authored one — reel (cover
+  opens), lamp switch (the live lamp into the open cover), the lamp itself (cover closes, film) —
+  three presses, as the user confirms retail plays it. The reel is not in kinostreet's start kit
+  (`actor_spawn_props_default.lua`: spanner, mauzer, one box — the campaign carries it from
+  grsvt); the console `give <entity|name> [model]` takes a level's pickup with its `on_take` chain
+  or puts an item in the bag by name (`give ITEM_lampa`, `give RIG_Bobina ItemBABINA`). And the
+  reel did not spin after the film: `RGB_BabinKinoKrut`'s model has a one-frame `default` beside
+  its 0.5 s `anim1`, and 36.3's `is_playing` looped the frame — `AnimationObject` now starts the
+  model's first *motion* (13 placements campaign-wide, futur's spinners among them; self-test
+  `AnimationObject playback` +`pose_skipped`). **43.15** (the second manual pass): "the new lamp
+  is not installed" was a press going past the switches — the projector's two `RUBIL` switches
+  are invisible placements inside its level-mesh housing with the shown reels' box beside them
+  and the dead lamp behind, authored against the original's Use **cone** (`use_dist` 2.5 m /
+  `use_fov` 20°, 43.8's RE) — now `game/UseCone.h` stands *behind* the ray: when the ray meets
+  nothing that answers Use, the nearest button with shapes or `on_use`-linked body with shapes in
+  the cone is pressed, no farther than a metre past the level mesh the ray stopped at
+  (`Invariants.md`, "The use cone stands behind the Use ray"; self-test `Use cone`); and "the
+  key does not spawn in the cutscene" on `kinostreet2` was the player walking over it — Jolt
+  hands the character's weight to its ground body every frame, 1225 u/s on the 1-kg, 3-unit key,
+  through the corridor floor at `Discrete` — a dynamic pickup is `LinearCast` now
+  (`PhysicsWorld::setBodyLinearCast`; the 43.5 spawn-inside case is the same body; self-test
+  `Pickup body swept`); and the soda machines drinkable without waiting were 43.8's ghost rule
+  wider than the original — the Use ray now meets a ghost only with its shapes *on*
+  (`usecone::ghostAnswersUse`; `Hide` keeps the geoms, `disable_shapes` removes them — 46 full
+  cups `RIG_gaz_stakan_full_*` across the campaign are hidden and shapes-off for the 9 s fill with
+  the health `on_use` linked from the start); and met6's tube lifting "too slowly" was the swim:
+  the original has no swim state — afloat the carrier is in `Fall`, `Update_Fall` adds `FlySpeed`
+  150 per 0.02 s step along the full look against `Water::OnEvent`'s 0.932/step damping, which
+  settles at ~305 u/s up for a 60° look (~5 m/s along the look); ours was the walk speed × the
+  0.3 air factor = 104. `physics::kSwimSpeed` 320 along the look now, no air factor (the same RE
+  puts the original's density-2 stream at ~290 u/s where ours reaches ~1700 — left alone).
+  Found and left: the live and dead lamps look alike (the bulb's
+  `model_trans_2Sijiv` = `$white$ × 0.3` additive, ours the model texture) and `ButtonEntity`
+  saves no runtime state — both in `TODO.md`. Five
   roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
