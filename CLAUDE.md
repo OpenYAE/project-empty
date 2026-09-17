@@ -854,8 +854,17 @@ a coordinator, not the facade.
   resets the air carry (it survived a level change). Self-tests `Turning platform carries rider`,
   `Frozen player rides`; `Invariants.md` two sections; met6's baseline re-recorded (its start is a
   ride on the metro wagon round a curve) and poh's (its gate camera stands in `TRG_Damage` — the
-  baseline is the death screen; the dead player now lands — `TODO.md`). The `general`
-  tail (authored `damage` table, `ButtonEntity` save state, NPC move sound twice,
+  baseline is the death screen; the dead player now lands — `TODO.md`). **44.4 is done**
+  (2026-09-18): the original spawns a level's records in `lua_next` order over the `entities`
+  table — Lua 5.0's hash layout of the keys, not the files' — and "the first `PlayerSpawner`" is
+  the first in that order; `assets/Lua50TableOrder.h` is ltable.c 5.0.2 for string keys (checked
+  against a Python transcription), `DS2EDFParser::rankDefsByLuaOrder()` gives every def its
+  `luaOrder` from a textual walk of the include tree, and `firstPlayerSpawner()` picks the lowest
+  in both spawn paths — lastlevel now reads `Spaner #20; passed over: SPAWN_Player #252` and the
+  player stands on the wagon (`--level` and `map lastlevel` alike); metro/theatre/lastzlo keep
+  their spot. Only the spawner choice reads the order (ids, `g_world_props`, 43.7's fallback stay
+  by file — `TODO.md` `general`). Self-tests `Lua 5.0 table order`, `EDF spawner by Lua order`.
+  The `general` tail (authored `damage` table, `ButtonEntity` save state, NPC move sound twice,
   `CALLBACK_NEED_TO_RELOAD`, Use-grab of dynamic bodies) is left for Phase 45 and listed there.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
