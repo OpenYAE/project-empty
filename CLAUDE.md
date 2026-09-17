@@ -778,7 +778,13 @@ a coordinator, not the facade.
   wider than the original — the Use ray now meets a ghost only with its shapes *on*
   (`usecone::ghostAnswersUse`; `Hide` keeps the geoms, `disable_shapes` removes them — 46 full
   cups `RIG_gaz_stakan_full_*` across the campaign are hidden and shapes-off for the 9 s fill with
-  the health `on_use` linked from the start). Found and left: the live and dead lamps look alike (the bulb's
+  the health `on_use` linked from the start); and met6's tube lifting "too slowly" was the swim:
+  the original has no swim state — afloat the carrier is in `Fall`, `Update_Fall` adds `FlySpeed`
+  150 per 0.02 s step along the full look against `Water::OnEvent`'s 0.932/step damping, which
+  settles at ~305 u/s up for a 60° look (~5 m/s along the look); ours was the walk speed × the
+  0.3 air factor = 104. `physics::kSwimSpeed` 320 along the look now, no air factor (the same RE
+  puts the original's density-2 stream at ~290 u/s where ours reaches ~1700 — left alone).
+  Found and left: the live and dead lamps look alike (the bulb's
   `model_trans_2Sijiv` = `$white$ × 0.3` additive, ours the model texture) and `ButtonEntity`
   saves no runtime state — both in `TODO.md`. Five
   roots are read in the data before the work
