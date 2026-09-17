@@ -762,7 +762,25 @@ a coordinator, not the facade.
   reel did not spin after the film: `RGB_BabinKinoKrut`'s model has a one-frame `default` beside
   its 0.5 s `anim1`, and 36.3's `is_playing` looped the frame — `AnimationObject` now starts the
   model's first *motion* (13 placements campaign-wide, futur's spinners among them; self-test
-  `AnimationObject playback` +`pose_skipped`). Five
+  `AnimationObject playback` +`pose_skipped`). **43.15** (the second manual pass): "the new lamp
+  is not installed" was a press going past the switches — the projector's two `RUBIL` switches
+  are invisible placements inside its level-mesh housing with the shown reels' box beside them
+  and the dead lamp behind, authored against the original's Use **cone** (`use_dist` 2.5 m /
+  `use_fov` 20°, 43.8's RE) — now `game/UseCone.h` stands *behind* the ray: when the ray meets
+  nothing that answers Use, the nearest button with shapes or `on_use`-linked body with shapes in
+  the cone is pressed, no farther than a metre past the level mesh the ray stopped at
+  (`Invariants.md`, "The use cone stands behind the Use ray"; self-test `Use cone`); and "the
+  key does not spawn in the cutscene" on `kinostreet2` was the player walking over it — Jolt
+  hands the character's weight to its ground body every frame, 1225 u/s on the 1-kg, 3-unit key,
+  through the corridor floor at `Discrete` — a dynamic pickup is `LinearCast` now
+  (`PhysicsWorld::setBodyLinearCast`; the 43.5 spawn-inside case is the same body; self-test
+  `Pickup body swept`); and the soda machines drinkable without waiting were 43.8's ghost rule
+  wider than the original — the Use ray now meets a ghost only with its shapes *on*
+  (`usecone::ghostAnswersUse`; `Hide` keeps the geoms, `disable_shapes` removes them — 46 full
+  cups `RIG_gaz_stakan_full_*` across the campaign are hidden and shapes-off for the 9 s fill with
+  the health `on_use` linked from the start). Found and left: the live and dead lamps look alike (the bulb's
+  `model_trans_2Sijiv` = `$white$ × 0.3` additive, ours the model texture) and `ButtonEntity`
+  saves no runtime state — both in `TODO.md`. Five
   roots are read in the data before the work
   begins, four of them classes: `human_friendly = true` is authored on exactly **one** actor of the
   campaign (`theatre`'s `ACTOR_balerun`) and nothing in the engine reads it — in the original it is
