@@ -906,6 +906,31 @@ a coordinator, not the facade.
   `general`, cause not found).
   The `general` tail (authored `damage` table, `ButtonEntity` save state, NPC move sound twice,
   `CALLBACK_NEED_TO_RELOAD`, Use-grab of dynamic bodies) is left for Phase 45 and listed there.
+- `yae-engine/docs/Phase46_EffectsParticles.md` — **effects and particles** (plan approved by the user
+  2026-09-18, not started; Phase 45 is reserved for the `general` tail). Decisions: faithful-first
+  (the original's quirks are reproduced and recorded in `Invariants.md`), all of 46.0–46.9 in
+  release 1, particles stay in the picture gate, retail reference recordings per the doc's Appendix A
+  (priority: muzzle flashes, flamethrower jet, wind), budget on `meat` ≤ 0.3 ms CPU + 0.5 ms GPU. Part A is the **legacy system** for the first
+  release: the original's effect templates (`effects/**/*.lua`, 265 files, 193 particle systems / 423
+  groups; channels `partice_system_desc` (sic), `light_desc`, `sound_desc`, `decal_desc`) played as the
+  original played them. The RE settled the model: the particle code is **McAllister's Particle System
+  API** (`namespace papi` in `ds2physics.dll`, stepped once per client frame by `World::UpdatePSyses`,
+  collided by a ray `posB → pos` in the ODE world) with DS2 additions (`bounce2`, `source_from_group`,
+  `set_position`, per-action `time`/`filter`/`switchable`); the templates use 13 of 32 actions, 8 of 11
+  domains, 6 render types. Facts that change the picture: sprite `size` is a **half-extent**, `add` is
+  `glBlendFunc(ONE, ONE)`, `rotation`/`angular_vel`/`starting_age` are Gaussian **(mean, σ)** pairs, the
+  authored `sprite_axis_align_*` type is **unknown to the original's parser** and drawn as a plain
+  billboard, `damping` is `v *= 1 − dt·(1 − d)` with authored negative `d`. Today `"Effect"` (735
+  placements) is a bare `VisualEntity`, `"ParticleSystem"` (42) maps names to five presets, and the Lua
+  effect API is stubbed (33.11). Ten subphases 46.0–46.9 (harness, parser, PAPI core, renderer,
+  instance/coordinator, entity class, script API, engine channels incl. material pairs by contact
+  speed, `object_flare` lens flares, closing). Part B is the path to a **modern system** (Phase 47
+  sketch): a `.yaefx` JSON schema, one runtime with the legacy interpreter as a converter (faithful by
+  default, "recipe vs lock" as in `yae-materials`), GPU path, `RenderScene` batches; Effekseer assessed
+  and accepted by the user as an editor/import (as-is or a fork), not as the core runtime; the visual
+  editor is a separate phase (yae-sdk or Workbench). **Resource policy (user, 2026-09-18):** the pilot
+  (release 1) runs on the original resources only; from the second version on (Phase 47+) total
+  modification is allowed — new formats, new versions of old formats — **with compatibility** kept.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
@@ -915,5 +940,8 @@ a coordinator, not the facade.
 
 1. **C++ = engine primitives, Lua = game logic.** Thin bindings; let Lua prototypes decide behaviour.
 2. **Never modify game resources** (`.ds2*`). Compensate in code (see `physics::kCrane*` for the meat-crane case).
+   Horizon (user's decision 2026-09-18, `Phase46_EffectsParticles.md`): this holds for the pilot release; from
+   the second version on, improvements may modify or replace resources — new formats, new versions of the
+   old ones — as long as the untouched originals keep loading.
 3. **Preserve the deterministic frame order** (see Invariants.md) — reordering breaks game logic.
 4. Physically-sensitive changes: verify on **m02/meat** (crane/joints/ropes) — see LevelTestMatrix.md.
