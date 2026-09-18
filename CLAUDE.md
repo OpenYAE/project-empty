@@ -812,7 +812,9 @@ a coordinator, not the facade.
   cvars) stays.
 - `yae-engine/docs/Phase44_FixParallLastlevelFuturLastzlo.md` — the per-level method for the last
   four maps without a phase doc: `parall` (three halves), `lastlevel`, `futur`, `lastzlo` — 12
-  items, 12 subphases (reconnaissance 2026-09-17). **44.0 is done** (2026-09-18): `parall`,
+  items, 12 subphases (reconnaissance 2026-09-17). **Phase 44 is closed — 44.0–44.11 done**
+  (2026-09-18; six subphases with fixes, one by measurement, four dropped by the user, one
+  deferred). **44.0 is done** (2026-09-18): `parall`,
   `parall_part2`, `parall_part3`, `lastlevel` and `futur` are in the smoke and picture gate
   (**25 levels**; smoke baseline 83 shapes, the 14 new ones theirs; cameras and every recipe in
   `LevelTestMatrix.md`, which also gained a `lastzlo` row), the crane reads
@@ -864,6 +866,44 @@ a coordinator, not the facade.
   player stands on the wagon (`--level` and `map lastlevel` alike); metro/theatre/lastzlo keep
   their spot. Only the spawner choice reads the order (ids, `g_world_props`, 43.7's fallback stay
   by file — `TODO.md` `general`). Self-tests `Lua 5.0 table order`, `EDF spawner by Lua order`.
+  **44.7 closed by measurement** (2026-09-18): futur's whole shaft in one 150 s run — 66 s up on
+  `RIG_Lift01`, the actors at the top, `ACT_Ril_10`'s real death (`fire_io … Kill`) bringing
+  `RIG_Lift02` down, the player in through the railing's north-east gap, the locked ride to
+  `TRG_End → next_level lastzlo`; five earlier recipe attempts hit cage walls, not engine faults.
+  **44.8 is done** (2026-09-18): lastzlo's start lift was "перекошен" literally — a round railed
+  platform stood on its edge in the shaft mouth — because ours built it as a dynamic body of the
+  EDF's mass 100, authored jammed 20 units into the mouth, and Jolt's first frames of penetration
+  recovery flipped it (the gate's 1-in-5 flake was that recovery's contact order). The original's
+  `.phs` builder (`sv_game.dll.c:53113`) gives every `.phs` body of mass ≤ 0 `SetInfiniteMass` and
+  the world's category and never reads the EDF mass when a `.phs` exists; 40-odd models — every
+  lift, wagon, tram door, scene rig — ship all bodies at 0. `phs::Definition::pinsEveryBody()`
+  now sends such a placement down the animated-platform (kinematic bone-body) path whether or not
+  anything plays it: six placements on the gate levels (that lift, lastlevel's `tapok` wagon that
+  had crept under the player, metro's `DOOR_BIG01`, meat's three grates), `lastzlo` 0.000 five runs
+  in a row, `lastzlo`/`lastlevel` baselines re-recorded (the train sits on its rails now). Self-tests
+  `Pinned phs is kinematic`, `Pinned phs shipped`; `Invariants.md`, "A `.phs` that pins every body
+  is a platform, never a prop". **44.10 is done** (2026-09-18): `disconnect` is the kernel's
+  "end the session" (`ds2kernel.dll` `sub_4EBF80`: client off, server stopped — the shell's main
+  menu), sent by lastzlo's `m_on_end_cinema` after `outro.avi`, which *is* outro + credits + title
+  card (250 s; `credits.avi` is only the menu's button); nobody received it. Now the level-wide
+  `disconnect` input and `engine.process_command("disconnect")` → `GameRulesYAE::requestDisconnect()`,
+  honoured at the top of the next frame (`returnToMainMenu()` — the signal arrives from inside the
+  entity update). Found on the way: a coroutine whose first resume starts a clip was ticked again in
+  the same frame (`wait(0)` after `play_video` came due at once — grsvt's `gaz` waits 5 s first and
+  never showed it), so `m_on_end_cinema` fired at the outro's first second — `EntitySystem::updateFull`
+  takes a `mayTick` predicate now, `!cinematicPlaybackActive()`. Self-test `Disconnect request`;
+  `Invariants.md`, "`disconnect` ends the session, and a clip's coroutine waits for the clip".
+  **44.11 closed the phase**: `--check` green with 25 levels, picture gate 25/25, scenes 4/4,
+  `--asan` plus the recipes of 44.1/44.4/44.7/44.10 under `build-asan` (0 reports), the crane
+  unchanged after every physical subphase, the chains `parall_part3 → lastlevel → futur → lastzlo →
+  menu` by name with 0 errors. Two harness changes: `YAE_SPAWN_POS`/`YAE_SPAWN_YAW` now apply to
+  the **first level of a run only** (a transition afterwards spawns as the campaign would — the
+  override had dropped the player into the void of the next map), and poh's gate camera moved out
+  of `TRG_Damage` (its baseline had been the death screen since 42.0) to the water's edge. The
+  four reference scenes were re-recorded: `ward`/`shop`/`yard` had drifted from their 09-14
+  baselines *before* Phase 44 (identical numbers at 43.15's source; shop's old baseline shows a
+  streaked brick relief that no source, catalog or cvar reproduces today — recorded in `TODO.md`
+  `general`, cause not found).
   The `general` tail (authored `damage` table, `ButtonEntity` save state, NPC move sound twice,
   `CALLBACK_NEED_TO_RELOAD`, Use-grab of dynamic bodies) is left for Phase 45 and listed there.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
