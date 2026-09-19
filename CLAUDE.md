@@ -920,6 +920,22 @@ a coordinator, not the facade.
   `general`, cause not found).
   The `general` tail (authored `damage` table, `ButtonEntity` save state, NPC move sound twice,
   `CALLBACK_NEED_TO_RELOAD`, Use-grab of dynamic bodies) is left for Phase 45 and listed there.
+- `yae-engine/docs/Phase45_FixGeneralMet6Krovli.md` — the per-item method applied to `docs/TODO2.md`:
+  twelve campaign-wide items (player speed as authored + cvar, spawn order by `lua_next` for the whole
+  list, look under `lock_players`, a disabled actor is invisible, `calc_target_dir` with pitch, the
+  `g_diff_levels` damage multipliers, the sniper scope, missiles on physics, explosion/roll camera
+  effectors, perception, conveyor material swap, debris vs characters, rat death chunks) plus `met6`'s
+  belts and `krovli`'s door (the Use-grab of 41.5) and wires — 15 items, 18 subphases (45.0–45.17).
+  **Not started** (reconnaissance 2026-09-19, HEAD `4cae0ed`). Seven roots are read in the data before
+  any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
+  retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
+  false` as invisible (21 of 21; 368 such actors in the campaign); `calcTargetDir` without a target is
+  yaw-only; `g_diff_levels` (ELECTRO ×4.5 for the player) is never read; a belt's motion is a
+  `replace_material` on `NEBO` (WorldProps) — a level-template swap; debris are ragdoll parts and
+  `ph_ragdolls_players_no_collision` only reaches corpses; a rope is `ODE::Cloth` whose link rest
+  length is span × `strain` (0.9 = pre-tensioned), not a stiffness — the solver is read in full
+  (`ds2physics.dll.c:26000`). The reference saves also expose the original's whole spawn order
+  (`Save19`: `WORLD` first, then hash order), the check 45.0 runs before 45.2 touches any id.
 - `yae-engine/docs/Phase46_EffectsParticles.md` — **effects and particles** (plan approved by the user
   2026-09-18, not started; Phase 45 is reserved for the `general` tail). Decisions: faithful-first
   (the original's quirks are reproduced and recorded in `Invariants.md`), all of 46.0–46.9 in
