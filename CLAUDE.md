@@ -826,20 +826,125 @@ a coordinator, not the facade.
   cvars) stays.
 - `yae-engine/docs/Phase44_FixParallLastlevelFuturLastzlo.md` — the per-level method for the last
   four maps without a phase doc: `parall` (three halves), `lastlevel`, `futur`, `lastzlo` — 12
-  items, 12 subphases. **Not started** (reconnaissance 2026-09-17). Read in the data before the
-  work: five of the twelve items are one class — the player *riding* an animated `RigidBody` in
-  world coordinates (parall's wagon `LIFT_tapok` and turntable `LIFT_razvorot` with levers on
-  slider joints, futur's 57-second cart `RIG_vagon` and final lift `RIG_Lift02`, lastzlo's room
-  lift `RIGID_lift`), never measured for the player and never for a *rotating* platform (44.1
-  answers for all five); `lastlevel` includes FRODO **and** FUNI, which define 18 names twice
-  (two funicular wagons of mass 1000 in one spot, two `button_no_model` levers, a `TRIGGER_rub`
-  that plays the wagon backwards from its end) — 43.7's rule meets two *bodies* for the first
-  time; futur's generators get `play name = "default"` on a one-frame pose; the game's ending
-  is `g_world_props:signal("disconnect")`, which nothing in the engine receives (retail: outro →
-  credits → main menu). 44.0 puts `parall`/`parall_part2`/`parall_part3`/`lastlevel`/`futur` in
-  the gate (25 levels; the parall halves have no `PlayerSpawner` of their own). The `general`
-  tail (authored `damage` table, `ButtonEntity` save state, NPC move sound twice,
+  items, 12 subphases (reconnaissance 2026-09-17). **Phase 44 is closed — 44.0–44.11 done**
+  (2026-09-18; six subphases with fixes, one by measurement, four dropped by the user, one
+  deferred). **44.0 is done** (2026-09-18): `parall`,
+  `parall_part2`, `parall_part3`, `lastlevel` and `futur` are in the smoke and picture gate
+  (**25 levels**; smoke baseline 83 shapes, the 14 new ones theirs; cameras and every recipe in
+  `LevelTestMatrix.md`, which also gained a `lastzlo` row), the crane reads
+  `197.4/197.3/197.9/197.9 +6.1°` before the first change. Between the reconnaissance and 44.0
+  the user played the four maps and rewrote their `TODO.md` sections: six of the twelve items
+  are **closed by the user** (mob-on-mob damage, the shelves, the turntable, the funicular, the
+  cart, the environment animations), the flare colour is deferred, and the three reworded ones —
+  parall's wagon *at the end of the scene*, futur's final lift, lastzlo's room lift — are **one
+  class with one log line**: `I/O: lock_players → frozen=true`, after which the animated platform
+  under the player leaves (carrier velocity 75–306 u/s published) and the frozen player stays
+  (44.1; three verified recipes). 44.0 also measured the same wagon without the lock — the player
+  rides the first second and drops off the tail when the clip accelerates to 240–275 u/s — and
+  the turntable — 55° of its ≈90° at the edge, sliding inward; nothing at the centre — two more
+  defects of the class. The reconnaissance was wrong in three places, found by reading the
+  include trees the way the engine does (`--include_from_path` lines are skipped): `parall.ds2edf`
+  loads only part1 (`parallMAN` — wagon, turntable, levers — comes only with `parall_part3`),
+  `lastlevel` never loads FUNI (no 18 duplicate names, no second funicular), `futur` never loads
+  `futurLOW` (no `Lift_LOW` twin); the ending chain hangs on `TRG_THE_END`, not `TRG_Door_01`, and
+  `outro.avi` is 250 s with the credits inside (the user's item is now "no main menu after them").
+  New item from the user, root read in 44.0: `lastlevel` loads **two** `PlayerSpawner`s —
+  `SPAWN_Player` (MUSIC, 2006-08-17) 200 units *under* the tunnel floor, which the engine takes
+  first by include order, and `Spaner` (GAME, 2006-10-24) on the deck of the `tapok` wagon the
+  player arrives on; the original also takes the first, but from a `LuaTableIterator`
+  (`lua_next`, Lua 5.0 hash order) over `entities` — 44.4 decides by simulating that order. The
+  levers of parall's platforms are welds, not sliders (`Joint01/02` limits [0, 0]). **44.1 is
+  done** (2026-09-18) on two engine roots, both classes: `PlayerController::update()` returned at
+  `frozen_` before the character step, so a locked player (`lock_players`, a death, a cutscene)
+  hung in the air while his platform left — now `updateFrozen()` steps the body with no input
+  (gravity, carry, landing, camera), as the original's ODE `BhvCarrier` is stepped whatever the
+  input lock; and a carrier published only its bone origin's velocity, nothing of its spin — now
+  it publishes the rigid motion between two poses (`PhysicsWorld::CarrierMotion`, `spinBetween`)
+  and a rider takes the surface velocity **at his feet** as the *chord* of the turn
+  (`carrierVelocityAt`; a tangent step spirals outward 6 %/s at 90 °/s, Jolt's
+  `GetGroundPosition()` is one frame behind and drifts 4 %/s). All three scenes run end to end
+  now (parall's wagon through the turntable's quarter turn, the lock and 13 s to `next_level
+  lastlevel`; lastzlo's plate to the boss; futur's lift to `TRG_End`); the two "defects" the
+  reconnaissance measured on the wagon were recipe artefacts (`Barrier_m03_03`, destroyed by
+  `TRG_AI_m03_22` on the authored path; the bridge not yet turned). `CharacterController::init()`
+  resets the air carry (it survived a level change). Self-tests `Turning platform carries rider`,
+  `Frozen player rides`; `Invariants.md` two sections; met6's baseline re-recorded (its start is a
+  ride on the metro wagon round a curve) and poh's (its gate camera stands in `TRG_Damage` — the
+  baseline is the death screen; the dead player now lands — `TODO.md`). **44.4 is done**
+  (2026-09-18): the original spawns a level's records in `lua_next` order over the `entities`
+  table — Lua 5.0's hash layout of the keys, not the files' — and "the first `PlayerSpawner`" is
+  the first in that order; `assets/Lua50TableOrder.h` is ltable.c 5.0.2 for string keys (checked
+  against a Python transcription), `DS2EDFParser::rankDefsByLuaOrder()` gives every def its
+  `luaOrder` from a textual walk of the include tree, and `firstPlayerSpawner()` picks the lowest
+  in both spawn paths — lastlevel now reads `Spaner #20; passed over: SPAWN_Player #252` and the
+  player stands on the wagon (`--level` and `map lastlevel` alike); metro/theatre/lastzlo keep
+  their spot. Only the spawner choice reads the order (ids, `g_world_props`, 43.7's fallback stay
+  by file — `TODO.md` `general`). Self-tests `Lua 5.0 table order`, `EDF spawner by Lua order`.
+  **44.7 closed by measurement** (2026-09-18): futur's whole shaft in one 150 s run — 66 s up on
+  `RIG_Lift01`, the actors at the top, `ACT_Ril_10`'s real death (`fire_io … Kill`) bringing
+  `RIG_Lift02` down, the player in through the railing's north-east gap, the locked ride to
+  `TRG_End → next_level lastzlo`; five earlier recipe attempts hit cage walls, not engine faults.
+  **44.8 is done** (2026-09-18): lastzlo's start lift was "перекошен" literally — a round railed
+  platform stood on its edge in the shaft mouth — because ours built it as a dynamic body of the
+  EDF's mass 100, authored jammed 20 units into the mouth, and Jolt's first frames of penetration
+  recovery flipped it (the gate's 1-in-5 flake was that recovery's contact order). The original's
+  `.phs` builder (`sv_game.dll.c:53113`) gives every `.phs` body of mass ≤ 0 `SetInfiniteMass` and
+  the world's category and never reads the EDF mass when a `.phs` exists; 40-odd models — every
+  lift, wagon, tram door, scene rig — ship all bodies at 0. `phs::Definition::pinsEveryBody()`
+  now sends such a placement down the animated-platform (kinematic bone-body) path whether or not
+  anything plays it: six placements on the gate levels (that lift, lastlevel's `tapok` wagon that
+  had crept under the player, metro's `DOOR_BIG01`, meat's three grates), `lastzlo` 0.000 five runs
+  in a row, `lastzlo`/`lastlevel` baselines re-recorded (the train sits on its rails now). Self-tests
+  `Pinned phs is kinematic`, `Pinned phs shipped`; `Invariants.md`, "A `.phs` that pins every body
+  is a platform, never a prop". **44.10 is done** (2026-09-18): `disconnect` is the kernel's
+  "end the session" (`ds2kernel.dll` `sub_4EBF80`: client off, server stopped — the shell's main
+  menu), sent by lastzlo's `m_on_end_cinema` after `outro.avi`, which *is* outro + credits + title
+  card (250 s; `credits.avi` is only the menu's button); nobody received it. Now the level-wide
+  `disconnect` input and `engine.process_command("disconnect")` → `GameRulesYAE::requestDisconnect()`,
+  honoured at the top of the next frame (`returnToMainMenu()` — the signal arrives from inside the
+  entity update). Found on the way: a coroutine whose first resume starts a clip was ticked again in
+  the same frame (`wait(0)` after `play_video` came due at once — grsvt's `gaz` waits 5 s first and
+  never showed it), so `m_on_end_cinema` fired at the outro's first second — `EntitySystem::updateFull`
+  takes a `mayTick` predicate now, `!cinematicPlaybackActive()`. Self-test `Disconnect request`;
+  `Invariants.md`, "`disconnect` ends the session, and a clip's coroutine waits for the clip".
+  **44.11 closed the phase**: `--check` green with 25 levels, picture gate 25/25, scenes 4/4,
+  `--asan` plus the recipes of 44.1/44.4/44.7/44.10 under `build-asan` (0 reports), the crane
+  unchanged after every physical subphase, the chains `parall_part3 → lastlevel → futur → lastzlo →
+  menu` by name with 0 errors. Two harness changes: `YAE_SPAWN_POS`/`YAE_SPAWN_YAW` now apply to
+  the **first level of a run only** (a transition afterwards spawns as the campaign would — the
+  override had dropped the player into the void of the next map), and poh's gate camera moved out
+  of `TRG_Damage` (its baseline had been the death screen since 42.0) to the water's edge. The
+  four reference scenes were re-recorded: `ward`/`shop`/`yard` had drifted from their 09-14
+  baselines *before* Phase 44 (identical numbers at 43.15's source; shop's old baseline shows a
+  streaked brick relief that no source, catalog or cvar reproduces today — recorded in `TODO.md`
+  `general`, cause not found).
+  The `general` tail (authored `damage` table, `ButtonEntity` save state, NPC move sound twice,
   `CALLBACK_NEED_TO_RELOAD`, Use-grab of dynamic bodies) is left for Phase 45 and listed there.
+- `yae-engine/docs/Phase46_EffectsParticles.md` — **effects and particles** (plan approved by the user
+  2026-09-18, not started; Phase 45 is reserved for the `general` tail). Decisions: faithful-first
+  (the original's quirks are reproduced and recorded in `Invariants.md`), all of 46.0–46.9 in
+  release 1, particles stay in the picture gate, retail reference recordings per the doc's Appendix A
+  (priority: muzzle flashes, flamethrower jet, wind), budget on `meat` ≤ 0.3 ms CPU + 0.5 ms GPU. Part A is the **legacy system** for the first
+  release: the original's effect templates (`effects/**/*.lua`, 265 files, 193 particle systems / 423
+  groups; channels `partice_system_desc` (sic), `light_desc`, `sound_desc`, `decal_desc`) played as the
+  original played them. The RE settled the model: the particle code is **McAllister's Particle System
+  API** (`namespace papi` in `ds2physics.dll`, stepped once per client frame by `World::UpdatePSyses`,
+  collided by a ray `posB → pos` in the ODE world) with DS2 additions (`bounce2`, `source_from_group`,
+  `set_position`, per-action `time`/`filter`/`switchable`); the templates use 13 of 32 actions, 8 of 11
+  domains, 6 render types. Facts that change the picture: sprite `size` is a **half-extent**, `add` is
+  `glBlendFunc(ONE, ONE)`, `rotation`/`angular_vel`/`starting_age` are Gaussian **(mean, σ)** pairs, the
+  authored `sprite_axis_align_*` type is **unknown to the original's parser** and drawn as a plain
+  billboard, `damping` is `v *= 1 − dt·(1 − d)` with authored negative `d`. Today `"Effect"` (735
+  placements) is a bare `VisualEntity`, `"ParticleSystem"` (42) maps names to five presets, and the Lua
+  effect API is stubbed (33.11). Ten subphases 46.0–46.9 (harness, parser, PAPI core, renderer,
+  instance/coordinator, entity class, script API, engine channels incl. material pairs by contact
+  speed, `object_flare` lens flares, closing). Part B is the path to a **modern system** (Phase 47
+  sketch): a `.yaefx` JSON schema, one runtime with the legacy interpreter as a converter (faithful by
+  default, "recipe vs lock" as in `yae-materials`), GPU path, `RenderScene` batches; Effekseer assessed
+  and accepted by the user as an editor/import (as-is or a fork), not as the core runtime; the visual
+  editor is a separate phase (yae-sdk or Workbench). **Resource policy (user, 2026-09-18):** the pilot
+  (release 1) runs on the original resources only; from the second version on (Phase 47+) total
+  modification is allowed — new formats, new versions of old formats — **with compatibility** kept.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
@@ -849,5 +954,8 @@ a coordinator, not the facade.
 
 1. **C++ = engine primitives, Lua = game logic.** Thin bindings; let Lua prototypes decide behaviour.
 2. **Never modify game resources** (`.ds2*`). Compensate in code (see `physics::kCrane*` for the meat-crane case).
+   Horizon (user's decision 2026-09-18, `Phase46_EffectsParticles.md`): this holds for the pilot release; from
+   the second version on, improvements may modify or replace resources — new formats, new versions of the
+   old ones — as long as the untouched originals keep loading.
 3. **Preserve the deterministic frame order** (see Invariants.md) — reordering breaks game logic.
 4. Physically-sensitive changes: verify on **m02/meat** (crane/joints/ropes) — see LevelTestMatrix.md.
