@@ -966,8 +966,21 @@ a coordinator, not the facade.
   **45.3 done**: the look under a freeze — `lock_players` leaves the eyes free (the server locks the
   carrier's move mask, `Look` is a separate call and `block_turn` a separate property no scene
   sends), a death or cutscene freeze holds the view, and no freeze banks the mouse (`setFrozen(frozen,
-  lookFree)`, self-test `Frozen look`); whether retail lets a locked player look around is still a
-  retail question — one flag.
+  lookFree)`, self-test `Frozen look`); retail agrees (the user: lastzlo's lift, the locked player looks around) — accepted.
+  **45.4 done**: an actor born `is_enabled = false` is hidden and capsule-less whatever its
+  `is_visible` (the retail saves: 21 of 21 such actors recorded `is_visible = false` — reversing
+  37.8's inference, which was about a prop), `enable`/`ai_activate` bring it in; self-test
+  `Disabled actor hidden`; the gate 25/25 unchanged.
+  **45.5 done**: `calc_target_dir` without a target is the shooter's look **with pitch** (the
+  thunder's fireball lands where the camera points: floor at −30°, wall at +25°; self-test
+  `calc_target_dir pitch`). **45.6 done**: `g_diff_levels` — read by nobody until now — multiplies
+  a **missile's** damage by the *shooter's* side and the DS2 damage code, as the original's one
+  reader does (`FUN_0f8d39b0`; hitscan, `Bomb`, `Explosion`, the `damage` command are not
+  multiplied): the player's thunder on NORMAL is 3.5 × 3.6 = 12.6 (measured on metro's soldier),
+  an NPC's missile ×1.2; the table is built by `sv_game_init` so it is read after that hook; a
+  loaded save's difficulty now reaches the rules; console `difficulty [name]`; `disp_multiplier`
+  parsed, not applied (`game/DifficultyTable.h`, self-test `Difficulty table`; `Invariants.md`, "A
+  missile's damage is multiplied by the difficulty table").
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
