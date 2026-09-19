@@ -999,6 +999,15 @@ a coordinator, not the facade.
   numbers (`inter_grenade` 0.5/0.3), rolls with friction feeding the spin, lies on its side at
   rest; a ground probe finds rolling contact the velocity sweep cannot; self-test `Grenade
   ballistics`; `Invariants.md` 36.6 extended. A Jolt body (the plan's option b) was not needed.
+  **45.9 done**: camera effectors — a blast's authored `effector` (missile default
+  `camera_explosion`, Bomb/Explosion `-unknown-` = none) now reaches the camera by
+  `object_quaker`'s distance rule (`game/BlastShake.h`), the `roll` class leans the view by the
+  body's side speed (own + carry, world units; strafes and poh's tram saturate the authored 2°),
+  the view got a roll channel, and the `quake` was re-read from the binary: `amplitude_h` is an
+  angle in radians on pitch and yaw, `amplitude_v` a position on all three axes, fading
+  linearly — 30.7.4 had read both as position, so explosions (0.1) were invisible. `fx` prints
+  the live offsets; self-test `Blast and roll effectors`; `meat`/`met6` baselines re-recorded
+  (the lean) — for the user's eye; `Invariants.md`, "A blast shakes the camera it reaches…".
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
