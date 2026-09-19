@@ -990,6 +990,15 @@ a coordinator, not the facade.
   element inherits its group's `z_order`, the twice-defined group its higher one — user's call);
   `hold altfire|reload`; self-test `FSM double registration`; `Invariants.md`, "FSM
   self-transitions" extended.
+  **45.8 done**: grenades and Molotovs — the flight was already ballistic (first contact within
+  0.3 % of `v²sin2θ/g`), the body was not: the model flew with an identity pose (a stick grenade
+  upright in the world, the bottle never turning) and bounced on engine numbers that killed 40 %
+  of the speed per hit. Now a missile has a pose (the shooter's basis) and a spin (the authored
+  `m_angular_velocity` × [0.5, 1.5] per component, rad/s, as `sv_game.dll` `FUN_0f8a0870` sets
+  it), bounces as a Coulomb contact on a solid sphere with its `material_default`'s authored
+  numbers (`inter_grenade` 0.5/0.3), rolls with friction feeding the spin, lies on its side at
+  rest; a ground probe finds rolling contact the velocity sweep cannot; self-test `Grenade
+  ballistics`; `Invariants.md` 36.6 extended. A Jolt body (the plan's option b) was not needed.
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
