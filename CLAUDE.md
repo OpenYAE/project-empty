@@ -17,8 +17,17 @@ missing behaviour in engine code instead.
   `configsuser`, …), read at startup since Phase 32.7.3b: it is what every `FS_PATH_*`
   answer comes from. `$my_games$` resolves to `yae-game/my games/` (writable), never to
   the read-only `documents_my games/`. Changing where saves go is one line in that file.
-- `c-files/`, `programs_extracted/` — decompiled original DLLs, for RE reference.
-  **Not one build:** most are 2006-11-11, but `sv_game.dll`, `ds2kernel.dll`,
+- `yae-research-private/` — the **private** reverse-engineering repository (its own git,
+  gitignored here; split out of this repo on 2026-09-18): the decompiled originals
+  (`decompiled/c-files/<dll>.dll.c`, Ghidra and Hex-Rays exports), the unpacked shader
+  programs, the Ghidra project, the symbol dumps and the analysis tools. Never published, never
+  copied into this tree. `yae-research/` beside it is the **public** notes repository (the RE
+  write-ups of Phases 3–8, no listings) that the docs portal ingests. **Citation convention** used throughout
+  the engine's docs, sources and tests: `sv_game.dll.c:127553` is line 127553 of
+  `yae-research-private/decompiled/c-files/sv_game.dll.c` (those exports are frozen — a re-export
+  would move every line), `FUN_0f8a7940` is the function's address in the original binary and
+  `+0xa34` a field offset — the last two are verifiable in any disassembler on the game's own
+  files. **Not one build:** most binaries are 2006-11-11, but `sv_game.dll`, `ds2kernel.dll`,
   `ds2NavSystem.dll` and `you_are_empty.exe` are 2019 rebuilds — this is a *community*
   release whose unofficial patches pulled in libraries from a later DS2 Engine version
   (adapted for another game). Behaviour found only in those four files may never have
@@ -30,8 +39,13 @@ missing behaviour in engine code instead.
   gitignored: `npm run bake -- --all && npm run export-engine` rebuilds them locally. The engine
   auto-probes `<gameres>/../yae-materials/export/engine/catalog.yaemat`; `--no-materials-catalog`
   or `mat_catalog 0` loads levels vanilla. See `yae-materials/PLAN.md`.
-- `scripts/` — analysis notes (e.g. `YAE_Architecture_Review.md` — a Phase-10 snapshot, outdated).
-- `*.dll`, `*.exe` — original game binaries.
+- `scripts/` — the gate scripts behind `build.sh --check` (smoke, picture, conformance, format,
+  size budget, console reference), the gameres helpers (`gsf_dump.py`, `check_pak_sounds.py`, …),
+  the early engine phase plans (`Phase9_plan.md` … `Phase28_plan.md`) and engine audits
+  (`Hardcoded_Constants.md`, `unimplemented_*.md`, `YAE_Architecture_Review.md` — a Phase-10
+  snapshot, outdated). The RE notes that used to live here are in `yae-research/` (public), the tools in `yae-research-private/`.
+- `project-empty/` — the umbrella README of the ecosystem (the draft of the future root
+  repository; gitignored here).
 
 ## Build & run
 
