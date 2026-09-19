@@ -956,6 +956,13 @@ a coordinator, not the facade.
   the front as met), so ids, `index_in_factory`, `g_world_props` and 43.7's fallback follow it;
   kinostreet2's `TRG_Spric26` pair is ids 29/166 now; the crane unchanged; `parall_part3`'s
   baseline re-recorded (fence planks settling) — both re-recorded baselines await the user's eye.
+  Found by the user's acceptance pass and fixed the same day: gorkonec's soda cups were never
+  drawn — `classifyModelTemplate` gave model surfaces no `sort_value` (default 5), so the cup
+  (`model_gaz_stakan_glass`, authored 8, additive) drew before the machine's translucent front
+  panel (`def_trans_refl_Vx`, 8, blend) and was painted over; `registerModelScene` now reads the
+  template's `sort_value` from the `.mat` library (`SceneResources::setMaterialLibrary`,
+  `applyModelTemplateOrder`; self-test `Model template sort`; `ward` scene re-recorded). The
+  instant heal there is authored (`delay = 0` in every copy of `gorkoneccray`).
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
