@@ -927,7 +927,7 @@ a coordinator, not the facade.
   effectors, perception, conveyor material swap, debris vs characters, rat death chunks) plus `met6`'s
   belts and `krovli`'s door (the Use-grab of 41.5) and wires — 15 items, 18 subphases (45.0–45.17).
   **In progress**: 45.0 begun (crane `197.4/197.3/197.9/197.9 +6.1°`, `--check` green, speed
-  before 397.6 u/s), **45.1 done 2026-09-19 — awaiting the user's manual pass** (two attention
+  before 397.6 u/s), **45.1 done and accepted by the user 2026-09-19** (manual pass: walk 150, Shift 400, the re-timed recipes) (two attention
   points in the doc's header are closed only by the user, and rolled back on a bug: the crane's
   `verletStretch` after 45.16, and the gate baselines/`hold` recipes after 45.1/45.4/45.16).
   45.1: the retail player walks at `walk_forward_speed` = **150 u/s** and has no run — read in
@@ -941,6 +941,21 @@ a coordinator, not the facade.
   `Player speed from design`, every `hold
   forward N` recipe in `LevelTestMatrix.md` re-timed (old N in brackets); found on the way: the
   actor sets the carrier's `FlySpeed` to 100 where 43.15 assumed 150 (`TODO.md` `general`).
+  **45.2 part 1 done 2026-09-19**: the check of `luaOrder` against the retail's own `level_start`
+  saves found a root above the order — **the include rule** (`DS2EDFParser::resolveInclude`,
+  mirrored in `sdk_dump.ts`): exact spelling beside the including file → exact at the levels root
+  → exact anywhere → newest case-insensitive; the tree is three paks in one place (base under
+  `<map>/`, patch 0 beside it, patch 1 at the root) and the engine had loaded the base's pre-patch
+  copies of 16 includes on 13 maps (every `*sound`, `lastlevelFRODO`, `gorkonecCRAY`, `kinosound`,
+  meat's `m03a`) — gor's base sound file alone carried 9 medkits and 10 boxes retail never had.
+  With the right files the Lua 5.0 order matches the saves 100 % (gor 224/224, meat 559/559,
+  kolhoz 395/395, med1 564/564; `WORLD` first). `--dump <edf>` prints `_engine_only.lua_order`;
+  self-test `EDF include resolution`; `gor_part_2`'s baseline re-recorded (a base test box in
+  frame); `lastzlo`/`met6` now load two `WorldProps`. **Part 2 done by the user's decision**: the
+  whole spawn list is the original's (`DS2EDFParser::orderDefsAsTheOriginal`, `WorldProps` pushed to
+  the front as met), so ids, `index_in_factory`, `g_world_props` and 43.7's fallback follow it;
+  kinostreet2's `TRG_Spric26` pair is ids 29/166 now; the crane unchanged; `parall_part3`'s
+  baseline re-recorded (fence planks settling) — both re-recorded baselines await the user's eye.
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
