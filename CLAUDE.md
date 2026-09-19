@@ -981,6 +981,15 @@ a coordinator, not the facade.
   loaded save's difficulty now reaches the rules; console `difficulty [name]`; `disp_multiplier`
   parsed, not applied (`game/DifficultyTable.h`, self-test `Difficulty table`; `Invariants.md`, "A
   missile's damage is multiplied by the difficulty table").
+  **45.7 done**: the sniper scope — `cl_<class>:on_init` used to run on the one merged object,
+  so `self.on_enter_zoom_in` was the *server's* handler registered twice and the client's (the
+  scope key) never ran; now it runs on the client's view (`__yae_client_view`: methods through
+  `cl_<class>` first, data/writes the entity's) and `FSM::addState` keeps a second handler set
+  for a different function under an existing name (the same function again is a no-op — no
+  double `on_update_fire`); the HUD shows the group's `__left`/`__right` fields with the scope, over the whole HUD (an
+  element inherits its group's `z_order`, the twice-defined group its higher one — user's call);
+  `hold altfire|reload`; self-test `FSM double registration`; `Invariants.md`, "FSM
+  self-transitions" extended.
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
