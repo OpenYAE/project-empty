@@ -1008,6 +1008,14 @@ a coordinator, not the facade.
   linearly — 30.7.4 had read both as position, so explosions (0.1) were invisible. `fx` prints
   the live offsets; self-test `Blast and roll effectors`; `meat`/`met6` baselines re-recorded
   (the lean) — for the user's eye; `Invariants.md`, "A blast shakes the camera it reaches…".
+  **45.10 done**: perception — the sight cone was `cos(view_fov/2)` on the yaw, half the
+  authored width; the original's visibility slot (`0x0f86ebe0`, `is_object_visible`) is
+  `dot(look, centre − eye) ≥ cos(view_fov)` in 3D — 90 is the front hemisphere, the anchor's
+  convention — and the chase (`FUN_0f8e47f0`) completes only within `chase_dist` *with the enemy
+  in sight*, else walks to the last-seen position (ours completed on distance and stood behind
+  cover "just looking"); `view_fov ≥ 180` is all-round; `ai_trace` prints `AI_GOAL chase` and
+  `AI_MOVE`; self-tests `Authored perception` (rewritten cone), `Chase ends only in sight`;
+  `Invariants.md`, "An actor sees the front hemisphere of its look…". Sound untouched.
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
