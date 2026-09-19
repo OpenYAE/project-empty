@@ -963,6 +963,11 @@ a coordinator, not the facade.
   template's `sort_value` from the `.mat` library (`SceneResources::setMaterialLibrary`,
   `applyModelTemplateOrder`; self-test `Model template sort`; `ward` scene re-recorded). The
   instant heal there is authored (`delay = 0` in every copy of `gorkoneccray`).
+  **45.3 done**: the look under a freeze — `lock_players` leaves the eyes free (the server locks the
+  carrier's move mask, `Look` is a separate call and `block_turn` a separate property no scene
+  sends), a death or cutscene freeze holds the view, and no freeze banks the mouse (`setFrozen(frozen,
+  lookFree)`, self-test `Frozen look`); whether retail lets a locked player look around is still a
+  retail question — one flag.
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
