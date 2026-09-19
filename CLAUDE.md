@@ -926,7 +926,22 @@ a coordinator, not the facade.
   `g_diff_levels` damage multipliers, the sniper scope, missiles on physics, explosion/roll camera
   effectors, perception, conveyor material swap, debris vs characters, rat death chunks) plus `met6`'s
   belts and `krovli`'s door (the Use-grab of 41.5) and wires — 15 items, 18 subphases (45.0–45.17).
-  **Not started** (reconnaissance 2026-09-19, HEAD `4cae0ed`). Seven roots are read in the data before
+  **In progress**: 45.0 begun (crane `197.4/197.3/197.9/197.9 +6.1°`, `--check` green, speed
+  before 397.6 u/s), **45.1 done 2026-09-19 — awaiting the user's manual pass** (two attention
+  points in the doc's header are closed only by the user, and rolled back on a bug: the crane's
+  `verletStretch` after 45.16, and the gate baselines/`hold` recipes after 45.1/45.4/45.16).
+  45.1: the retail player walks at `walk_forward_speed` = **150 u/s** and has no run — read in
+  the disassembly, not the export (`set_walk_speed` = vtable slot `+0x1e4` → `[actor+0x2164]`;
+  the only runtime write is the carrier's creation, `0x0f88b21e`, from `walk_forward_speed`;
+  `run_*` never read; `move_accelerate` unbound) — `game/PlayerSpeed.h`,
+  `PlayerController::applySpeed`, cvars `pl_walk_speed`/`pl_run_speed` (0 = authored; `400`/`700`
+  bring the harness speed back) and `pl_sprint` (Shift runs — on by the user's decision, an
+  exception: retail's `set_move` drops the client's accelerate bit — at `pl_run_speed`'s default
+  **400**, the engine's old walk; `0` = the authored `run_forward_speed` 200), self-test
+  `Player speed from design`, every `hold
+  forward N` recipe in `LevelTestMatrix.md` re-timed (old N in brackets); found on the way: the
+  actor sets the carrier's `FlySpeed` to 100 where 43.15 assumed 150 (`TODO.md` `general`).
+  Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
   false` as invisible (21 of 21; 368 such actors in the campaign); `calcTargetDir` without a target is
