@@ -1043,6 +1043,18 @@ a coordinator, not the facade.
   clip the model lacks plays nothing"; the retail question (does the wheel turn?) and the `mehan/`
   `.phs` lookup are in `TODO.md` `met6`. Harness: `screenshot` captures the state after the
   commands that follow it in the same tick.
+  **45.15 done** (2026-09-20): the Use-grab — the original's actor Use hands a `pickable` body
+  lighter than `ph_hold_mass` to `ODE::BhvCarrier::Take`, and the Hand drives it to feet + 116 up +
+  90 along the look with `Object::Controller`'s PD servo (kp 1250 /s², kd 35 /s, the orientation
+  kept relative to the look), a second Use drops, `ph_throw_on_drop` throws (one 20 ms step of
+  `look × ph_throw_force × 1e6`) — `game/HandCarry.h`, `PlayerController::tryUse/dropHeld`,
+  `scripting/CarryLuaAPI` (`arms_has_thing`, `execute_action(ACTION_USE)` — the thunder's right
+  button works), `game/HandWiring.h` (the `ph_*` vars from the autorun/`engine.set_var` store, the
+  drop on an item take, death, destroy, level end); a `fixing = false` door has no motor by Use
+  any more (`sv_door:on_use` is empty; the leaf is grabbed, `open`/`close` keep the motor) — krovli's
+  `DOOR_room_l/r` open by hand; self-tests `Use grabs a body`, `Use grabs a door leaf`;
+  `Invariants.md`, "Use takes a pickable body in hand". Found and left in `TODO.md` `general`: a
+  physical door's `close` overshoots to the other stop (pre-existing).
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
