@@ -1147,7 +1147,16 @@ a coordinator, not the facade.
   (`ds2physics.dll.c:26000`). The reference saves also expose the original's whole spawn order
   (`Save19`: `WORLD` first, then hash order), the check 45.0 runs before 45.2 touches any id.
 - `yae-engine/docs/Phase46_EffectsParticles.md` — **effects and particles** (plan approved by the user
-  2026-09-18; **46.0 done 2026-09-21**, 46.1 next). 46.0 gave the harness: `bash scripts/effects_survey.sh`
+  2026-09-18; **46.0 and 46.1 done 2026-09-21**, 46.2 next). 46.1 is the template parser —
+  `assets/EffectTemplate.h` (the four channels as data, in the binary's vocabulary),
+  `EffectTemplateParser`, `EffectTemplateLibrary` (the tree once, `get(name)` as the original
+  resolves: `.lua` appended, base name anywhere, the **newest** of 14 duplicated names),
+  `--dump <x.lua>`, `fx info <tpl>`, self-test `Effect template grammar` (266/193/423,
+  `pfx_expl01`/`pfx_flamethrower1` field by field); `HitEffectLibrary` is a thin wrapper now.
+  Read in the disassembly: **`time = {a, b}` is start + duration** (both stored as authored,
+  `papi::system::update` tests `a ≤ t ≤ a + b`), `custom_render`/`use_fixed_color`/`use_tm`/
+  `sprite_axis_align_*` do not exist in the binary at all, `tex_env` ∈ {add, mul, mul_scale_2x},
+  an unknown `decal_type` (`replace`, `bland`) is blend. 46.0 gave the harness: `bash scripts/effects_survey.sh`
   (Lua 5.4 over `effects/**` and every `.ds2edf`; `--record`/`--check` against
   `scripts/effects_survey_baseline.txt` — the reconnaissance numbers reproduced: 266 files / 193
   systems / 423 groups, 777 placements, plus the oddities list for `OriginalScriptDefects.md`), the
