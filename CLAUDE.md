@@ -1063,6 +1063,22 @@ a coordinator, not the facade.
   the crane `197.4/197.3/197.9/197.9 +6.1°` unchanged (its numbers are the cables' and hinges',
   not the chain's); `ropes <name>` prints `sag`; self-test `Rope rest length is strained`;
   `Invariants.md`, "A rope's link rests at `strain` of its span".
+  **45.18 done** (2026-09-20, an item the user added after accepting 45.16 — a mob's idle heard
+  clearly at level start from across the map, then "a motor heard through walls at 20–50 m"):
+  three roots — the sound system's attenuation was miniaudio's clamped inverse (a sound never
+  falls below `min/max` of its volume), `add_sound(name)` without distances (every lift, door,
+  button) defaulted to 2/100 m where the original's source is born 1/15, and every actor's idle
+  is played by its `on_init` before the listener exists. The original (`ds2soundsystem.dll`
+  `sub_1000C480`) computes the gain itself — `t²·min/d`, or `t²·0.5` for `old_distance_model`,
+  **zero at and beyond `max_dist`** — and ours does now, every frame; a 3D sound asked for before
+  the first `updateListener()` is not started. The sound's metre is 64 units (the client's
+  ×0.015625 and its debug draw against `max_distance`, `cl_game.dll.c:67454`) — one iteration
+  tried 100 so gor's spawn would hear its wind (20.6 m from a `max_distance 20` source) and the
+  user's ear refused the wider radii; that wind at the spawn is the open retail check. The old
+  model's flag is on every sound object at birth and halves everything, head sounds too — the
+  overall level is now the original's ("too loud, the slider does not help"). `sounds`
+  prints distance and gain; self-test `Sound distance law`; `Invariants.md`, "A sound is silent
+  beyond its `max_dist`"; smoke baseline re-recorded (load-time sounds no longer attempt to load).
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
