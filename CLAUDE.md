@@ -1147,7 +1147,14 @@ a coordinator, not the facade.
   (`ds2physics.dll.c:26000`). The reference saves also expose the original's whole spawn order
   (`Save19`: `WORLD` first, then hash order), the check 45.0 runs before 45.2 touches any id.
 - `yae-engine/docs/Phase46_EffectsParticles.md` — **effects and particles** (plan approved by the user
-  2026-09-18; **46.0 and 46.1 done 2026-09-21**, 46.2 next). 46.1 is the template parser —
+  2026-09-18; **46.0–46.2 done 2026-09-21**, 46.3 next). 46.2 is the PAPI simulation —
+  `effects/Papi.h/.cpp`, every action read from `ds2physics.dll.c` and cited by address (the
+  27-word particle record with DS2's `prevPos`, `colliding` as a per-particle *probability*, the
+  inclusive age filter and which actions skip it, swap-with-last removal, PAPI 1.x's NRand from
+  the disassembly, `source_vel` as a multiplier of the emitter's velocity, **`reset` kills every
+  particle**), `ParticleManager::spawnTemplate` as the bridge (stepped, collided through
+  `PhysicsWorld::particleRayZUp`, drawn by the old billboard), `fx spawn`/`attach`/`stats`/`clear`
+  on it, seven `Papi *` self-tests. 46.1 is the template parser —
   `assets/EffectTemplate.h` (the four channels as data, in the binary's vocabulary),
   `EffectTemplateParser`, `EffectTemplateLibrary` (the tree once, `get(name)` as the original
   resolves: `.lua` appended, base name anywhere, the **newest** of 14 duplicated names),
