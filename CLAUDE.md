@@ -1034,6 +1034,15 @@ a coordinator, not the facade.
   over `allEntities`; `onEntityAddedToWorld` wires each runtime one now and the rat drops its four
   `rat_debris` pieces; `Rat_Blood.lua` is an effect template for Phase 46. Self-test
   `Script-spawned bomb debris`; `Invariants.md`, "A runtime RigidBody breaks like an authored one".
+  **45.14 closed by measurement** (2026-09-20): met6's belts, fans and turbine play their
+  authored `anim1` from their triggers (the belt clip is a 1.5-unit flutter, the two bands are the
+  two runs of one loop — `hide` removes both); the wheel `RIGID_koleso01` is sent `anim_play anim1`
+  while `met_koleso` has only `default`, and the original's handler (`sv_game.dll` `FUN_0f8aa390`:
+  clip length by name 0 → no controller) plays nothing for it, as ours does — no `default` auto-play
+  exists for a `RigidBody`; self-test `Anim play on show`; `Invariants.md`, "An `anim_play` naming a
+  clip the model lacks plays nothing"; the retail question (does the wheel turn?) and the `mehan/`
+  `.phs` lookup are in `TODO.md` `met6`. Harness: `screenshot` captures the state after the
+  commands that follow it in the same tick.
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
