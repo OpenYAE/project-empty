@@ -290,8 +290,9 @@ a coordinator, not the facade.
   `gameres/scripts` tree, saved as reversible diffs (`patch -R` reconstructs the original exactly).
   10 of the 13 are removed; the 3 that remain name the subphase that owns them.
   `bash scripts/compare_gameres_scripts.sh --list` is the live check — it compares the tree against
-  `scripts/gameres_scripts_manifest.txt` (491 sha256 hashes, checked in because the reference tree
-  lives outside this repo) and fails on any difference not on its ACCEPTED list.
+  `scripts/gameres_scripts_manifest.txt` (497 sha256 hashes; since 45.19b the reference is the two
+  script `.pak`s themselves — the shipped scripts — unpacked in place) and fails on any difference
+  not on its ACCEPTED list.
 - `yae-engine/docs/Phase39_EngineHardening.md` — the engine-hardening plan (observability, lifetime,
   the frame out of `main`, GPU-resident frame data, CI/sanitizers, layers, threads, docs). Renamed from
   38 when the Phase 37 tail took that number. **39.1 is done** (2026-09-11): pending I/O holds its
@@ -1079,6 +1080,37 @@ a coordinator, not the facade.
   overall level is now the original's ("too loud, the slider does not help"). `sounds`
   prints distance and gain; self-test `Sound distance law`; `Invariants.md`, "A sound is silent
   beyond its `max_dist`"; smoke baseline re-recorded (load-time sounds no longer attempt to load).
+  **45.19 done** (2026-09-20, an item the user added — the weapon wheel skipping weapons and
+  the hands staying on an emptied weapon): `InputCommands::endFrame` copied the wheel impulse
+  into `previous_` before clearing it, so every second notch of a quick scroll was swallowed —
+  now notches are counted and each is a `select_weapon(NEXT/PREV)` step (`wheelSteps`,
+  `hold next|prev`); and `select_holdable` from the scripts (`select_weapon(BEST_WEAPON)` on
+  an empty clip) never reached the first-person model — `WeaponCoordinator::syncFPToLuaHoldable`
+  reconciles the hands with Lua's holdable once a frame. Self-test `Wheel notches`;
+  `Invariants.md`, "Every wheel notch is a step, and the hands follow the Lua holdable".
+  **45.19b** (the user: still not the retail order): retail's wheel is the script's `select_weapon`
+  by `priority` (RE `sv_game.dll` `FUN_0f8833a0` → the function bound as `select_weapon`), and the
+  *shipped* copy wraps (NEXT past the top retries from 0, PREV below the bottom from 1e6) —
+  `cycleWeapon` makes that second call when the script answers `false`; self-test `Weapon
+  switching` +`wrap`. **Found on the way, the user's decision (`TODO.md` `general`): the engine
+  reads the pre-release script dump, not the shipped scripts** — `scripts_engine.pak` /
+  `scripts_you_are_empty.pak` (entries dated 2006-10…11, the release's) differ from the loose
+  `scripts_*/` trees (2006-05…09) in 138 files, all but one newer in the pak: `select_weapon`'s
+  wrap, `g_diff_levels` HARD (45.6 read the dump's 1.4/0.6; shipped 1.5/0.5), maxim/thunder_fire `priority 0.5`,
+  `ui_ini.lua` (the key-assign box), `materials_pairs.lua`, `coroutines.gorkonec`, and
+  `channel = "effect_hit"` on 120 effect files (Phase 46). **The tree is the paks now** (the
+  Steam install has nothing else; the original's file index — `ds2base.dll` — is by lower-cased
+  basename, newest mtime wins, a zip entry carries the archive's mtime). The first unpack died
+  on `gorkonec`: the shipped `coroutines.lua` includes a level file that indexes the renamed
+  `coroutines.gorKonec`, and with one textual `DoFile` chunk stock Lua would lose the twelve
+  levels after it — the original does not, because **DS2's Lua never raises on indexing a
+  non-table** (`ds2scriptsystem.dll`: every basic type has an empty default table, `luaV_gettable`
+  has no `typeerror` on that path, `luaV_settable` raw-sets into it) — `scripting/DS2TypeTables.h`
+  reproduces it on every state (self-test `DS2 nil indexing`; `Invariants.md`, "The shipped
+  scripts are the paks, and a nil indexes as an empty table"). Consequences: HARD is 1.5/0.5,
+  the maxim (0.5) is what a direct start of `lastzlo` holds after the level strips the kit
+  (baseline re-recorded), `set_req_fixed_update_rate` bound, the manifest re-recorded (497,
+  the paks are the reference; the dump survives in `yae-sdk/Projects/test/scripts`).
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
