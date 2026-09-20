@@ -39,6 +39,17 @@ missing behaviour in engine code instead.
   gitignored: `npm run bake -- --all && npm run export-engine` rebuilds them locally. The engine
   auto-probes `<gameres>/../yae-materials/export/engine/catalog.yaemat`; `--no-materials-catalog`
   or `mat_catalog 0` loads levels vanilla. See `yae-materials/PLAN.md`.
+  **Material calibration (2026-09-20):** `yae-materials/docs/MaterialCalibration.md` is the
+  three-repo plan (MC-0…MC-7); its **§0a** is the handoff for the engine side — the materials
+  side (CAL-00…CAL-04) is done: the synthetic calibration set (`yae-materials/calibration/`,
+  `npm run calibration:make`; pack `calibration/pack/current.json`, stems `calib-<name>`; the
+  same set bound to `med1`'s ward in `calibration/pack/level/current.json` —
+  `reference_scenes.sh ward --tag calib --args "--materials-catalog …"`), `texelsPerMeter` and
+  per-axis tiling measured into the records, a measured colour-space QA check, and packs that
+  never carry a signed `normalScale`. What the engine owes before the Workbench `engine look`
+  can start: `MaterialContract.md`, `--matball` + `matball.json`, `debug_view tangent`, the
+  MC-2 sign table on `calib-bump-l` (hypothesis H1 — the V axis), and an answer to whether the
+  `cubeman` template path bypasses the catalog's base colour (`plitkashahmatorez` on `ward`).
 - `scripts/` — the gate scripts behind `build.sh --check` (smoke, picture, conformance, format,
   size budget, console reference), the gameres helpers (`gsf_dump.py`, `check_pak_sounds.py`, …),
   the early engine phase plans (`Phase9_plan.md` … `Phase28_plan.md`) and engine audits
@@ -290,8 +301,9 @@ a coordinator, not the facade.
   `gameres/scripts` tree, saved as reversible diffs (`patch -R` reconstructs the original exactly).
   10 of the 13 are removed; the 3 that remain name the subphase that owns them.
   `bash scripts/compare_gameres_scripts.sh --list` is the live check — it compares the tree against
-  `scripts/gameres_scripts_manifest.txt` (491 sha256 hashes, checked in because the reference tree
-  lives outside this repo) and fails on any difference not on its ACCEPTED list.
+  `scripts/gameres_scripts_manifest.txt` (497 sha256 hashes; since 45.19b the reference is the two
+  script `.pak`s themselves — the shipped scripts — unpacked in place) and fails on any difference
+  not on its ACCEPTED list.
 - `yae-engine/docs/Phase39_EngineHardening.md` — the engine-hardening plan (observability, lifetime,
   the frame out of `main`, GPU-resident frame data, CI/sanitizers, layers, threads, docs). Renamed from
   38 when the Phase 37 tail took that number. **39.1 is done** (2026-09-11): pending I/O holds its
@@ -926,7 +938,205 @@ a coordinator, not the facade.
   `g_diff_levels` damage multipliers, the sniper scope, missiles on physics, explosion/roll camera
   effectors, perception, conveyor material swap, debris vs characters, rat death chunks) plus `met6`'s
   belts and `krovli`'s door (the Use-grab of 41.5) and wires — 15 items, 18 subphases (45.0–45.17).
-  **Not started** (reconnaissance 2026-09-19, HEAD `4cae0ed`). Seven roots are read in the data before
+  **In progress**: 45.0 begun (crane `197.4/197.3/197.9/197.9 +6.1°`, `--check` green, speed
+  before 397.6 u/s), **45.1 done and accepted by the user 2026-09-19** (manual pass: walk 150, Shift 400, the re-timed recipes) (two attention
+  points in the doc's header are closed only by the user, and rolled back on a bug: the crane's
+  `verletStretch` after 45.16, and the gate baselines/`hold` recipes after 45.1/45.4/45.16).
+  45.1: the retail player walks at `walk_forward_speed` = **150 u/s** and has no run — read in
+  the disassembly, not the export (`set_walk_speed` = vtable slot `+0x1e4` → `[actor+0x2164]`;
+  the only runtime write is the carrier's creation, `0x0f88b21e`, from `walk_forward_speed`;
+  `run_*` never read; `move_accelerate` unbound) — `game/PlayerSpeed.h`,
+  `PlayerController::applySpeed`, cvars `pl_walk_speed`/`pl_run_speed` (0 = authored; `400`/`700`
+  bring the harness speed back) and `pl_sprint` (Shift runs — on by the user's decision, an
+  exception: retail's `set_move` drops the client's accelerate bit — at `pl_run_speed`'s default
+  **400**, the engine's old walk; `0` = the authored `run_forward_speed` 200), self-test
+  `Player speed from design`, every `hold
+  forward N` recipe in `LevelTestMatrix.md` re-timed (old N in brackets); found on the way: the
+  actor sets the carrier's `FlySpeed` to 100 where 43.15 assumed 150 (`TODO.md` `general`).
+  **45.2 part 1 done 2026-09-19**: the check of `luaOrder` against the retail's own `level_start`
+  saves found a root above the order — **the include rule** (`DS2EDFParser::resolveInclude`,
+  mirrored in `sdk_dump.ts`): exact spelling beside the including file → exact at the levels root
+  → exact anywhere → newest case-insensitive; the tree is three paks in one place (base under
+  `<map>/`, patch 0 beside it, patch 1 at the root) and the engine had loaded the base's pre-patch
+  copies of 16 includes on 13 maps (every `*sound`, `lastlevelFRODO`, `gorkonecCRAY`, `kinosound`,
+  meat's `m03a`) — gor's base sound file alone carried 9 medkits and 10 boxes retail never had.
+  With the right files the Lua 5.0 order matches the saves 100 % (gor 224/224, meat 559/559,
+  kolhoz 395/395, med1 564/564; `WORLD` first). `--dump <edf>` prints `_engine_only.lua_order`;
+  self-test `EDF include resolution`; `gor_part_2`'s baseline re-recorded (a base test box in
+  frame); `lastzlo`/`met6` now load two `WorldProps`. **Part 2 done by the user's decision**: the
+  whole spawn list is the original's (`DS2EDFParser::orderDefsAsTheOriginal`, `WorldProps` pushed to
+  the front as met), so ids, `index_in_factory`, `g_world_props` and 43.7's fallback follow it;
+  kinostreet2's `TRG_Spric26` pair is ids 29/166 now; the crane unchanged; `parall_part3`'s
+  baseline re-recorded (fence planks settling) — both re-recorded baselines await the user's eye.
+  Found by the user's acceptance pass and fixed the same day: gorkonec's soda cups were never
+  drawn — `classifyModelTemplate` gave model surfaces no `sort_value` (default 5), so the cup
+  (`model_gaz_stakan_glass`, authored 8, additive) drew before the machine's translucent front
+  panel (`def_trans_refl_Vx`, 8, blend) and was painted over; `registerModelScene` now reads the
+  template's `sort_value` from the `.mat` library (`SceneResources::setMaterialLibrary`,
+  `applyModelTemplateOrder`; self-test `Model template sort`; `ward` scene re-recorded). The
+  instant heal there is authored (`delay = 0` in every copy of `gorkoneccray`).
+  **45.3 done**: the look under a freeze — `lock_players` leaves the eyes free (the server locks the
+  carrier's move mask, `Look` is a separate call and `block_turn` a separate property no scene
+  sends), a death or cutscene freeze holds the view, and no freeze banks the mouse (`setFrozen(frozen,
+  lookFree)`, self-test `Frozen look`); retail agrees (the user: lastzlo's lift, the locked player looks around) — accepted.
+  **45.4 done**: an actor born `is_enabled = false` is hidden and capsule-less whatever its
+  `is_visible` (the retail saves: 21 of 21 such actors recorded `is_visible = false` — reversing
+  37.8's inference, which was about a prop), `enable`/`ai_activate` bring it in; self-test
+  `Disabled actor hidden`; the gate 25/25 unchanged.
+  **45.5 done**: `calc_target_dir` without a target is the shooter's look **with pitch** (the
+  thunder's fireball lands where the camera points: floor at −30°, wall at +25°; self-test
+  `calc_target_dir pitch`). **45.6 done**: `g_diff_levels` — read by nobody until now — multiplies
+  a **missile's** damage by the *shooter's* side and the DS2 damage code, as the original's one
+  reader does (`FUN_0f8d39b0`; hitscan, `Bomb`, `Explosion`, the `damage` command are not
+  multiplied): the player's thunder on NORMAL is 3.5 × 3.6 = 12.6 (measured on metro's soldier),
+  an NPC's missile ×1.2; the table is built by `sv_game_init` so it is read after that hook; a
+  loaded save's difficulty now reaches the rules; console `difficulty [name]`; `disp_multiplier`
+  parsed, not applied (`game/DifficultyTable.h`, self-test `Difficulty table`; `Invariants.md`, "A
+  missile's damage is multiplied by the difficulty table").
+  **45.7 done**: the sniper scope — `cl_<class>:on_init` used to run on the one merged object,
+  so `self.on_enter_zoom_in` was the *server's* handler registered twice and the client's (the
+  scope key) never ran; now it runs on the client's view (`__yae_client_view`: methods through
+  `cl_<class>` first, data/writes the entity's) and `FSM::addState` keeps a second handler set
+  for a different function under an existing name (the same function again is a no-op — no
+  double `on_update_fire`); the HUD shows the group's `__left`/`__right` fields with the scope, over the whole HUD (an
+  element inherits its group's `z_order`, the twice-defined group its higher one — user's call);
+  `hold altfire|reload`; self-test `FSM double registration`; `Invariants.md`, "FSM
+  self-transitions" extended.
+  **45.8 done**: grenades and Molotovs — the flight was already ballistic (first contact within
+  0.3 % of `v²sin2θ/g`), the body was not: the model flew with an identity pose (a stick grenade
+  upright in the world, the bottle never turning) and bounced on engine numbers that killed 40 %
+  of the speed per hit. Now a missile has a pose (the shooter's basis) and a spin (the authored
+  `m_angular_velocity` × [0.5, 1.5] per component, rad/s, as `sv_game.dll` `FUN_0f8a0870` sets
+  it), bounces as a Coulomb contact on a solid sphere with its `material_default`'s authored
+  numbers (`inter_grenade` 0.5/0.3), rolls with friction feeding the spin, lies on its side at
+  rest; a ground probe finds rolling contact the velocity sweep cannot; self-test `Grenade
+  ballistics`; `Invariants.md` 36.6 extended. A Jolt body (the plan's option b) was not needed.
+  **45.9 done**: camera effectors — a blast's authored `effector` (missile default
+  `camera_explosion`, Bomb/Explosion `-unknown-` = none) now reaches the camera by
+  `object_quaker`'s distance rule (`game/BlastShake.h`), the `roll` class leans the view by the
+  body's side speed (own + carry, world units; strafes and poh's tram saturate the authored 2°),
+  the view got a roll channel, and the `quake` was re-read from the binary: `amplitude_h` is an
+  angle in radians on pitch and yaw, `amplitude_v` a position on all three axes, fading
+  linearly — 30.7.4 had read both as position, so explosions (0.1) were invisible. `fx` prints
+  the live offsets; self-test `Blast and roll effectors`; `meat`/`met6` baselines re-recorded
+  (the lean) — for the user's eye; `Invariants.md`, "A blast shakes the camera it reaches…".
+  **45.10 done**: perception — the sight cone was `cos(view_fov/2)` on the yaw, half the
+  authored width; the original's visibility slot (`0x0f86ebe0`, `is_object_visible`) is
+  `dot(look, centre − eye) ≥ cos(view_fov)` in 3D — 90 is the front hemisphere, the anchor's
+  convention — and the chase (`FUN_0f8e47f0`) completes only within `chase_dist` *with the enemy
+  in sight*, else walks to the last-seen position (ours completed on distance and stood behind
+  cover "just looking"); `view_fov ≥ 180` is all-round; `ai_trace` prints `AI_GOAL chase` and
+  `AI_MOVE`; self-tests `Authored perception` (rewritten cone), `Chase ends only in sight`;
+  `Invariants.md`, "An actor sees the front hemisphere of its look…". Sound untouched.
+  **45.11 done**: the belts that would not stop — `NEBO` (`WorldProps`) was a bare `Entity`
+  with no `replace_material`, so parall's level-template swap (`custom_conveyor1_forward` →
+  `_off`) went nowhere: `entity/WorldPropsEntity.h` + `SceneResources::swapLevelTemplate`
+  rebuild the level surfaces' params from the new template; and `play anim1 once` over the
+  running loop (metro's `ESKOLATOR`) was swallowed by the play handler's keep-alive guard —
+  the same clip asked for in another mode now changes its mode in place
+  (`AnimationPlayer::setPlaybackMode`), the cycle plays out and stops. Self-tests `World
+  material swap`, `Play once ends a loop`; `Invariants.md`, "`replace_material` on
+  `WorldProps`…".
+  **45.12 done**: debris pieces are corpse bodies to the player's capsule (`DebrisSystem` marks
+  them; the original's debris are `RagDoll`s under the same `ph_ragdolls_players_no_collision`),
+  NPCs meet them as before (`Ragdoll::Create` sets no ODE category — the carrier's mask 7 finds
+  them); self-test `Debris ignores player`; `Invariants.md`, "Debris is a ragdoll to the player".
+  **45.13 done**: the rats' death chunks — a script-spawned `RigidBody` (every rat's `Bomb`,
+  actor_basic's ragdoll bomb) got no fall-apart callback, because the wiring ran once at load
+  over `allEntities`; `onEntityAddedToWorld` wires each runtime one now and the rat drops its four
+  `rat_debris` pieces; `Rat_Blood.lua` is an effect template for Phase 46. Self-test
+  `Script-spawned bomb debris`; `Invariants.md`, "A runtime RigidBody breaks like an authored one".
+  **45.14 closed by measurement** (2026-09-20): met6's belts, fans and turbine play their
+  authored `anim1` from their triggers (the belt clip is a 1.5-unit flutter, the two bands are the
+  two runs of one loop — `hide` removes both); the wheel `RIGID_koleso01` is sent `anim_play anim1`
+  while `met_koleso` has only `default`, and the original's handler (`sv_game.dll` `FUN_0f8aa390`:
+  clip length by name 0 → no controller) plays nothing for it, as ours does — no `default` auto-play
+  exists for a `RigidBody`; self-test `Anim play on show`; `Invariants.md`, "An `anim_play` naming a
+  clip the model lacks plays nothing"; the retail question (does the wheel turn?) and the `mehan/`
+  `.phs` lookup are in `TODO.md` `met6`. Harness: `screenshot` captures the state after the
+  commands that follow it in the same tick.
+  **45.15 done** (2026-09-20): the Use-grab — the original's actor Use hands a `pickable` body
+  lighter than `ph_hold_mass` to `ODE::BhvCarrier::Take`, and the Hand drives it to feet + 116 up +
+  90 along the look with `Object::Controller`'s PD servo (kp 1250 /s², kd 35 /s, the orientation
+  kept relative to the look), a second Use drops, `ph_throw_on_drop` throws (one 20 ms step of
+  `look × ph_throw_force × 1e6`) — `game/HandCarry.h`, `PlayerController::tryUse/dropHeld`,
+  `scripting/CarryLuaAPI` (`arms_has_thing`, `execute_action(ACTION_USE)` — the thunder's right
+  button works), `game/HandWiring.h` (the `ph_*` vars from the autorun/`engine.set_var` store, the
+  drop on an item take, death, destroy, level end); a `fixing = false` door has no motor by Use
+  any more (`sv_door:on_use` is empty; the leaf is grabbed, `open`/`close` keep the motor) — krovli's
+  `DOOR_room_l/r` open by hand; self-tests `Use grabs a body`, `Use grabs a door leaf`;
+  `Invariants.md`, "Use takes a pickable body in hand". Found and left in `TODO.md` `general`: a
+  physical door's `close` overshoots to the other stop (pre-existing).
+  **45.16 done, awaiting the user's acceptance** (2026-09-20; the crane and krovli's wires against
+  retail — a bug rolls it back whole): a `Rope` is `ODE::Cloth` — links rest at span/segment ×
+  `strain` (0.9 = pre-tensioned, not "90 % stiff"), bend links at 2× × `bend` and push apart only,
+  five passes of `k = r²/(d²+r²) − 0.5` per fixed 20 ms step, gravity 1050, the wind a per-step
+  random horizontal direction that averages to nothing; krovli's wires sag 58–62 instead of 250,
+  the crane `197.4/197.3/197.9/197.9 +6.1°` unchanged (its numbers are the cables' and hinges',
+  not the chain's); `ropes <name>` prints `sag`; self-test `Rope rest length is strained`;
+  `Invariants.md`, "A rope's link rests at `strain` of its span".
+  **45.18 done** (2026-09-20, an item the user added after accepting 45.16 — a mob's idle heard
+  clearly at level start from across the map, then "a motor heard through walls at 20–50 m"):
+  three roots — the sound system's attenuation was miniaudio's clamped inverse (a sound never
+  falls below `min/max` of its volume), `add_sound(name)` without distances (every lift, door,
+  button) defaulted to 2/100 m where the original's source is born 1/15, and every actor's idle
+  is played by its `on_init` before the listener exists. The original (`ds2soundsystem.dll`
+  `sub_1000C480`) computes the gain itself — `t²·min/d`, or `t²·0.5` for `old_distance_model`,
+  **zero at and beyond `max_dist`** — and ours does now, every frame; a 3D sound asked for before
+  the first `updateListener()` is not started. The sound's metre is 64 units (the client's
+  ×0.015625 and its debug draw against `max_distance`, `cl_game.dll.c:67454`) — one iteration
+  tried 100 so gor's spawn would hear its wind (20.6 m from a `max_distance 20` source) and the
+  user's ear refused the wider radii; that wind at the spawn is the open retail check. The old
+  model's flag is on every sound object at birth and halves everything, head sounds too — the
+  overall level is now the original's ("too loud, the slider does not help"). `sounds`
+  prints distance and gain; self-test `Sound distance law`; `Invariants.md`, "A sound is silent
+  beyond its `max_dist`"; smoke baseline re-recorded (load-time sounds no longer attempt to load).
+  **45.19 done** (2026-09-20, an item the user added — the weapon wheel skipping weapons and
+  the hands staying on an emptied weapon): `InputCommands::endFrame` copied the wheel impulse
+  into `previous_` before clearing it, so every second notch of a quick scroll was swallowed —
+  now notches are counted and each is a `select_weapon(NEXT/PREV)` step (`wheelSteps`,
+  `hold next|prev`); and `select_holdable` from the scripts (`select_weapon(BEST_WEAPON)` on
+  an empty clip) never reached the first-person model — `WeaponCoordinator::syncFPToLuaHoldable`
+  reconciles the hands with Lua's holdable once a frame. Self-test `Wheel notches`;
+  `Invariants.md`, "Every wheel notch is a step, and the hands follow the Lua holdable".
+  **45.19b** (the user: still not the retail order): retail's wheel is the script's `select_weapon`
+  by `priority` (RE `sv_game.dll` `FUN_0f8833a0` → the function bound as `select_weapon`), and the
+  *shipped* copy wraps (NEXT past the top retries from 0, PREV below the bottom from 1e6) —
+  `cycleWeapon` makes that second call when the script answers `false`; self-test `Weapon
+  switching` +`wrap`. **Found on the way, the user's decision (`TODO.md` `general`): the engine
+  reads the pre-release script dump, not the shipped scripts** — `scripts_engine.pak` /
+  `scripts_you_are_empty.pak` (entries dated 2006-10…11, the release's) differ from the loose
+  `scripts_*/` trees (2006-05…09) in 138 files, all but one newer in the pak: `select_weapon`'s
+  wrap, `g_diff_levels` HARD (45.6 read the dump's 1.4/0.6; shipped 1.5/0.5), maxim/thunder_fire `priority 0.5`,
+  `ui_ini.lua` (the key-assign box), `materials_pairs.lua`, `coroutines.gorkonec`, and
+  `channel = "effect_hit"` on 120 effect files (Phase 46). **The tree is the paks now** (the
+  Steam install has nothing else; the original's file index — `ds2base.dll` — is by lower-cased
+  basename, newest mtime wins, a zip entry carries the archive's mtime). The first unpack died
+  on `gorkonec`: the shipped `coroutines.lua` includes a level file that indexes the renamed
+  `coroutines.gorKonec`, and with one textual `DoFile` chunk stock Lua would lose the twelve
+  levels after it — the original does not, because **DS2's Lua never raises on indexing a
+  non-table** (`ds2scriptsystem.dll`: every basic type has an empty default table, `luaV_gettable`
+  has no `typeerror` on that path, `luaV_settable` raw-sets into it) — `scripting/DS2TypeTables.h`
+  reproduces it on every state (self-test `DS2 nil indexing`; `Invariants.md`, "The shipped
+  scripts are the paks, and a nil indexes as an empty table"). Consequences: HARD is 1.5/0.5,
+  the maxim (0.5) is what a direct start of `lastzlo` holds after the level strips the kit
+  (baseline re-recorded), `set_req_fixed_update_rate` bound, the manifest re-recorded (497,
+  the paks are the reference; the dump survives in `yae-sdk/Projects/test/scripts`).
+  **45.20 done** (2026-09-20, the user's item — env/hit/scream sounds louder than weapons and
+  the menu, "no fade, a cut at the edge"): the master is the endpoint's and now measured
+  (`sounds` prints `master`, `mix peak`, clipped share, `sounds volume <v>` for an A/B); the
+  distance law is the original's `t²` re-read in the disassembly (steep by design, zero at
+  `max_dist`; OpenAL's own attenuation is disabled by a 1e6 reference distance); the balance
+  root is **`snd_reuse_same_voices`** — the same file within 150 ms and √3 m restarts the
+  playing voice instead of adding one (`SoundSystem::reuseSameVoice`; eight pellets, one hit
+  per variant); self-test `Event sound retrigger` rewritten; `Invariants.md`, "A sound asked
+  for twice in 150 ms at one place is one voice". Then the user's examples (med1's clock at
+  0.20) gave the loudness root: the client turns an authored `volume` into the voice's gain as
+  **`clamp(1 + volume, 0, 1)`** (`cl_game.dll` `0x10076316`, `sub_1000BEE0`'s clamp) — `-0.7` is
+  0.3 and the hundredths-of-a-decibel convention (`-300 … -2100`, ~200 sources) is silence in
+  retail; `ds2VolumeToGain` is that now, a silent source gets no voice — `Invariants.md`, "An
+  authored `volume` is `1 + volume`, clamped".
+  Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
   false` as invisible (21 of 21; 368 such actors in the campaign); `calcTargetDir` without a target is
