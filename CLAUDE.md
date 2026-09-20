@@ -1016,6 +1016,15 @@ a coordinator, not the facade.
   cover "just looking"); `view_fov ≥ 180` is all-round; `ai_trace` prints `AI_GOAL chase` and
   `AI_MOVE`; self-tests `Authored perception` (rewritten cone), `Chase ends only in sight`;
   `Invariants.md`, "An actor sees the front hemisphere of its look…". Sound untouched.
+  **45.11 done**: the belts that would not stop — `NEBO` (`WorldProps`) was a bare `Entity`
+  with no `replace_material`, so parall's level-template swap (`custom_conveyor1_forward` →
+  `_off`) went nowhere: `entity/WorldPropsEntity.h` + `SceneResources::swapLevelTemplate`
+  rebuild the level surfaces' params from the new template; and `play anim1 once` over the
+  running loop (metro's `ESKOLATOR`) was swallowed by the play handler's keep-alive guard —
+  the same clip asked for in another mode now changes its mode in place
+  (`AnimationPlayer::setPlaybackMode`), the cycle plays out and stops. Self-tests `World
+  material swap`, `Play once ends a loop`; `Invariants.md`, "`replace_material` on
+  `WorldProps`…".
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
