@@ -51,7 +51,7 @@ missing behaviour in engine code instead.
   MC-2 sign table on `calib-bump-l` (hypothesis H1 — the V axis), and an answer to whether the
   `cubeman` template path bypasses the catalog's base colour (`plitkashahmatorez` on `ward`).
 - `scripts/` — the gate scripts behind `build.sh --check` (smoke, picture, conformance, format,
-  size budget, console reference), the gameres helpers (`gsf_dump.py`, `check_pak_sounds.py`, …),
+  size budget, console reference), the gameres helpers (`gsf_dump.py`, `check_pak_sounds.py`, `effects_survey.sh`, …),
   the early engine phase plans (`Phase9_plan.md` … `Phase28_plan.md`) and engine audits
   (`Hardcoded_Constants.md`, `unimplemented_*.md`, `YAE_Architecture_Review.md` — a Phase-10
   snapshot, outdated). The RE notes that used to live here are in `yae-research/` (public), the tools in `yae-research-private/`.
@@ -1147,7 +1147,16 @@ a coordinator, not the facade.
   (`ds2physics.dll.c:26000`). The reference saves also expose the original's whole spawn order
   (`Save19`: `WORLD` first, then hash order), the check 45.0 runs before 45.2 touches any id.
 - `yae-engine/docs/Phase46_EffectsParticles.md` — **effects and particles** (plan approved by the user
-  2026-09-18, not started; Phase 45 is reserved for the `general` tail). Decisions: faithful-first
+  2026-09-18; **46.0 done 2026-09-21**, 46.1 next). 46.0 gave the harness: `bash scripts/effects_survey.sh`
+  (Lua 5.4 over `effects/**` and every `.ds2edf`; `--record`/`--check` against
+  `scripts/effects_survey_baseline.txt` — the reconnaissance numbers reproduced: 266 files / 193
+  systems / 423 groups, 777 placements, plus the oddities list for `OriginalScriptDefects.md`), the
+  console `fx` family in `game/EffectCommands.h` (`fx list [mask]`, `spawn`, `attach`, `stats`,
+  `reload`, `show` beside the 30.7.4 `pp`/`eff`/`stop`/`list pp|eff` — every answer says
+  `preset …, legacy player not yet` until 46.1–46.4), `perf counters`' `particles:` line, and
+  `tests/referenses-effects/` for the retail recordings of Appendix A (the user's part, none yet).
+  Found on the way: `DebugCoordinator::spawnTestParticles()` puts three preset emitters at the
+  world origin of every level (dev builds) — goes with the presets in 46.7. Decisions: faithful-first
   (the original's quirks are reproduced and recorded in `Invariants.md`), all of 46.0–46.9 in
   release 1, particles stay in the picture gate, retail reference recordings per the doc's Appendix A
   (priority: muzzle flashes, flamethrower jet, wind), budget on `meat` ≤ 0.3 ms CPU + 0.5 ms GPU. Part A is the **legacy system** for the first
