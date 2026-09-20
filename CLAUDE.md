@@ -39,6 +39,17 @@ missing behaviour in engine code instead.
   gitignored: `npm run bake -- --all && npm run export-engine` rebuilds them locally. The engine
   auto-probes `<gameres>/../yae-materials/export/engine/catalog.yaemat`; `--no-materials-catalog`
   or `mat_catalog 0` loads levels vanilla. See `yae-materials/PLAN.md`.
+  **Material calibration (2026-09-20):** `yae-materials/docs/MaterialCalibration.md` is the
+  three-repo plan (MC-0…MC-7); its **§0a** is the handoff for the engine side — the materials
+  side (CAL-00…CAL-04) is done: the synthetic calibration set (`yae-materials/calibration/`,
+  `npm run calibration:make`; pack `calibration/pack/current.json`, stems `calib-<name>`; the
+  same set bound to `med1`'s ward in `calibration/pack/level/current.json` —
+  `reference_scenes.sh ward --tag calib --args "--materials-catalog …"`), `texelsPerMeter` and
+  per-axis tiling measured into the records, a measured colour-space QA check, and packs that
+  never carry a signed `normalScale`. What the engine owes before the Workbench `engine look`
+  can start: `MaterialContract.md`, `--matball` + `matball.json`, `debug_view tangent`, the
+  MC-2 sign table on `calib-bump-l` (hypothesis H1 — the V axis), and an answer to whether the
+  `cubeman` template path bypasses the catalog's base colour (`plitkashahmatorez` on `ward`).
 - `scripts/` — the gate scripts behind `build.sh --check` (smoke, picture, conformance, format,
   size budget, console reference), the gameres helpers (`gsf_dump.py`, `check_pak_sounds.py`, …),
   the early engine phase plans (`Phase9_plan.md` … `Phase28_plan.md`) and engine audits
@@ -1111,6 +1122,20 @@ a coordinator, not the facade.
   the maxim (0.5) is what a direct start of `lastzlo` holds after the level strips the kit
   (baseline re-recorded), `set_req_fixed_update_rate` bound, the manifest re-recorded (497,
   the paks are the reference; the dump survives in `yae-sdk/Projects/test/scripts`).
+  **45.20 done** (2026-09-20, the user's item — env/hit/scream sounds louder than weapons and
+  the menu, "no fade, a cut at the edge"): the master is the endpoint's and now measured
+  (`sounds` prints `master`, `mix peak`, clipped share, `sounds volume <v>` for an A/B); the
+  distance law is the original's `t²` re-read in the disassembly (steep by design, zero at
+  `max_dist`; OpenAL's own attenuation is disabled by a 1e6 reference distance); the balance
+  root is **`snd_reuse_same_voices`** — the same file within 150 ms and √3 m restarts the
+  playing voice instead of adding one (`SoundSystem::reuseSameVoice`; eight pellets, one hit
+  per variant); self-test `Event sound retrigger` rewritten; `Invariants.md`, "A sound asked
+  for twice in 150 ms at one place is one voice". Then the user's examples (med1's clock at
+  0.20) gave the loudness root: the client turns an authored `volume` into the voice's gain as
+  **`clamp(1 + volume, 0, 1)`** (`cl_game.dll` `0x10076316`, `sub_1000BEE0`'s clamp) — `-0.7` is
+  0.3 and the hundredths-of-a-decibel convention (`-300 … -2100`, ~200 sources) is silence in
+  retail; `ds2VolumeToGain` is that now, a silent source gets no voice — `Invariants.md`, "An
+  authored `volume` is `1 + volume`, clamped".
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
