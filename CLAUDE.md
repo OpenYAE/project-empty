@@ -1055,6 +1055,14 @@ a coordinator, not the facade.
   `DOOR_room_l/r` open by hand; self-tests `Use grabs a body`, `Use grabs a door leaf`;
   `Invariants.md`, "Use takes a pickable body in hand". Found and left in `TODO.md` `general`: a
   physical door's `close` overshoots to the other stop (pre-existing).
+  **45.16 done, awaiting the user's acceptance** (2026-09-20; the crane and krovli's wires against
+  retail — a bug rolls it back whole): a `Rope` is `ODE::Cloth` — links rest at span/segment ×
+  `strain` (0.9 = pre-tensioned, not "90 % stiff"), bend links at 2× × `bend` and push apart only,
+  five passes of `k = r²/(d²+r²) − 0.5` per fixed 20 ms step, gravity 1050, the wind a per-step
+  random horizontal direction that averages to nothing; krovli's wires sag 58–62 instead of 250,
+  the crane `197.4/197.3/197.9/197.9 +6.1°` unchanged (its numbers are the cables' and hinges',
+  not the chain's); `ropes <name>` prints `sag`; self-test `Rope rest length is strained`;
+  `Invariants.md`, "A rope's link rests at `strain` of its span".
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
