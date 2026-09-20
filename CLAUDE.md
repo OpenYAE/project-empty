@@ -1029,6 +1029,11 @@ a coordinator, not the facade.
   them; the original's debris are `RagDoll`s under the same `ph_ragdolls_players_no_collision`),
   NPCs meet them as before (`Ragdoll::Create` sets no ODE category — the carrier's mask 7 finds
   them); self-test `Debris ignores player`; `Invariants.md`, "Debris is a ragdoll to the player".
+  **45.13 done**: the rats' death chunks — a script-spawned `RigidBody` (every rat's `Bomb`,
+  actor_basic's ragdoll bomb) got no fall-apart callback, because the wiring ran once at load
+  over `allEntities`; `onEntityAddedToWorld` wires each runtime one now and the rat drops its four
+  `rat_debris` pieces; `Rat_Blood.lua` is an effect template for Phase 46. Self-test
+  `Script-spawned bomb debris`; `Invariants.md`, "A runtime RigidBody breaks like an authored one".
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
