@@ -1025,6 +1025,10 @@ a coordinator, not the facade.
   (`AnimationPlayer::setPlaybackMode`), the cycle plays out and stops. Self-tests `World
   material swap`, `Play once ends a loop`; `Invariants.md`, "`replace_material` on
   `WorldProps`…".
+  **45.12 done**: debris pieces are corpse bodies to the player's capsule (`DebrisSystem` marks
+  them; the original's debris are `RagDoll`s under the same `ph_ragdolls_players_no_collision`),
+  NPCs meet them as before (`Ragdoll::Create` sets no ODE category — the carrier's mask 7 finds
+  them); self-test `Debris ignores player`; `Invariants.md`, "Debris is a ragdoll to the player".
   Reconnaissance 2026-09-19 on HEAD `4cae0ed`. Seven roots are read in the data before
   any run: the authored player speed is `actor_player_design.lua` 150/200 with no run key bound in
   retail; the original's reference saves record every actor authored `is_visible = true, is_enabled =
