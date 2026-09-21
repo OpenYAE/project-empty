@@ -106,7 +106,8 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   `release` = `YAE_DEV=OFF`, `YAE_BUILD_TESTS=OFF` (`build-release/`; `--self-test` there says so
   and exits 2), `asan` = RelWithDebInfo + `YAE_SANITIZE=address,undefined` + Jolt's `USE_ASSERTS`
   (`build-asan/`; a Jolt assert is logged as `[ERROR]` and the run continues — 41.3; the one
-  accepted assert, equal hinge limits, is logged once as INFO).
+  accepted assert, equal hinge limits, is logged once as INFO; `YAE_JOLT_ASSERT_BT=1` prints the
+  call stack of the first three, `addr2line -f -C -e build-asan/yae-engine <+off>` names it — 46.9b).
   `YAE_FETCH_DEPS=OFF` is a real branch now: `find_package` for SDL3, Jolt, glm and Lua 5.4, and
   it fails by package name when one is missing. `mingw` cross-builds for Windows with llvm-mingw
   from `~/opt` (no root) and wine runs the result — **`yae-engine/docs/WindowsBuild.md`** is the
@@ -1167,10 +1168,13 @@ a coordinator, not the facade.
   `flares_custom` is loaded by nothing) parsed by `assets/FlareTableLibrary` with the client's
   vocabulary (flags byte bit 0 `dist_invariant` … bit 7 `nearest`, `FLARE_BL_ADD/MODULATE/BLEND`
   = 0/1/2 = ONE/ONE, DST_COLOR/ZERO, SRC_ALPHA/ONE_MINUS); `effects/FlareSystem` steps twenty
-  flares a frame, each at most every 20 ms, a plain element lit by a **ray through the level
-  collision mesh alone** (`PhysicsWorld::levelMeshBlocksZUp` — the original's `ICollisionSystem`)
-  with the visibility following at 0.005/ms, a `glow` element depth-tested instead (its box vs
-  the frustum, no ray); draws through the ParticleRenderer with colour × fade(d) × visibility,
+  flares a frame, each at most every 20 ms, a plain element lit by a **ray through everything
+  solid but the characters** (`PhysicsWorld::flareRayBlockedZUp` — the server's trace object the
+  renderer is handed, `ODE::World::Trace` mask 0x43: level, props, kinematic `.phs` bodies, doors;
+  not actors, corpses, sensors, barriers, ghosts — 46.9b, after the user's "flares through the
+  wagon": 46.8 had read the level mesh alone, and lastzlo's wagon cone shone through the
+  boss-room door) with the visibility following at 0.005/ms, a `glow` element depth-tested
+  instead (its box vs the frustum, no ray); draws through the ParticleRenderer with colour × fade(d) × visibility,
   `offset` along the line to the view axis at distance d, size × d when `dist_invariant`, world
   up under `z_align`, no fog, no depth write, the `depth_test` flag read by nobody; the fade map
   is `map[key] = value` (the default table is always lit). 172 placements on `meat`/`meat_part2`/
@@ -1178,7 +1182,7 @@ a coordinator, not the facade.
   `show`/`hide`/`enable`/`disable`/`is_visible`; `engine.create_flare` & co. bound;
   `AreaHide.hide_flares` is dead code in this build (its box function has no caller). Console
   `flares entities` per-flare readout + summary, `io <flare>`; self-tests `Flare tables`,
-  `Flare element offset`, `Flare entity inputs`; pass `render:flares` (0.012 ms on futur);
+  `Flare element offset`, `Flare entity inputs`, `Flare ray solids`; pass `render:flares` (0.012 ms on futur);
   `futur`/`lastzlo` baselines re-recorded; `Invariants.md`, "A flare is lit by a ray through the
   level mesh…". 46.7 is the engine channels — every
   effect the engine plays itself (a hit, a breaking prop, a blast, a missile's `attached_effect`
