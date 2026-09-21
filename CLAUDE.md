@@ -1147,7 +1147,14 @@ a coordinator, not the facade.
   (`ds2physics.dll.c:26000`). The reference saves also expose the original's whole spawn order
   (`Save19`: `WORLD` first, then hash order), the check 45.0 runs before 45.2 touches any id.
 - `yae-engine/docs/Phase46_EffectsParticles.md` — **effects and particles** (plan approved by the user
-  2026-09-18; **46.0–46.2 done 2026-09-21**, 46.3 next). 46.2 is the PAPI simulation —
+  2026-09-18; **46.0–46.3 done 2026-09-21**, 46.4 next). 46.3 is the renderer —
+  `particles/ParticleRenderer` rewritten as batches of the original's six sprite types (read in
+  `ds2render.dll` `FUN_10033aa0`: **`rotation` turns the texture, not the quad**, and a rotated UV
+  square wraps with GL_REPEAT; `velocity_align` runs *from* the particle `sx + |v|·kx` along v̂;
+  `lines` are a camera-facing ribbon prevPos → pos of half-width `size.x`; `add = ONE/ONE`,
+  `modulate = DST_COLOR/ZERO`, `overlay = ONE_MINUS_SRC_ALPHA/ONE`; depth test on, mask off by
+  default), flipbook, `tex_env`, alpha test, the level's fog (attenuating `add`), the presets kept
+  pixel-identical as `preset` batches; GL self-test `Particle quad geometry`. 46.2 is the PAPI simulation —
   `effects/Papi.h/.cpp`, every action read from `ds2physics.dll.c` and cited by address (the
   27-word particle record with DS2's `prevPos`, `colliding` as a per-particle *probability*, the
   inclusive age filter and which actions skip it, swap-with-last removal, PAPI 1.x's NRand from
