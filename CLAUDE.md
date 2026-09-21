@@ -199,7 +199,10 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
 · `scripting` (Lua 5.4 bindings) · `ai` (combat loop, goals, perception) · `game` (GameRulesYAE facade +
 coordinators, `PhysicsCoordinator` among them since 39.5.1) · `assets` (`.ds2/.ds2md/.ds2cm/.ds2edf` parsers) · `audio` · `animation` · `navigation`
 · `ui` (also the comics player) · `scene` · `resource` · `camera` · `input` · `platform`
-· `video` (AVI cutscenes: decoder backend + player + preset resolution).
+· `video` (AVI cutscenes: decoder backend + player + preset resolution)
+· `effects` (Phase 46: the PAPI simulation `Papi`, `EffectInstance`, the particle draw list `ParticleManager` and
+`ParticleRenderer`, the `object_flare` system `FlareSystem` (46.8); the templates are parsed in `assets/EffectTemplate*`,
+the flare tables in `assets/FlareTable*`, the instances live in `game/EffectCoordinator`).
 
 Input routing: `app/AppEventRouter` owns the SDL event chain (console → video → comics →
 cutscene → ESC/pause → screenshot → frozen guard → debug → gameplay). **Order is the contract** —
@@ -1147,7 +1150,93 @@ a coordinator, not the facade.
   (`ds2physics.dll.c:26000`). The reference saves also expose the original's whole spawn order
   (`Save19`: `WORLD` first, then hash order), the check 45.0 runs before 45.2 touches any id.
 - `yae-engine/docs/Phase46_EffectsParticles.md` — **effects and particles** (plan approved by the user
-  2026-09-18; **46.0–46.3 done 2026-09-21**, 46.4 next). 46.3 is the renderer —
+  2026-09-18; **Phase 46 is closed — 46.0–46.9 done 2026-09-21**; Part B / Phase 47 is a
+  sketch). 46.9 closed it without a code change: `--check` green (243/243, smoke 25/25),
+  size ceilings for the phase's five big files with reasons, `--asan` with the recipes of
+  46.4/46.6/46.7/46.8 at 0 reports, the picture gate 25/25 twice with identical numbers
+  (`meat`/`gor_part_2` re-recorded for a ≤ 6/255 prop-settle residue since 46.7), scenes 4/4,
+  the crane unchanged; `perf` on `meat` at 3440×1440 — `game:effects` 0.021 ms CPU,
+  `render:particles` 0.032 ms CPU / 0.019 ms GPU for 61 instances and 1152 particles (the
+  plan's ≤ 0.3 + 0.5 ms budget with a tenfold margin; `gorkonec`'s full-frame fog sprites are
+  the GPU maximum at 0.039 ms); `Invariants.md` gained the 46.1–46.3 section ("An effect is a
+  template of four channels…"), `OriginalScriptDefects.md` C7–C10 (`pfx_electro_smog` does
+  not parse, `angulat_vel`, poh's missing `pfx_smoke01_blue/red`, `bland`/`WLM_WooD.tga`
+  fallbacks), `LevelTestMatrix.md` the effect recipes, `TODO.md` the phase's leftovers
+  (contact effects of props, bloodmark scale, bone effects, retail references). 46.8 is `object_flare` — the
+  original's ds2render flare object read whole: `flares.lua` (`test_flare` + `flares_default`;
+  `flares_custom` is loaded by nothing) parsed by `assets/FlareTableLibrary` with the client's
+  vocabulary (flags byte bit 0 `dist_invariant` … bit 7 `nearest`, `FLARE_BL_ADD/MODULATE/BLEND`
+  = 0/1/2 = ONE/ONE, DST_COLOR/ZERO, SRC_ALPHA/ONE_MINUS); `effects/FlareSystem` steps twenty
+  flares a frame, each at most every 20 ms, a plain element lit by a **ray through the level
+  collision mesh alone** (`PhysicsWorld::levelMeshBlocksZUp` — the original's `ICollisionSystem`)
+  with the visibility following at 0.005/ms, a `glow` element depth-tested instead (its box vs
+  the frustum, no ray); draws through the ParticleRenderer with colour × fade(d) × visibility,
+  `offset` along the line to the view axis at distance d, size × d when `dist_invariant`, world
+  up under `z_align`, no fog, no depth write, the `depth_test` flag read by nobody; the fade map
+  is `map[key] = value` (the default table is always lit). 172 placements on `meat`/`meat_part2`/
+  `futur`/`lastzlo` only (none on `kolhoz`/`med1`); `FlareEntity` hides on
+  `show`/`hide`/`enable`/`disable`/`is_visible`; `engine.create_flare` & co. bound;
+  `AreaHide.hide_flares` is dead code in this build (its box function has no caller). Console
+  `flares entities` per-flare readout + summary, `io <flare>`; self-tests `Flare tables`,
+  `Flare element offset`, `Flare entity inputs`; pass `render:flares` (0.012 ms on futur);
+  `futur`/`lastzlo` baselines re-recorded; `Invariants.md`, "A flare is lit by a ray through the
+  level mesh…". 46.7 is the engine channels — every
+  effect the engine plays itself (a hit, a breaking prop, a blast, a missile's `attached_effect`
+  and `explode_effect_name`, a lit fuse) is the template played whole as an anonymous one-shot
+  of the coordinator, as the original's five creators do (`FUN_0f8d2b10` hit with +Z the normal,
+  `FUN_0f8aa7d0`/144960 in the object's matrix, `FUN_0f8f5500`/93908 riding the object); the
+  **presets are gone** (`ParticleManager` is the frame's draw list now, moved with
+  `ParticleRenderer` to `effects/`; `ParticleEmitter.h`/`ParticleTypes.h`, `uPreset`,
+  `game:particles`, the VisualEntity emitter map deleted); a material pair is selected by the
+  contact's speed windows (`n_range`/`t_range`, inclusive — a bullet is (1, 1), an actor's step
+  (0, |v|/2000)), not by a roll; a prop's own contact effects (`coll_wood_box_*`) have no reader
+  in the server code and are not invented. Self-tests `Material pair by speed`, `Hit effect
+  plays template`; `Invariants.md`, "An engine channel plays the template whole…". 46.6 is the script API — the ten
+  entity methods on the coordinator (`EntityMethodsExtended::registerEffectsExtAPI`; the
+  `LuaGameAPI` stubs, `__effect_*` tables, `createMuzzleFlash` and the C++
+  `load_shoot_effect`/`visualize_shoot_effect` gone): `create_effect(tid, model, ref_point)`
+  attaches to the **tag shape's whole matrix on its bone** (`actorTagMatrixLocal`,
+  `FirstPersonWeapon::getTagWorldMatrix` for the FP model via `game/EffectWiring.h`,
+  re-resolved after the weapon's emit with the frame's camera), created active as the original
+  does; `reset_effect` = reset + activate (message 0x24); `release_effect` = anonymous,
+  `destroy_effect` = now. An NPC's `fire_trace` tenth argument plays the tracer one-shot at the
+  shot's origin along the shot (`FUN_0f8d2b10`); the player has no tracer in retail. Found on
+  the way: the original's base object calls the script's **`on_inslot_enable/disable/destroy`**
+  after those inputs — ours let the C++ handler shadow it, so the flamethrower's nozzle
+  (`actor_flamethrower:on_inslot_enable`) never lit by a trigger; `EntitySystem::setInslotCallback`
+  → `LuaEngine::callEntityInslot`, and `fire_io` now takes `EntityIO::deliverInput` like an
+  authored link. Self-test `Effect script API`; `Invariants.md`, "The script's effect is a
+  coordinator handle…". 46.5 is the placed effect —
+  `entity/EffectEntity` for both `Effect` (735) and `ParticleSystem` (42): the instance created at
+  spawn from `file_name` at the `tm` verbatim, `active` → activated (shown), `is_visible = false` →
+  hidden, `is_enabled = false` → hidden and inactive until `enable`; the RE swapped the
+  reconnaissance's two classes (`Effect` = ctor `FUN_0f8f3190`, `ParticleSystem` = `FUN_0f8d15a0`)
+  and settled the one difference — **`Effect::activate` reads `parameters.reset` (true = reset +
+  activate, message 0x24), `ParticleSystem` never does** — which is how the 556 authored
+  `activate {reset = true}` re-arm scene explosions whose `time`-windowed sources fired at load in a
+  hidden instance (the PSys clock runs from creation, active or not). `parent`/`parent_point` (70,
+  all RigidBody/Bomb parents) ride rigidly from the authored pose, bound on the first frame the
+  parent exists; the editor's `shape`/`size` gizmo is not read. Particles draw from their own
+  generator (`PapiRandom::seed`) so a birth no longer shifts `rng::global()`; `effectCoordinator_`
+  is declared before `entitySystem_` (onDestroy releases into it). Gate re-recorded 25/25 (only
+  `gorkonec`/`parall_part3` beyond noise — authored fog) and the `shop` scene (a lamp's
+  `pfx_cone2_dust` over the camera); poh's `pfx_smoke01_blue/red.lua` do not exist in the tree (a
+  WARN, retail misses them too). Self-test `Effect entity inputs`; `io <effect>` prints `effect:`;
+  `fx stats [all]`. 46.4 is the instance and the coordinator —
+  `effects/EffectInstance.h` + `game/EffectCoordinator` (a coordinator beside the others, not the
+  facade): the original's instance read in `cl_game.dll` (`FUN_10028e20`/`FUN_10027ba0`/
+  `FUN_100279c0`/`FUN_10026720`/`FUN_100266a0`) — **born hidden and inactive**, `activate` shows the
+  instance, runs the `switchable` sources, replays the sound and lays the decal (`probability`,
+  the surface normal = the matrix's +Z, outward — 46.6 read the hit templates), `show`/`hide` carry the sound, the sound file is drawn **once per instance**, `reset` kills
+  every particle, a lost parent freezes and deactivates, only *anonymous* one-shots are collected
+  when no longer alive (`light.duration > time` ∨ sound playing ∨ `auto_delete > t`); **the light
+  channel is a clock and nothing else in retail** — no code reads `range`/`color`, so no flash is
+  drawn (faithful-first; the flash is a `TODO.md` `general` item by the user's decision). An
+  attachment to an actor gets 37.13's quarter turn (a flame authored along +X leaves the character
+  forward) and the player's `transform` is rebuilt each frame at last (`syncPlayerEntityPosition`);
+  `ParticleManager` draws the instances through `setSystemProvider`; `fx spawn`/`attach`/`inst`/
+  `stats`/`clear` on the coordinator (an actor without a tag gets the effect at its eye); self-tests
+  `Effect instance clock`, `Effect attachment`, `Effect light is a clock`. 46.3 is the renderer —
   `particles/ParticleRenderer` rewritten as batches of the original's six sprite types (read in
   `ds2render.dll` `FUN_10033aa0`: **`rotation` turns the texture, not the quad**, and a rotated UV
   square wraps with GL_REPEAT; `velocity_align` runs *from* the particle `sx + |v|·kx` along v̂;
