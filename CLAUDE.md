@@ -141,7 +141,8 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   capture) are the A/B for every shader change; `debug_view <albedo|normal|roughness|metallic|direct|
   indirect|ao|lightmap>` in the console shows one quantity untonemapped (`--view <name>` shoots every
   scene in it; not a saved setting). Budgets per scene are in `Phase40_GraphicsRealism.md`, 40.0.3.
-  `--console "cmd; cmd"` runs console commands into every shot, `--tag name` names the output,
+  `--retail` shoots the `slot-*` scenes (a retail quicksave loaded, 1920×1080 — 47.1, D9) and
+  prints the scale and FOV against the retail frame. `--console "cmd; cmd"` runs console commands into every shot, `--tag name` names the output,
   `--no-post` drops the composite, `--args "--flag"` passes engine flags — an A/B is two such runs.
   **Colour pipeline (40.1):** `r_cvar r_color_pipeline 1` is the linear profile (live, no reload;
   `legacy` = 0 stays the default), `r_light_falloff 1` the physical inverse-square falloff with the
@@ -1313,7 +1314,10 @@ a coordinator, not the facade.
   **47.0 done** — the Release 1 criteria K1–K7 measured on HEAD: all 12 untried campaign junctions
   load by `map` with 0 errors, 12 of 16 slots clean under ASan (our four `meat` slots 43–46 NaN),
   `release` smoke 25/25, `med1` runs under wine for the first time; retail answers closed in
-  `TODO.md`): 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
+  `TODO.md`; **47.1 done** — every DS2 angle is horizontal at the frame's own aspect
+  (`gameplay::ds2Projection`, `Camera::fov` holds it as authored), the hands are `m_model_fov` at the
+  weapon's authored 4:3 with no camera offset; `reference_scenes.sh --retail` measures the five
+  `slot-*` scenes against their retail frames with `scripts/fov_match.py` — far pairs 1.00 ± 0.005): 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
   authored DS2 horizontal FOV — `view_fov` 90, weapons 90/55/45 — goes through a fixed 4:3 in
   `ds2FovToVerticalDeg`, so 16:9 is 1.333× too wide) → 47.2 `light_desc` flash → 47.3 the
   `damage` command and the electrobolt against retail numbers → 47.4 engineering TODOs → 47.5
