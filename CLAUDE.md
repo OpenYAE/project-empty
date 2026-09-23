@@ -1309,8 +1309,11 @@ a coordinator, not the facade.
   flare show/hide, anchors, prop contacts, hidden idles, `AreaHide`), C items the user deferred,
   D decisions (`r_fx_lights`, `pl_sprint`, colour profile, licences, the case-variant EDF tree on
   NTFS, gor's zeppelin, publication timing, Effekseer) and how answers flow back into TODO/Invariants.
-- `yae-engine/docs/Phase47_Release1Readiness.md` — **the current tracker** (plan 2026-09-23,
-  not started): 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
+- `yae-engine/docs/Phase47_Release1Readiness.md` — **the current tracker** (plan 2026-09-23;
+  **47.0 done** — the Release 1 criteria K1–K7 measured on HEAD: all 12 untried campaign junctions
+  load by `map` with 0 errors, 12 of 16 slots clean under ASan (our four `meat` slots 43–46 NaN),
+  `release` smoke 25/25, `med1` runs under wine for the first time; retail answers closed in
+  `TODO.md`): 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
   authored DS2 horizontal FOV — `view_fov` 90, weapons 90/55/45 — goes through a fixed 4:3 in
   `ds2FovToVerticalDeg`, so 16:9 is 1.333× too wide) → 47.2 `light_desc` flash → 47.3 the
   `damage` command and the electrobolt against retail numbers → 47.4 engineering TODOs → 47.5
