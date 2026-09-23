@@ -1309,6 +1309,14 @@ a coordinator, not the facade.
   flare show/hide, anchors, prop contacts, hidden idles, `AreaHide`), C items the user deferred,
   D decisions (`r_fx_lights`, `pl_sprint`, colour profile, licences, the case-variant EDF tree on
   NTFS, gor's zeppelin, publication timing, Effekseer) and how answers flow back into TODO/Invariants.
+- `yae-engine/docs/Phase47_Release1Readiness.md` — **the current tracker** (plan 2026-09-23,
+  not started): 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
+  authored DS2 horizontal FOV — `view_fov` 90, weapons 90/55/45 — goes through a fixed 4:3 in
+  `ds2FovToVerticalDeg`, so 16:9 is 1.333× too wide) → 47.2 `light_desc` flash → 47.3 the
+  `damage` command and the electrobolt against retail numbers → 47.4 engineering TODOs → 47.5
+  the user's saves (stairs, kolhoz_part2 scene) → 47.6 save state (9 of 29 entity classes write
+  their own) → 47.7 the campaign by name (12 untested stitches) → 47.8 `release` + mid-range card
+  → 47.9 levels from the paks (D5) → 47.10 Windows with assets → 47.11 Release 1 candidate.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
