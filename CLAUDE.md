@@ -1151,8 +1151,8 @@ a coordinator, not the facade.
   (`ds2physics.dll.c:26000`). The reference saves also expose the original's whole spawn order
   (`Save19`: `WORLD` first, then hash order), the check 45.0 runs before 45.2 touches any id.
 - `yae-engine/docs/Phase46_EffectsParticles.md` — **effects and particles** (plan approved by the user
-  2026-09-18; **Phase 46 is closed — 46.0–46.9 done 2026-09-21**; Part B / Phase 47 is a
-  sketch). 46.9 closed it without a code change: `--check` green (243/243, smoke 25/25),
+  2026-09-18; **Phase 46 is closed — 46.0–46.9 done 2026-09-21**; Part B — effects v2 — is
+  **Phase 51** in `docs/Roadmap.md`, a sketch). 46.9 closed it without a code change: `--check` green (243/243, smoke 25/25),
   size ceilings for the phase's five big files with reasons, `--asan` with the recipes of
   46.4/46.6/46.7/46.8 at 0 reports, the picture gate 25/25 twice with identical numbers
   (`meat`/`gor_part_2` re-recorded for a ≤ 6/255 prop-settle residue since 46.7), scenes 4/4,
@@ -1289,13 +1289,26 @@ a coordinator, not the facade.
   placements) is a bare `VisualEntity`, `"ParticleSystem"` (42) maps names to five presets, and the Lua
   effect API is stubbed (33.11). Ten subphases 46.0–46.9 (harness, parser, PAPI core, renderer,
   instance/coordinator, entity class, script API, engine channels incl. material pairs by contact
-  speed, `object_flare` lens flares, closing). Part B is the path to a **modern system** (Phase 47
-  sketch): a `.yaefx` JSON schema, one runtime with the legacy interpreter as a converter (faithful by
+  speed, `object_flare` lens flares, closing). Part B is the path to a **modern system** (Phase 51
+  sketch; numbered 47 until the 2026-09-21 roadmap): a `.yaefx` JSON schema, one runtime with the legacy interpreter as a converter (faithful by
   default, "recipe vs lock" as in `yae-materials`), GPU path, `RenderScene` batches; Effekseer assessed
   and accepted by the user as an editor/import (as-is or a fork), not as the core runtime; the visual
   editor is a separate phase (yae-sdk or Workbench). **Resource policy (user, 2026-09-18):** the pilot
-  (release 1) runs on the original resources only; from the second version on (Phase 47+) total
+  (release 1) runs on the original resources only; from the second version on (Phase 51+, effects v2) total
   modification is allowed — new formats, new versions of old formats — **with compatibility** kept.
+- `yae-engine/docs/Roadmap.md` — **the order of the phases after 46** (approved 2026-09-21): the
+  user's retail session first in time (`RetailSession.md` — every question, recording and decision
+  that only the user can settle), then **47 Release 1 readiness** (engineering TODOs, saves, the
+  campaign acceptance 38.5, `release` preset + a mid-range card, **Windows with assets last**),
+  **48 material calibration on the engine side** (MC-0/1/2 of `yae-materials/docs/MaterialCalibration.md`
+  — small, unblocks that repository), **49 audit and refactoring** (the proof is the gate at 0.000),
+  **50 cleaning** (git history purge, licences, root layout, code and docs for publication),
+  then **40.3–40.7** and **51 effects v2** (the Part B sketch of Phase 46, numbered 47 until then).
+- `yae-engine/docs/RetailSession.md` — the checklist for the user's retail sessions: A recordings
+  (Appendix A, the four scenes' originals, flares, fog, ropes), B behaviour questions (wheel order,
+  flare show/hide, anchors, prop contacts, hidden idles, `AreaHide`), C items the user deferred,
+  D decisions (`r_fx_lights`, `pl_sprint`, colour profile, licences, the case-variant EDF tree on
+  NTFS, gor's zeppelin, publication timing, Effekseer) and how answers flow back into TODO/Invariants.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
