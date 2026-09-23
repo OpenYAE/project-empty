@@ -1317,7 +1317,9 @@ a coordinator, not the facade.
   `TODO.md`; **47.1 done** — every DS2 angle is horizontal at the frame's own aspect
   (`gameplay::ds2Projection`, `Camera::fov` holds it as authored), the hands are `m_model_fov` at the
   weapon's authored 4:3 with no camera offset; `reference_scenes.sh --retail` measures the five
-  `slot-*` scenes against their retail frames with `scripts/fov_match.py` — far pairs 1.00 ± 0.005): 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
+  `slot-*` scenes against their retail frames with `scripts/fov_match.py` — far pairs 1.00 ± 0.005; **47.2 done** — an effect's `light_desc` with `duration > 0` is a fading point light beside
+  the lamps (`r_fx_lights`, on — D1, beyond retail), at the level's mean lamp intensity; a level
+  without lamps now clears the light buffer instead of keeping the previous level's lamps): 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
   authored DS2 horizontal FOV — `view_fov` 90, weapons 90/55/45 — goes through a fixed 4:3 in
   `ds2FovToVerticalDeg`, so 16:9 is 1.333× too wide) → 47.2 `light_desc` flash → 47.3 the
   `damage` command and the electrobolt against retail numbers → 47.4 engineering TODOs → 47.5
