@@ -1332,13 +1332,22 @@ a coordinator, not the facade.
   user's saves: the player's slope limit is 50° like an NPC's (the campaign's steel stairs bevel
   every nosing at exactly 45°, a float tie at a 45° limit — Save 45 on `meat`), and only a dormant
   actor is seeded with the player at load while `ai_activate` hands the activator
-  (`game/EnemySeed.h` — kolhoz_part2's born-enabled madman had run to his cliff anchor at load)): 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
+  (`game/EnemySeed.h` — kolhoz_part2's born-enabled madman had run to his cliff anchor at load);
+  **47.6 done** — saves: format 5 carries each prop's clip (`animBlock`; a platform's bones and every
+  lift body are teleported onto it) and each FSM's update schedule, nine classes write their own state
+  (button, counter, timer, lift, conveyor, joint, bomb, WorldProps, barrier — appended at the end of a
+  leaf class, read only when present), a load no longer runs `on_level_start` (the original's `+0xf6`
+  restore flag), console `physics nan`; the 16 slots load clean under ASan except our pre-format-5
+  `meat` 43–46, which need re-saving): 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
   authored DS2 horizontal FOV — `view_fov` 90, weapons 90/55/45 — goes through a fixed 4:3 in
   `ds2FovToVerticalDeg`, so 16:9 is 1.333× too wide) → 47.2 `light_desc` flash → 47.3 the
   `damage` command and the electrobolt against retail numbers → 47.4 engineering TODOs → 47.5
   the user's saves (stairs, kolhoz_part2 scene) → 47.6 save state (9 of 29 entity classes write
   their own) → 47.7 the campaign by name (12 untested stitches) → 47.8 `release` + mid-range card
   → 47.9 levels from the paks (D5) → 47.10 Windows with assets → 47.11 Release 1 candidate.
+- `yae-engine/docs/Phase47_UserChecklist.md` — what the user has to do, check in our game, compare
+  with retail and decide after 47.0–47.6 (re-save the format-4 slots 43–48, retail questions, pending
+  decisions, re-recorded baselines to eyeball); answers flow back as `RetailSession.md`'s do.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
