@@ -1322,7 +1322,17 @@ a coordinator, not the facade.
   without lamps now clears the light buffer instead of keeping the previous level's lamps; **47.3
   done** — the authored `damage` command deals `hit`, or twice the health with `kill` (RE
   `FUN_0f82dfc0`), and a blast hurts every hitbox it reaches, the missile's shooter too (RE `0f8cd2f0`);
-  the blast on the player — one capsule here, per-bone geoms in retail — is left for 47.4): 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
+  the blast on the player — one capsule here, per-bone geoms in retail — is deferred in `TODO.md`;
+  **47.4 done** — engineering TODOs 5–13: a physical door is held at its stop by its motor instead
+  of being teleported; a model's `.phs` is found by name under `models/` (`physics/PhsLocator.h`,
+  `FS_PATH_MODELS` — met6's belts, `klumba`), and a prop's ball blank on all three axes is a weld;
+  NPC move sounds are the script's alone; a callback's table arrives as a luaobject (NPC reload);
+  a prop's contact plays its material's `inter_info` `coll_*` (a reconstruction, sound only as in
+  retail B7); `FlySpeed` 100 re-verified and left as a retail question (B12); **47.5 done** — the
+  user's saves: the player's slope limit is 50° like an NPC's (the campaign's steel stairs bevel
+  every nosing at exactly 45°, a float tie at a 45° limit — Save 45 on `meat`), and only a dormant
+  actor is seeded with the player at load while `ai_activate` hands the activator
+  (`game/EnemySeed.h` — kolhoz_part2's born-enabled madman had run to his cliff anchor at load)): 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
   authored DS2 horizontal FOV — `view_fov` 90, weapons 90/55/45 — goes through a fixed 4:3 in
   `ds2FovToVerticalDeg`, so 16:9 is 1.333× too wide) → 47.2 `light_desc` flash → 47.3 the
   `damage` command and the electrobolt against retail numbers → 47.4 engineering TODOs → 47.5
