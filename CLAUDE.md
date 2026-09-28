@@ -164,7 +164,7 @@ bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/ga
 - **Graphics work (Phase 40.0):** the four reference scenes (`scripts/reference_scenes.sh`,
   `tests/referenses-scenes/README.md` — cameras, reference settings, the original's frames still to
   capture) are the A/B for every shader change; `debug_view <albedo|normal|roughness|metallic|direct|
-  indirect|ao|lightmap>` in the console shows one quantity untonemapped (`--view <name>` shoots every
+  indirect|ao|lightmap|tangent|bitangent>` in the console shows one quantity untonemapped (`--view <name>` shoots every
   scene in it; not a saved setting). Budgets per scene are in `Phase40_GraphicsRealism.md`, 40.0.3.
   `--retail` shoots the `slot-*` scenes (a retail quicksave loaded, 1920×1080 — 47.1, D9) and
   prints the scale and FOV against the retail frame. `--console "cmd; cmd"` runs console commands into every shot, `--tag name` names the output,
@@ -280,8 +280,9 @@ a coordinator, not the facade.
   the glTF 2.0 / UE / Unity / Blender table and how their materials come in without editing pixels;
   appendix A — `.yaemat` dialects 1 and 2 as `MaterialCatalog.h` reads them; appendix B — `matball.json`.
   Workbench, the review sheet and the SDK viewers mirror the engine by it. Found writing it: triangle
-  strips get no tangent frame (4 219 lit surfaces with a catalog normal map sit on the fallback world
-  X/Z — fixed in 48.6), and a one-channel base colour samples red.
+  strips get no tangent frame (4 219 lit surfaces with a catalog normal map sit on the fallback — the
+  file's +X/+Z, in the world T = +X and B straight up: maps dropped on walls facing ±X, relief inverted
+  along V on walls facing ±Z — fixed in 48.6), and a one-channel base colour samples red.
 - `yae-engine/docs/RTGL1_Integration_Plan.md` — GL stays the shipping renderer; RT is a gated
   experimental branch. Its Phase 1 (backend-neutral render scene) is what MaterialSystem.md builds.
 - `yae-engine/docs/Phase34_FixMed1Map.md` — the twenty `med1` TODO items, one subphase each, with
@@ -1408,7 +1409,10 @@ a coordinator, not the facade.
   the remaining paks for a Steam install, the mid-range card, `windows.yml`); answers flow back as
   `RetailSession.md`'s do.
 - `yae-engine/docs/Phase48_MaterialCalibrationEngine.md` — **the current phase** (plan 2026-09-28;
-  **48.0 and 48.1 done 2026-09-29** — 48.1 is `MaterialContract.md` (above); 48.0: baseline on the isolated root — `--check`, gate 25/25 and scenes 9/9 at
+  **48.0–48.2 done 2026-09-29** — 48.2 adds `debug_view tangent|bitangent` (the normal-map frame on every
+  surface, one `tangentFrame()` for the view and the shading; on `wall`'s brick vault of `slot-shop` 72.7 %
+  of the pixels sit on the strip fallback with B straight up — the relief inverted along V, whatever H1
+  says); 48.1 is `MaterialContract.md` (above); 48.0: baseline on the isolated root — `--check`, gate 25/25 and scenes 9/9 at
   0.000, the crane unchanged; the ward floor named by painting stems with a solid-colour catalog
   (`scripts/paint_catalog.py` + `debug_view albedo`): `plitkaromb` (`cubeman`) under the camera,
   `plitkashahmatorez` 0 px in the frame (it is the corridor's side fields beside `plitkashahmatbit`),
