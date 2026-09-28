@@ -1384,6 +1384,23 @@ a coordinator, not the facade.
   decisions, re-recorded baselines to eyeball; section 7: the ZIL recording, restoring `medC`, mounting
   the remaining paks for a Steam install, the mid-range card, `windows.yml`); answers flow back as
   `RetailSession.md`'s do.
+- `yae-engine/docs/Phase48_MaterialCalibrationEngine.md` — **the next phase** (plan 2026-09-28, not
+  started; M–L; runs **in parallel with the user's Phase 47 testing** — every picture change behind a
+  cvar that stays off until one joint switch in 48.10, engine runs on an isolated root with a copied
+  `config/`, 47 and 48 in separate commits): it also takes **40.1b** (the frame as retail shows it: the
+  same baked lightmaps, output without our exposure 0.7 + Reinhard — the original has no tonemapper,
+  and that composite halves mid-tones: 4 of 5 slot scenes are 1.6–2.4× darker than retail, ×1.0–1.5
+  once it is undone; `r_ll_scale` ×1.5 after `gor` (Q5), lamps double-counted over lightmaps on
+  `ward`; `linear` by default) and **40.4.1** (BRDF LUT, probe, specular on lightmapped walls
+  normalised by the lightmap). The engine side of the material calibration — `MaterialContract.md` (MC-0), `--matball` with
+  `matball.json` beside each frame (MC-1), `debug_view tangent|bitangent`, the sign table on
+  `calib-bump-l` and the V-axis hypothesis H1 decided by number (MC-2; if confirmed, relief flips on every
+  catalog surface — approved), the user's target (2026-09-28): **maximum compatibility** with downloaded
+  and generated materials — glTF 2.0 conventions as the base, UE's DirectX normals by the per-material tag
+  (Q4: glTF/OpenGL is the default for an untagged record), relief gain default 2 (no such constant exists in UE/Unity — their
+  baked light is directional; ours becomes so in 40.5.3), 40.4.1 before 40.3.1; the `cubeman` question (by `--dump`, the ward floor is
+  `plitkaromb`, not `plitkashahmatorez`), C10 (a model template's own `diffuse_texture`/`color4`), and
+  the handoff that unblocks `yae-materials` CAL-05+.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
