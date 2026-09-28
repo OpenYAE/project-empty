@@ -84,11 +84,17 @@ bash scripts/campaign_stitches.sh --chain                                     # 
 ```
 
 - `--level <path>` uses direct/CLI load (`loadLevelDirect`); campaign/transitions use `loadLevel` (by-name).
+- **Levels and maps come from the paks (Phase 47.9):** `levels/*.pak` is mounted at `levels/levels/`,
+  `maps/*.pak` at `maps/<stem>/` (`resource/Vfs.h`) — the same tree the unpacked copies form, so every
+  path still reads as before; a file no pak holds (`vdnh1`) is read from disk. `--loose-tree` reads the
+  unpacked copies instead (conformance does). Console `vfs [path]` names the archive a file comes from.
+  The unpacked copies are audited against the paks by `scripts/gameres_paks_audit.py` (check 4).
 - Logs: `yae-engine.log` (run_level.sh tees), plus `yae-engine-test*.log`.
 - `bash build.sh --check` is the one command that answers "is the tree still good": it fails on a
   warning in `src/`/`app/`/`tests/`, on a self-test failure, on a file past its size budget
   (`scripts/size_budget.sh` — raise a ceiling on purpose, never by accident), on an edit to the
-  read-only `gameres/scripts`, on a parser reading a file differently from the SDK's
+  read-only `gameres/scripts` or to the unpacked levels/maps against their paks, on a parser reading a
+  file differently from the SDK's
   (`scripts/conformance.sh`; a difference is either fixed or recorded in
   `scripts/conformance/accepted.txt` with its decision in `Invariants.md`), on a changed line that
   is not clang-formatted (`scripts/format_check.sh` — changed *lines* only, against
@@ -1345,7 +1351,18 @@ a coordinator, not the facade.
   `meat` 43–46, which need re-saving; follow-ups the same day: an NPC's own `fire_trace` is scaled by
   `g_diff_levels` and a random half, and an imported retail save brings the player's inventory — the
   records' class HUID is the prototype's `guid` (`game/ScriptClassTable.h` reads `prototypes`), the
-  bag is the player's native block, `SaveFormat.md`): 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
+  bag is the player's native block, `SaveFormat.md`); **47.7a done 2026-09-27/28** — the user's
+  playthrough: moto shown, AI hears steps/shots and no longer runs into walls, the guard survives a
+  load, stuck missiles hurt, death effects let go, swim 275, rifle clip planes, particle `tex_env`
+  clamped, fallback lamps per level; the ZIL (10) has two roots and waits for a retail recording;
+  **47.8 done** — `release` shoots 25/25 against the `dev` baselines (≤ 0.002/255), all presets free of
+  warnings, the frame budget measured on this machine (the mid-range card is the user's);
+  **47.9 done** — levels and maps from the paks (`resource/Vfs.h`, see Build & run), which found an
+  unrecorded ×10 impulse edit in the unpacked `med1/medC`; **47.10 done under wine** — self-tests
+  260/260 and 223/223, 25 levels, `med1`'s gate frame pixel-identical, saves on a Windows path;
+  **K2 measured** — `scripts/save_roundtrips.sh` (three save/load round trips per level under ASan,
+  bounded) found and fixed a door's non-unit rotation after a load and same-named twins paired
+  crosswise (`Save pairs twins`); plan: 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
   authored DS2 horizontal FOV — `view_fov` 90, weapons 90/55/45 — goes through a fixed 4:3 in
   `ds2FovToVerticalDeg`, so 16:9 is 1.333× too wide) → 47.2 `light_desc` flash → 47.3 the
   `damage` command and the electrobolt against retail numbers → 47.4 engineering TODOs → 47.5
@@ -1353,8 +1370,10 @@ a coordinator, not the facade.
   their own) → 47.7 the campaign by name (12 untested stitches) → 47.8 `release` + mid-range card
   → 47.9 levels from the paks (D5) → 47.10 Windows with assets → 47.11 Release 1 candidate.
 - `yae-engine/docs/Phase47_UserChecklist.md` — what the user has to do, check in our game, compare
-  with retail and decide after 47.0–47.6 (re-save the format-4 slots 43–48, retail questions, pending
-  decisions, re-recorded baselines to eyeball); answers flow back as `RetailSession.md`'s do.
+  with retail and decide after 47.0–47.10 (re-save the format-4 slots 43–48, retail questions, pending
+  decisions, re-recorded baselines to eyeball; section 7: the ZIL recording, restoring `medC`, mounting
+  the remaining paks for a Steam install, the mid-range card, `windows.yml`); answers flow back as
+  `RetailSession.md`'s do.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
