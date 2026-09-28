@@ -81,9 +81,18 @@ bash scripts/smoke_levels.sh --shots [level…]                                 
 bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  # Phase 40's four reference scenes (ward/shop/yard/tunnel) at 1440p
 bash scripts/campaign_stitches.sh [level…]                                    # 47.7: each campaign stitch through its authored exit trigger (kit carried, 0 [ERROR])
 bash scripts/campaign_stitches.sh --chain                                     # 47.7: all 24 levels by name in one process (~6 min)
+bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/gameres   # 48.0: every run on a copy with its own config/
 ```
 
 - `--level <path>` uses direct/CLI load (`loadLevelDirect`); campaign/transitions use `loadLevel` (by-name).
+- **Runs while the user plays (Phase 48.0):** every engine run writes `config/settings.cfg` beside its
+  asset root on exit, offscreen too, and the gate scripts swap the reference settings/`render.cfg` in
+  and back — a race on the user's files. `bash scripts/isolated_root.sh [dir]` (default
+  `yae-engine/build/iso`) builds the game as links with a `config/` of its own (`gameres/` is a tree of
+  real directories with file links — a linked directory's `..` would lead back into `yae-game`), and
+  `YAE_GAMERES=<dir>/gameres` points `build.sh` (`--check`, `--asan`), `smoke_levels.sh`,
+  `reference_scenes.sh` (also `--root`), `console_reference.sh`, `campaign_stitches.sh` and
+  `save_roundtrips.sh` at it. Stop only your own engine processes, by PID — never `pkill` by name.
 - **The game's files come from the paks (Phase 47.9, 47.12):** every pak but the sounds is mounted where
   its unpacked copy lies — `levels/*.pak` at `levels/levels/`, `maps/*.pak` at `maps/<stem>/`, models,
   textures, materials, `rpl` and both script paks likewise (`resource/Vfs.h`) — so every path still reads
@@ -141,7 +150,9 @@ bash scripts/campaign_stitches.sh --chain                                     # 
   more than doubled and grew by 5+ — some warnings repeat on a timer, so ±1 between runs is noise.
   `--record` rewrites the baseline, `--frames N` runs longer, and naming levels (`… med1 meat`)
   checks a subset. The engine flag behind it is `--frames N`: run the real loop N times, then quit
-  with 0, or 1 if anything logged `[ERROR]`.
+  with 0, or 1 if anything logged `[ERROR]`. A level whose log says `self-test summary: … FAILED` fails
+  too (48.0): the GL self-tests run only in windowed runs — `--self-test` SKIPs them — and `Grey card`
+  had failed unseen for a day.
 - **Shaders (Phase 39.2.3)** live in `yae-engine/shaders/` (`*.vert`, `*.frag`, `*.glsl` include
   blocks) and are embedded at build time (`cmake/EmbedShaders.cmake` → `build/generated/`); a new
   file is picked up by the next build, no reconfigure. `#include "x.glsl"` is resolved one level deep,
@@ -1384,8 +1395,17 @@ a coordinator, not the facade.
   decisions, re-recorded baselines to eyeball; section 7: the ZIL recording, restoring `medC`, mounting
   the remaining paks for a Steam install, the mid-range card, `windows.yml`); answers flow back as
   `RetailSession.md`'s do.
-- `yae-engine/docs/Phase48_MaterialCalibrationEngine.md` — **the next phase** (plan 2026-09-28, not
-  started; M–L; runs **in parallel with the user's Phase 47 testing** — every picture change behind a
+- `yae-engine/docs/Phase48_MaterialCalibrationEngine.md` — **the current phase** (plan 2026-09-28;
+  **48.0 done 2026-09-29**: baseline on the isolated root — `--check`, gate 25/25 and scenes 9/9 at
+  0.000, the crane unchanged; the ward floor named by painting stems with a solid-colour catalog
+  (`scripts/paint_catalog.py` + `debug_view albedo`): `plitkaromb` (`cubeman`) under the camera,
+  `plitkashahmatorez` 0 px in the frame (it is the corridor's side fields beside `plitkashahmatbit`),
+  and `cubeman` does not bypass the catalog's base colour; the ward wall's real lightmap is 0.16 (the
+  rig's 0.5 is 3× that); med1's opening `fade_out_long` makes the `ward` frame at 240 frames 80 % bright
+  (numbers from it, debug views too, are ×0.8 — slot scenes are not affected); `--retail` prints the
+  light per slot scene (`scripts/exposure_match.py`): without our composite shop/tunnel/yard are within
+  3–15 % of retail, lastzlo 0.68 ≈ 1/1.5; found and fixed on the way: the GL self-test `Grey card`
+  failing since `4471ebe` — a C++ `#include` pasted into its GLSL; M–L; runs **in parallel with the user's Phase 47 testing** — every picture change behind a
   cvar that stays off until one joint switch in 48.10, engine runs on an isolated root with a copied
   `config/`, 47 and 48 in separate commits): it also takes **40.1b** (the frame as retail shows it: the
   same baked lightmaps, output without our exposure 0.7 + Reinhard — the original has no tonemapper,
