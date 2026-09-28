@@ -79,14 +79,28 @@ bash scripts/conformance.sh                                                   # 
 ./yae-engine/build/yae-engine --level … --frames 240                          # 240 frames, then a `perf` summary of every stage and pass (Phase 39.0)
 bash scripts/smoke_levels.sh --shots [level…]                                 # the picture gate: fixed cameras vs local baselines (--record-shots makes them)
 bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  # Phase 40's four reference scenes (ward/shop/yard/tunnel) at 1440p
+bash scripts/campaign_stitches.sh [level…]                                    # 47.7: each campaign stitch through its authored exit trigger (kit carried, 0 [ERROR])
+bash scripts/campaign_stitches.sh --chain                                     # 47.7: all 24 levels by name in one process (~6 min)
 ```
 
 - `--level <path>` uses direct/CLI load (`loadLevelDirect`); campaign/transitions use `loadLevel` (by-name).
+- **The game's files come from the paks (Phase 47.9, 47.12):** every pak but the sounds is mounted where
+  its unpacked copy lies — `levels/*.pak` at `levels/levels/`, `maps/*.pak` at `maps/<stem>/`, models,
+  textures, materials, `rpl` and both script paks likewise (`resource/Vfs.h`) — so every path still reads
+  as before; a file no pak holds (`vdnh1`, the films) is read from disk. **The newer copy wins, as in the
+  original**: a loose file newer than its pak entry is read over it (that is a mod; the community patch's
+  two HD textures are), an older one is not. Loaders read through `vfs::read`/`list`/`listFilesRecursive`,
+  Lua files through `vfs::luaDoFile` (`resource/VfsLua.h`) — never `std::ifstream`/`luaL_dofile` on a game
+  path. `--loose-tree` reads the unpacked copies instead (conformance does). Console `vfs [path|rescan]`
+  names the archive a file comes from. `python3 scripts/paks_only_root.py <dir>` builds a Steam-like root
+  (paks only, links) for `smoke_levels.sh --root` / `YAE_GAMERES=`. The unpacked copies are audited
+  against the paks by `scripts/gameres_paks_audit.py` (check 4).
 - Logs: `yae-engine.log` (run_level.sh tees), plus `yae-engine-test*.log`.
 - `bash build.sh --check` is the one command that answers "is the tree still good": it fails on a
   warning in `src/`/`app/`/`tests/`, on a self-test failure, on a file past its size budget
   (`scripts/size_budget.sh` — raise a ceiling on purpose, never by accident), on an edit to the
-  read-only `gameres/scripts`, on a parser reading a file differently from the SDK's
+  read-only `gameres/scripts` or to the unpacked levels/maps against their paks, on a parser reading a
+  file differently from the SDK's
   (`scripts/conformance.sh`; a difference is either fixed or recorded in
   `scripts/conformance/accepted.txt` with its decision in `Invariants.md`), on a changed line that
   is not clang-formatted (`scripts/format_check.sh` — changed *lines* only, against
@@ -141,7 +155,8 @@ bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  
   capture) are the A/B for every shader change; `debug_view <albedo|normal|roughness|metallic|direct|
   indirect|ao|lightmap>` in the console shows one quantity untonemapped (`--view <name>` shoots every
   scene in it; not a saved setting). Budgets per scene are in `Phase40_GraphicsRealism.md`, 40.0.3.
-  `--console "cmd; cmd"` runs console commands into every shot, `--tag name` names the output,
+  `--retail` shoots the `slot-*` scenes (a retail quicksave loaded, 1920×1080 — 47.1, D9) and
+  prints the scale and FOV against the retail frame. `--console "cmd; cmd"` runs console commands into every shot, `--tag name` names the output,
   `--no-post` drops the composite, `--args "--flag"` passes engine flags — an A/B is two such runs.
   **Colour pipeline (40.1):** `r_cvar r_color_pipeline 1` is the linear profile (live, no reload;
   `legacy` = 0 stays the default), `r_light_falloff 1` the physical inverse-square falloff with the
@@ -1309,14 +1324,83 @@ a coordinator, not the facade.
   flare show/hide, anchors, prop contacts, hidden idles, `AreaHide`), C items the user deferred,
   D decisions (`r_fx_lights`, `pl_sprint`, colour profile, licences, the case-variant EDF tree on
   NTFS, gor's zeppelin, publication timing, Effekseer) and how answers flow back into TODO/Invariants.
-- `yae-engine/docs/Phase47_Release1Readiness.md` — **the current tracker** (plan 2026-09-23,
-  not started): 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
+- `yae-engine/docs/Phase47_Release1Readiness.md` — **the current tracker** (plan 2026-09-23;
+  **47.0 done** — the Release 1 criteria K1–K7 measured on HEAD: all 12 untried campaign junctions
+  load by `map` with 0 errors, 12 of 16 slots clean under ASan (our four `meat` slots 43–46 NaN),
+  `release` smoke 25/25, `med1` runs under wine for the first time; retail answers closed in
+  `TODO.md`; **47.1 done** — every DS2 angle is horizontal at the frame's own aspect
+  (`gameplay::ds2Projection`, `Camera::fov` holds it as authored), the hands are `m_model_fov` at the
+  weapon's authored 4:3 with no camera offset; `reference_scenes.sh --retail` measures the five
+  `slot-*` scenes against their retail frames with `scripts/fov_match.py` — far pairs 1.00 ± 0.005; **47.2 done** — an effect's `light_desc` with `duration > 0` is a fading point light beside
+  the lamps (`r_fx_lights`, on — D1, beyond retail), at the level's mean lamp intensity; a level
+  without lamps now clears the light buffer instead of keeping the previous level's lamps; **47.3
+  done** — the authored `damage` command deals `hit`, or twice the health with `kill` (RE
+  `FUN_0f82dfc0`), and a blast hurts every hitbox it reaches, the missile's shooter too (RE `0f8cd2f0`);
+  the blast on the player — one capsule here, per-bone geoms in retail — is deferred in `TODO.md`;
+  **47.4 done** — engineering TODOs 5–13: a physical door is held at its stop by its motor instead
+  of being teleported; a model's `.phs` is found by name under `models/` (`physics/PhsLocator.h`,
+  `FS_PATH_MODELS` — met6's belts, `klumba`), and a prop's ball blank on all three axes is a weld;
+  NPC move sounds are the script's alone; a callback's table arrives as a luaobject (NPC reload);
+  a prop's contact plays its material's `inter_info` `coll_*` (a reconstruction, sound only as in
+  retail B7); `FlySpeed` 100 re-verified and left as a retail question (B12); **47.5 done** — the
+  user's saves: the player's slope limit is 50° like an NPC's (the campaign's steel stairs bevel
+  every nosing at exactly 45°, a float tie at a 45° limit — Save 45 on `meat`), and `ai_activate`
+  hands the activator (`game/EnemySeed.h` — kolhoz_part2's born-enabled madman had run to his cliff
+  anchor at load; since the 47.6 follow-up **nobody** is seeded with the player at load, as in the
+  original — the dormant seed also primed perception, so a bare `enable` woke kolhoz_part2's yard of
+  fake-dead kolkhozniks all at once instead of the authored one-by-one `ai_activate`s);
+  **47.6 done** — saves: format 5 carries each prop's clip (`animBlock`; a platform's bones and every
+  lift body are teleported onto it) and each FSM's update schedule, nine classes write their own state
+  (button, counter, timer, lift, conveyor, joint, bomb, WorldProps, barrier — appended at the end of a
+  leaf class, read only when present), a load no longer runs `on_level_start` (the original's `+0xf6`
+  restore flag), console `physics nan`; the 16 slots load clean under ASan except our pre-format-5
+  `meat` 43–46, which need re-saving; follow-ups the same day: an NPC's own `fire_trace` is scaled by
+  `g_diff_levels` and a random half, and an imported retail save brings the player's inventory — the
+  records' class HUID is the prototype's `guid` (`game/ScriptClassTable.h` reads `prototypes`), the
+  bag is the player's native block, `SaveFormat.md`); **47.7a done 2026-09-27/28** — the user's
+  playthrough: moto shown, AI hears steps/shots and no longer runs into walls, the guard survives a
+  load, stuck missiles hurt, death effects let go, swim 275, rifle clip planes, particle `tex_env`
+  clamped, fallback lamps per level; the ZIL (10) has two roots and waits for a retail recording;
+  **47.8 done** — `release` shoots 25/25 against the `dev` baselines (≤ 0.002/255), all presets free of
+  warnings, the frame budget measured on this machine (the mid-range card is the user's);
+  **47.9 done** — levels and maps from the paks (`resource/Vfs.h`, see Build & run), which found an
+  unrecorded ×10 impulse edit in the unpacked `med1/medC`; **47.10 done under wine** — self-tests
+  260/260 and 223/223, 25 levels, `med1`'s gate frame pixel-identical, saves on a Windows path;
+  **K2 measured** — `scripts/save_roundtrips.sh` (three save/load round trips per level under ASan,
+  bounded) found and fixed a door's non-unit rotation after a load and same-named twins paired
+  crosswise (`Save pairs twins`); **47.12 done** — the user's three decisions: `medC` restored in the
+  tree (the audit's ACCEPTED list is empty), every pak but the sounds mounted with the original's
+  newer-copy-wins rule (a Steam install runs; a newer loose file is a mod), and a prop's mass from its
+  `.phs` (the ZIL 3 400, not 30 000; med1's `mosk401door` a 1 900-kg car) — the ZIL scene's end waits
+  for the retail recording; plan: 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
   authored DS2 horizontal FOV — `view_fov` 90, weapons 90/55/45 — goes through a fixed 4:3 in
   `ds2FovToVerticalDeg`, so 16:9 is 1.333× too wide) → 47.2 `light_desc` flash → 47.3 the
   `damage` command and the electrobolt against retail numbers → 47.4 engineering TODOs → 47.5
   the user's saves (stairs, kolhoz_part2 scene) → 47.6 save state (9 of 29 entity classes write
   their own) → 47.7 the campaign by name (12 untested stitches) → 47.8 `release` + mid-range card
   → 47.9 levels from the paks (D5) → 47.10 Windows with assets → 47.11 Release 1 candidate.
+- `yae-engine/docs/Phase47_UserChecklist.md` — what the user has to do, check in our game, compare
+  with retail and decide after 47.0–47.10 (re-save the format-4 slots 43–48, retail questions, pending
+  decisions, re-recorded baselines to eyeball; section 7: the ZIL recording, restoring `medC`, mounting
+  the remaining paks for a Steam install, the mid-range card, `windows.yml`); answers flow back as
+  `RetailSession.md`'s do.
+- `yae-engine/docs/Phase48_MaterialCalibrationEngine.md` — **the next phase** (plan 2026-09-28, not
+  started; M–L; runs **in parallel with the user's Phase 47 testing** — every picture change behind a
+  cvar that stays off until one joint switch in 48.10, engine runs on an isolated root with a copied
+  `config/`, 47 and 48 in separate commits): it also takes **40.1b** (the frame as retail shows it: the
+  same baked lightmaps, output without our exposure 0.7 + Reinhard — the original has no tonemapper,
+  and that composite halves mid-tones: 4 of 5 slot scenes are 1.6–2.4× darker than retail, ×1.0–1.5
+  once it is undone; `r_ll_scale` ×1.5 after `gor` (Q5), lamps double-counted over lightmaps on
+  `ward`; `linear` by default) and **40.4.1** (BRDF LUT, probe, specular on lightmapped walls
+  normalised by the lightmap). The engine side of the material calibration — `MaterialContract.md` (MC-0), `--matball` with
+  `matball.json` beside each frame (MC-1), `debug_view tangent|bitangent`, the sign table on
+  `calib-bump-l` and the V-axis hypothesis H1 decided by number (MC-2; if confirmed, relief flips on every
+  catalog surface — approved), the user's target (2026-09-28): **maximum compatibility** with downloaded
+  and generated materials — glTF 2.0 conventions as the base, UE's DirectX normals by the per-material tag
+  (Q4: glTF/OpenGL is the default for an untagged record), relief gain default 2 (no such constant exists in UE/Unity — their
+  baked light is directional; ours becomes so in 40.5.3), 40.4.1 before 40.3.1; the `cubeman` question (by `--dump`, the ward floor is
+  `plitkaromb`, not `plitkashahmatorez`), C10 (a model template's own `diffuse_texture`/`color4`), and
+  the handoff that unblocks `yae-materials` CAL-05+.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
