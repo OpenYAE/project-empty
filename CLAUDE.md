@@ -270,6 +270,18 @@ a coordinator, not the facade.
   the playable release). Several subsystems turn out to be written and switched off, or half-wired:
   vertex colours are parsed and dropped, detail maps are parsed and unused (SSAO was one of these
   until 33.1 turned it on). **This is the current graphics tracker.**
+- `yae-engine/docs/MaterialContract.md` — **the material contract** (Phase 48.1, version 0.1; 1.0 at
+  48.11): what every field of a material means, in numbers — twelve rules (slots; base colour a display
+  value under pure γ 2.2, data maps linear; rows never flipped, row 0 = `v = 0`, T along +U / B along +V,
+  the `opengl` green's axis *pending* 48.5 — H1; `normalScale` ≥ 0, 1.0 = authored; α = r², F0 =
+  mix(0.04, albedo, metallic); AO indirect only; lightmap [0, 0.5] ×2; the relief imitation with its
+  gain/clamp/L; lamps × 0.25; the composite per profile; 64 units/m and `texelsPerMeter`; the three shared
+  GLSL files by sha256), each with `file:line` and the self-test or `matball` measurement that holds it;
+  the glTF 2.0 / UE / Unity / Blender table and how their materials come in without editing pixels;
+  appendix A — `.yaemat` dialects 1 and 2 as `MaterialCatalog.h` reads them; appendix B — `matball.json`.
+  Workbench, the review sheet and the SDK viewers mirror the engine by it. Found writing it: triangle
+  strips get no tangent frame (4 219 lit surfaces with a catalog normal map sit on the fallback world
+  X/Z — fixed in 48.6), and a one-channel base colour samples red.
 - `yae-engine/docs/RTGL1_Integration_Plan.md` — GL stays the shipping renderer; RT is a gated
   experimental branch. Its Phase 1 (backend-neutral render scene) is what MaterialSystem.md builds.
 - `yae-engine/docs/Phase34_FixMed1Map.md` — the twenty `med1` TODO items, one subphase each, with
@@ -1396,7 +1408,7 @@ a coordinator, not the facade.
   the remaining paks for a Steam install, the mid-range card, `windows.yml`); answers flow back as
   `RetailSession.md`'s do.
 - `yae-engine/docs/Phase48_MaterialCalibrationEngine.md` — **the current phase** (plan 2026-09-28;
-  **48.0 done 2026-09-29**: baseline on the isolated root — `--check`, gate 25/25 and scenes 9/9 at
+  **48.0 and 48.1 done 2026-09-29** — 48.1 is `MaterialContract.md` (above); 48.0: baseline on the isolated root — `--check`, gate 25/25 and scenes 9/9 at
   0.000, the crane unchanged; the ward floor named by painting stems with a solid-colour catalog
   (`scripts/paint_catalog.py` + `debug_view albedo`): `plitkaromb` (`cubeman`) under the camera,
   `plitkashahmatorez` 0 px in the frame (it is the corridor's side fields beside `plitkashahmatbit`),
