@@ -84,11 +84,17 @@ bash scripts/campaign_stitches.sh --chain                                     # 
 ```
 
 - `--level <path>` uses direct/CLI load (`loadLevelDirect`); campaign/transitions use `loadLevel` (by-name).
-- **Levels and maps come from the paks (Phase 47.9):** `levels/*.pak` is mounted at `levels/levels/`,
-  `maps/*.pak` at `maps/<stem>/` (`resource/Vfs.h`) — the same tree the unpacked copies form, so every
-  path still reads as before; a file no pak holds (`vdnh1`) is read from disk. `--loose-tree` reads the
-  unpacked copies instead (conformance does). Console `vfs [path]` names the archive a file comes from.
-  The unpacked copies are audited against the paks by `scripts/gameres_paks_audit.py` (check 4).
+- **The game's files come from the paks (Phase 47.9, 47.12):** every pak but the sounds is mounted where
+  its unpacked copy lies — `levels/*.pak` at `levels/levels/`, `maps/*.pak` at `maps/<stem>/`, models,
+  textures, materials, `rpl` and both script paks likewise (`resource/Vfs.h`) — so every path still reads
+  as before; a file no pak holds (`vdnh1`, the films) is read from disk. **The newer copy wins, as in the
+  original**: a loose file newer than its pak entry is read over it (that is a mod; the community patch's
+  two HD textures are), an older one is not. Loaders read through `vfs::read`/`list`/`listFilesRecursive`,
+  Lua files through `vfs::luaDoFile` (`resource/VfsLua.h`) — never `std::ifstream`/`luaL_dofile` on a game
+  path. `--loose-tree` reads the unpacked copies instead (conformance does). Console `vfs [path|rescan]`
+  names the archive a file comes from. `python3 scripts/paks_only_root.py <dir>` builds a Steam-like root
+  (paks only, links) for `smoke_levels.sh --root` / `YAE_GAMERES=`. The unpacked copies are audited
+  against the paks by `scripts/gameres_paks_audit.py` (check 4).
 - Logs: `yae-engine.log` (run_level.sh tees), plus `yae-engine-test*.log`.
 - `bash build.sh --check` is the one command that answers "is the tree still good": it fails on a
   warning in `src/`/`app/`/`tests/`, on a self-test failure, on a file past its size budget
@@ -1362,7 +1368,11 @@ a coordinator, not the facade.
   260/260 and 223/223, 25 levels, `med1`'s gate frame pixel-identical, saves on a Windows path;
   **K2 measured** — `scripts/save_roundtrips.sh` (three save/load round trips per level under ASan,
   bounded) found and fixed a door's non-unit rotation after a load and same-named twins paired
-  crosswise (`Save pairs twins`); plan: 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
+  crosswise (`Save pairs twins`); **47.12 done** — the user's three decisions: `medC` restored in the
+  tree (the audit's ACCEPTED list is empty), every pak but the sounds mounted with the original's
+  newer-copy-wins rule (a Steam install runs; a newer loose file is a mod), and a prop's mass from its
+  `.phs` (the ZIL 3 400, not 30 000; med1's `mosk401door` a 1 900-kg car) — the ZIL scene's end waits
+  for the retail recording; plan: 47.0 criteria → 47.1 retail-slot scenes (D9) + FOV by the real aspect (the
   authored DS2 horizontal FOV — `view_fov` 90, weapons 90/55/45 — goes through a fixed 4:3 in
   `ds2FovToVerticalDeg`, so 16:9 is 1.333× too wide) → 47.2 `light_desc` flash → 47.3 the
   `damage` command and the electrobolt against retail numbers → 47.4 engineering TODOs → 47.5
