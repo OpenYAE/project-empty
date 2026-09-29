@@ -79,6 +79,8 @@ bash scripts/conformance.sh                                                   # 
 ./yae-engine/build/yae-engine --level … --frames 240                          # 240 frames, then a `perf` summary of every stage and pass (Phase 39.0)
 bash scripts/smoke_levels.sh --shots [level…]                                 # the picture gate: fixed cameras vs local baselines (--record-shots makes them)
 bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  # Phase 40's four reference scenes (ward/shop/yard/tunnel) at 1440p
+./yae-engine/build/yae-engine --matball all --materials-catalog yae-materials/calibration/pack/current.json \
+    --root yae-game/gameres --offscreen 640x640 --fixed-dt 0.0166667      # 48.3: one material alone, frames + matball.json → build/calib
 bash scripts/campaign_stitches.sh [level…]                                    # 47.7: each campaign stitch through its authored exit trigger (kit carried, 0 [ERROR])
 bash scripts/campaign_stitches.sh --chain                                     # 47.7: all 24 levels by name in one process (~6 min)
 bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/gameres   # 48.0: every run on a copy with its own config/
@@ -270,15 +272,17 @@ a coordinator, not the facade.
   the playable release). Several subsystems turn out to be written and switched off, or half-wired:
   vertex colours are parsed and dropped, detail maps are parsed and unused (SSAO was one of these
   until 33.1 turned it on). **This is the current graphics tracker.**
-- `yae-engine/docs/MaterialContract.md` — **the material contract** (Phase 48.1, version 0.1; 1.0 at
-  48.11): what every field of a material means, in numbers — twelve rules (slots; base colour a display
-  value under pure γ 2.2, data maps linear; rows never flipped, row 0 = `v = 0`, T along +U / B along +V,
-  the `opengl` green's axis *pending* 48.5 — H1; `normalScale` ≥ 0, 1.0 = authored; α = r², F0 =
+- `yae-engine/docs/MaterialContract.md` — **the material contract** (Phase 48.1, version 0.2 since 48.3;
+  1.0 at 48.11): what every field of a material means, in numbers — twelve rules (slots; base colour a display
+  value under pure γ 2.2, data maps linear; rows never flipped, row 0 = `v = 0`, T along +U / B along +V
+  where the engine builds the frame — the `.ds2` compiler's file frame has B along −V (48.3) — the
+  `opengl` green's axis *pending* 48.5 — H1; `normalScale` ≥ 0, 1.0 = authored; α = r², F0 =
   mix(0.04, albedo, metallic); AO indirect only; lightmap [0, 0.5] ×2; the relief imitation with its
   gain/clamp/L; lamps × 0.25; the composite per profile; 64 units/m and `texelsPerMeter`; the three shared
   GLSL files by sha256), each with `file:line` and the self-test or `matball` measurement that holds it;
   the glTF 2.0 / UE / Unity / Blender table and how their materials come in without editing pixels;
-  appendix A — `.yaemat` dialects 1 and 2 as `MaterialCatalog.h` reads them; appendix B — `matball.json`.
+  appendix A — `.yaemat` dialects 1 and 2 as `MaterialCatalog.h` reads them; appendix B — `matball.json`
+  format 0 as `--matball` writes it (48.3), the rig and its first numbers.
   Workbench, the review sheet and the SDK viewers mirror the engine by it. Found writing it: triangle
   strips get no tangent frame (4 219 lit surfaces with a catalog normal map sit on the fallback — the
   file's +X/+Z, in the world T = +X and B straight up: maps dropped on walls facing ±X, relief inverted
@@ -1409,7 +1413,17 @@ a coordinator, not the facade.
   the remaining paks for a Steam install, the mid-range card, `windows.yml`); answers flow back as
   `RetailSession.md`'s do.
 - `yae-engine/docs/Phase48_MaterialCalibrationEngine.md` — **the current phase** (plan 2026-09-28;
-  **48.0–48.2 done 2026-09-29** — 48.2 adds `debug_view tangent|bitangent` (the normal-map frame on every
+  **48.0–48.3 done 2026-09-29** — 48.3 is `--matball <stem|all>` (`app/MatballFrame`, the rig as data in
+  `render/MatballRig`): one catalog material on the level's own path (`MaterialCatalog::applyToLevel`, the
+  function the level load now calls too; `GPULevel`, `registerLevelScene`, the lamp through
+  `LightSystem`), a 2 × 2 m plane in three tangent frames (`computed`, `file`, `derivatives`), a 0.5 m
+  sphere, modes `wall`/`lamp`/`model`, both profiles, with and without the composite, `matball.json`
+  beside the frames (the contract's Appendix B, contract 0.2) — the calibration set is 68 frames in 4 s,
+  byte-identical on a second run, the grey card `wall/legacy` 66.02/255; saved render cvars are pinned to
+  the code defaults (a `YAE_CONSOLE` script runs before the first shot); found: the `.ds2` compiler wrote
+  file tangents with **B along −V** (`def_refl_alpha_Vx`: T = B), against the +V the engine computes — the
+  engine's three frames disagree (48.5), and the composite's grain at clock 0 is a constant −0.02 (the
+  matball runs it at 1 s); self-test `Matball rig`. 48.2 adds `debug_view tangent|bitangent` (the normal-map frame on every
   surface, one `tangentFrame()` for the view and the shading; on `wall`'s brick vault of `slot-shop` 72.7 %
   of the pixels sit on the strip fallback with B straight up — the relief inverted along V, whatever H1
   says); 48.1 is `MaterialContract.md` (above); 48.0: baseline on the isolated root — `--check`, gate 25/25 and scenes 9/9 at
