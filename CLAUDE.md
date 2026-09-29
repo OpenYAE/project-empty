@@ -80,6 +80,7 @@ bash scripts/conformance.sh                                                   # 
 bash scripts/smoke_levels.sh --shots [level…]                                 # the picture gate: fixed cameras vs local baselines (--record-shots makes them)
 bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  # Phase 40's four reference scenes (ward/shop/yard/tunnel) at 1440p
 bash scripts/reference_scenes.sh calib                                        # 48.4: the ward with the calibration pack (only when named)
+./yae-engine/build/yae-engine --level … --cvar r_normal_frame=1                  # 48.6: a render cvar set before the level loads, this run only
 ./yae-engine/build/yae-engine --matball all --materials-catalog yae-materials/calibration/pack/current.json \
     --root yae-game/gameres --offscreen 640x640 --fixed-dt 0.0166667      # 48.3: one material alone, frames + matball.json → build/calib
 bash scripts/campaign_stitches.sh [level…]                                    # 47.7: each campaign stitch through its authored exit trigger (kit carried, 0 [ERROR])
@@ -273,7 +274,7 @@ a coordinator, not the facade.
   the playable release). Several subsystems turn out to be written and switched off, or half-wired:
   vertex colours are parsed and dropped, detail maps are parsed and unused (SSAO was one of these
   until 33.1 turned it on). **This is the current graphics tracker.**
-- `yae-engine/docs/MaterialContract.md` — **the material contract** (Phase 48.1, version 0.3 since 48.5;
+- `yae-engine/docs/MaterialContract.md` — **the material contract** (Phase 48.1, version 0.4 since 48.6;
   1.0 at 48.11): what every field of a material means, in numbers — twelve rules (slots; base colour a display
   value under pure γ 2.2, data maps linear; rows never flipped, row 0 = `v = 0`, T along +U / B along +V
   where the engine builds the frame — the `.ds2` compiler's file frame has B along −V (48.3); an `opengl`
@@ -1414,7 +1415,25 @@ a coordinator, not the facade.
   the remaining paks for a Steam install, the mid-range card, `windows.yml`); answers flow back as
   `RetailSession.md`'s do.
 - `yae-engine/docs/Phase48_MaterialCalibrationEngine.md` — **the current phase** (plan 2026-09-28;
-  **48.0–48.5 done 2026-09-29** — 48.5 is the sign table on `calib-bump-l` (engine × 3 frames, the
+  **48.0–48.6, 48.8 and 48.9 done 2026-09-29** — 48.8 (40.4.1): the environment specular behind
+  `r_env_spec` (saved cvar, 0 until 48.10) — the split-sum BRDF LUT integrated on the CPU
+  (`render/EnvSpecular`, k = α/2) and read from an SSBO at binding 4 (texture unit 31 is the fragment
+  shader's last free one, and the probe holds it), the level's sky captured into a prefiltered cube at load
+  (`render/EnvProbe`; 20 of the 25 gate levels have a sky), normalised by the pixel's own lightmap/vertex
+  light/ambient, Lagarde's SO; `debug_view probe` shows the term; the `--matball` rig reflects a probe of its
+  own and `matball.json` records it (contract 0.5); `metal-halves` on the wall 1.2 → 149.6, +0.12 ms on
+  `med1`; self-tests `BRDF LUT energy`, `Env probe prefilter`; off, gate and scenes 0.000. 48.9 (C10): a model submesh draws its `.mat` template's own
+  `diffuse_texture` instead of the mesh's, as ds2render's `model_base` does (`render/ModelTemplateTexture.h`;
+  `$white$`/`$black$` built in, a film's name has no still and keeps the mesh's texture under the stream)
+  — the projector's live bulb glows, the soda cup is no longer grass; `color4` has **no reader** in the
+  original (`model_base` sets white) and is not applied; self-test `Model template diffuse`; gate 0.000;
+  the `cubeman` answer was already in §0a from 48.0/48.5. 48.6 is the switch `r_normal_frame` (saved cvar, 0 until 48.10): the
+  built frames' B turned to −V live in `pbr.frag` (`ITEM_FILE_FRAME` spares the compiler's), and at the
+  level load triangle strips get a frame and broken file frames (`def_refl_alpha_Vx`, T = B) are rebuilt
+  (`render/LevelTangents`, CPU-tested by `Level tangent frames`); `--cvar name=value` sets such a knob
+  before the level loads, this run only; `normalScale` counted and held to 8; a one-channel map reads
+  grey; under the switch `bump-L` lights towards L in all three frames and a GL/DX pair gives one frame;
+  off, the gate is 0.000; the relief at gain 2 still clamps 19–38 % of the gate's baked brick. 48.5 is the sign table on `calib-bump-l` (engine × 3 frames, the
   Workbench's Three.js 0.186 path and the SDK's 0.160 path in headless Chrome): the U axis agrees
   everywhere; along V the compiler's file frame, the Workbench and the oven put an `opengl` green to the
   top of the image (−V), the frames the engine builds (`computed`, `derivatives`) and the SDK to the
