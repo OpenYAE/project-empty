@@ -79,6 +79,7 @@ bash scripts/conformance.sh                                                   # 
 ./yae-engine/build/yae-engine --level … --frames 240                          # 240 frames, then a `perf` summary of every stage and pass (Phase 39.0)
 bash scripts/smoke_levels.sh --shots [level…]                                 # the picture gate: fixed cameras vs local baselines (--record-shots makes them)
 bash scripts/reference_scenes.sh [--record|--view albedo|--budgets] [scene…]  # Phase 40's four reference scenes (ward/shop/yard/tunnel) at 1440p
+bash scripts/reference_scenes.sh calib                                        # 48.4: the ward with the calibration pack (only when named)
 ./yae-engine/build/yae-engine --matball all --materials-catalog yae-materials/calibration/pack/current.json \
     --root yae-game/gameres --offscreen 640x640 --fixed-dt 0.0166667      # 48.3: one material alone, frames + matball.json → build/calib
 bash scripts/campaign_stitches.sh [level…]                                    # 47.7: each campaign stitch through its authored exit trigger (kit carried, 0 [ERROR])
@@ -272,11 +273,11 @@ a coordinator, not the facade.
   the playable release). Several subsystems turn out to be written and switched off, or half-wired:
   vertex colours are parsed and dropped, detail maps are parsed and unused (SSAO was one of these
   until 33.1 turned it on). **This is the current graphics tracker.**
-- `yae-engine/docs/MaterialContract.md` — **the material contract** (Phase 48.1, version 0.2 since 48.3;
+- `yae-engine/docs/MaterialContract.md` — **the material contract** (Phase 48.1, version 0.3 since 48.5;
   1.0 at 48.11): what every field of a material means, in numbers — twelve rules (slots; base colour a display
   value under pure γ 2.2, data maps linear; rows never flipped, row 0 = `v = 0`, T along +U / B along +V
-  where the engine builds the frame — the `.ds2` compiler's file frame has B along −V (48.3) — the
-  `opengl` green's axis *pending* 48.5 — H1; `normalScale` ≥ 0, 1.0 = authored; α = r², F0 =
+  where the engine builds the frame — the `.ds2` compiler's file frame has B along −V (48.3); an `opengl`
+  green goes to the top of the image (glTF), which the built frames break (H1 confirmed by 48.5, fixed in 48.6); `normalScale` ≥ 0, 1.0 = authored; α = r², F0 =
   mix(0.04, albedo, metallic); AO indirect only; lightmap [0, 0.5] ×2; the relief imitation with its
   gain/clamp/L; lamps × 0.25; the composite per profile; 64 units/m and `texelsPerMeter`; the three shared
   GLSL files by sha256), each with `file:line` and the self-test or `matball` measurement that holds it;
@@ -1413,7 +1414,18 @@ a coordinator, not the facade.
   the remaining paks for a Steam install, the mid-range card, `windows.yml`); answers flow back as
   `RetailSession.md`'s do.
 - `yae-engine/docs/Phase48_MaterialCalibrationEngine.md` — **the current phase** (plan 2026-09-28;
-  **48.0–48.3 done 2026-09-29** — 48.3 is `--matball <stem|all>` (`app/MatballFrame`, the rig as data in
+  **48.0–48.5 done 2026-09-29** — 48.5 is the sign table on `calib-bump-l` (engine × 3 frames, the
+  Workbench's Three.js 0.186 path and the SDK's 0.160 path in headless Chrome): the U axis agrees
+  everywhere; along V the compiler's file frame, the Workbench and the oven put an `opengl` green to the
+  top of the image (−V), the frames the engine builds (`computed`, `derivatives`) and the SDK to the
+  bottom — **H1 holds for the built frames**, a defect 48.6 corrects by B along −V there (the packs do not
+  change); contract 0.3, `matball.json` `orientation` per frame, the first handoff to `yae-materials` §0a
+  (CAL-05 may start). 48.4 is the GL self-test `Matball contract` (`tests/MatballTests.cpp`:
+  the rig through a `GLRenderer` of its own — the grey card 65.95 against 66.10 computed by the CPU
+  mirrors, AO on the indirect light only, the three tangent frames held as they stand, 13 ms, every GL
+  state put back) and the scene `calib` (`reference_scenes.sh calib`: `ward` with the level-binding pack,
+  480 frames, shot only when named; bump-L's relief falls into the window openings, not on the visible
+  wall); 48.3 is `--matball <stem|all>` (`app/MatballFrame`, the rig as data in
   `render/MatballRig`): one catalog material on the level's own path (`MaterialCatalog::applyToLevel`, the
   function the level load now calls too; `GPULevel`, `registerLevelScene`, the lamp through
   `LightSystem`), a 2 × 2 m plane in three tangent frames (`computed`, `file`, `derivatives`), a 0.5 m
