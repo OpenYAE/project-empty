@@ -274,7 +274,7 @@ a coordinator, not the facade.
   the playable release). Several subsystems turn out to be written and switched off, or half-wired:
   vertex colours are parsed and dropped, detail maps are parsed and unused (SSAO was one of these
   until 33.1 turned it on). **This is the current graphics tracker.**
-- `yae-engine/docs/MaterialContract.md` — **the material contract** (Phase 48.1, version 0.4 since 48.6;
+- `yae-engine/docs/MaterialContract.md` — **the material contract** (Phase 48.1, version 0.6 since 48.7;
   1.0 at 48.11): what every field of a material means, in numbers — twelve rules (slots; base colour a display
   value under pure γ 2.2, data maps linear; rows never flipped, row 0 = `v = 0`, T along +U / B along +V
   where the engine builds the frame — the `.ds2` compiler's file frame has B along −V (48.3); an `opengl`
@@ -1415,7 +1415,18 @@ a coordinator, not the facade.
   the remaining paks for a Steam install, the mid-range card, `windows.yml`); answers flow back as
   `RetailSession.md`'s do.
 - `yae-engine/docs/Phase48_MaterialCalibrationEngine.md` — **the current phase** (plan 2026-09-28;
-  **48.0–48.6, 48.8 and 48.9 done 2026-09-29** — 48.8 (40.4.1): the environment specular behind
+  **48.0–48.9 done 2026-09-29** — 48.7 (40.1b): the frame as retail shows it behind `r_retail_frame`
+  (saved cvar, 0 until 48.10): exposure 1, no tone map, no SSAO (the original has none; the lightmap bakes
+  the occlusion); the original's `r_ll_scale`/`r_ll_scale_value` at the level load (`assets/LightmapScale.h`,
+  RE `FUN_10091330`/`FUN_1005ab80`: every lightmap byte and the vertex light of buffers without lightmap UVs
+  ⌊clamp(b × 1.5, 0, 255)⌋; seeded from the autorun, `gor`'s `engine.set_var` is the cvar, Q5's fact: the
+  user's retail config holds 1 / 1.5); the level's lamps light no static level surface (RE: `lightmapped_base`/
+  `vertlight_base` draw with GL lighting off; `ITEM_STATIC`; flashes still do) and a model's lit colour
+  saturates at its texture (GL fixed-function clamp); linear bloom cut from exposed light (CAL-05's find);
+  the five slot scenes at 0.94–1.00 of retail by tile median (was 0.43–1.33); `reference_scenes.sh
+  --render-cfg`; self-tests `Lightmap scale`, `Matball contract` +retail; contract 0.6; the original's full model
+  light (WorldProps `light_hs_up/down_color`, lamps without attenuation, `lint_generic`) read, not reproduced
+  (`TODO.md`). 48.8 (40.4.1): the environment specular behind
   `r_env_spec` (saved cvar, 0 until 48.10) — the split-sum BRDF LUT integrated on the CPU
   (`render/EnvSpecular`, k = α/2) and read from an SSBO at binding 4 (texture unit 31 is the fragment
   shader's last free one, and the probe holds it), the level's sky captured into a prefiltered cube at load
