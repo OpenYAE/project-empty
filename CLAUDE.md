@@ -174,7 +174,7 @@ bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/ga
   prints the scale and FOV against the retail frame. `--console "cmd; cmd"` runs console commands into every shot, `--tag name` names the output,
   `--no-post` drops the composite, `--args "--flag"` passes engine flags — an A/B is two such runs.
   **Colour pipeline (40.1):** `r_cvar r_color_pipeline 1` is the linear profile (live, no reload;
-  `legacy` = 0 stays the default), `r_light_falloff 1` the physical inverse-square falloff with the
+  **the default since 48.10**, D3 — `0` is `legacy`), `r_light_falloff 1` the physical inverse-square falloff with the
   level's coefficient (`lights calibrate [target]` prints it; `yae-overlay/authored/levels/<stem>/lights.yae`
   stores it, the exposure and per-lamp overrides), `r_auto_exposure` (off) a histogram exposure,
   `r_shadow_alpha` (on) alpha-tested shadow casters (40.2.2: a grate shadows its texels; `perf counters`
@@ -191,12 +191,15 @@ bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/ga
   3 500 world draws at 0.7 ms — `perf counters` prints "shadow casters N of M".
 - **Picture gate (Phase 39.0.4):** `bash scripts/smoke_levels.sh --shots` shoots each golden level at
   frame 240 from a fixed camera (`--fixed-dt`, so two runs are pixel-identical) in a hidden window
-  of the baseline's size (`--offscreen WxH` — no fullscreen, no focus, so the desk being in use, the
-  cursor's display and stray keystrokes cannot reach it) and compares 160-px tiles with
+  of the baseline's size (`--offscreen WxH` — no fullscreen, no focus, and since 2026-09-30 it drops the
+  desk's mouse and keyboard events (`isDeskInput`, app/DevHooks — relative mouse motion still reached the
+  hidden window and turned the gate camera twice), so the desk being in use cannot reach it) and compares 160-px tiles with
   `tests/referenses-<level>/ours/baseline.png`. A run that logs an `[ERROR]` or writes no shot is a
   failure, never a comparison against the previous run's file. Baselines are local (`--record-shots`,
   gitignored — they depend on this machine's resolution and gamma); a rendering refactor that must
   not change the picture proves it with noise 0.000 here. The baselines were last re-recorded in
+  **48.10** (all 25 and the scenes, for Phase 48's picture switch — `r_normal_frame`, `r_env_spec`,
+  `linear` and relief gain 2 became the defaults together; `r_retail_frame` stays an A/B); before that in
   42.0 (all 18, after the 2026-09-13 renderer commits `4363d82`/`cdddbfd`; before that in 41.6 for the
   authored fog and `lastzlo` in 41.12; since then single levels with a reason — `grsvt` 42.4,
   `lastzlo` 42.2/42.7, `meat` 42.7). **Since 42.0 a gate run is pinned:** every engine invocation
@@ -1414,9 +1417,30 @@ a coordinator, not the facade.
   decisions, re-recorded baselines to eyeball; section 7: the ZIL recording, restoring `medC`, mounting
   the remaining paks for a Steam install, the mid-range card, `windows.yml`); answers flow back as
   `RetailSession.md`'s do.
-- `yae-engine/docs/Phase48_MaterialCalibrationEngine.md` — **the current phase** (plan 2026-09-28;
-  **48.0–48.9 done 2026-09-29** — 48.7 (40.1b): the frame as retail shows it behind `r_retail_frame`
-  (saved cvar, 0 until 48.10): exposure 1, no tone map, no SSAO (the original has none; the lightmap bakes
+- `yae-engine/docs/Phase48_MaterialCalibrationEngine.md` — the material calibration, engine side (plan
+  2026-09-28; **Phase 48 is closed — 48.0–48.12 done 2026-09-29/30**). **48.10** (2026-09-30, before the
+  end of the user's 47 check, by the user's decision — the 47 remarks become a mini-phase of their own):
+  the one picture switch — `r_normal_frame`, `r_env_spec` and `r_color_pipeline 1` (`linear`) are the
+  defaults, `r_lm_relief_gain` 2 (was 4); the defaults live as `GLRenderer::kDefault*` and the constructor
+  hands them to the composite and the light system; the gate (25) and the scenes (10) re-recorded.
+  **`r_retail_frame` is an A/B, default 0** — it was the default for a few hours, and the user decided:
+  **the goal is a better picture, not the retail one** (our lamps, shadows, tone map are the point; do not
+  anchor to retail — only "do not make it worse", e.g. a bright corner from baked bounce stays bright);
+  under it `--retail` reads 1.03 / 1.02 / 1.03 / 0.99 / 1.13 by tile median, and **no dynamic shadow falls
+  on the level** (ours are a lamp's missing light; the original projects model shadow maps —
+  `oe_mdl_shadowmap`, `r_mdl_shadows` — `TODO.md`). The user kept `r_env_spec` on (remind them if they
+  complain about highlights). The F5 fallback lamps' colour is `1.0 0.86 0.67` (was `1.0 0.72 0.42`, ~3000 K,
+  which read orange once `linear` mixed it with the lightmap in linear light — the user's choice, to test).
+  The `--matball` rig's lamp is uploaded as a flash (it lights the wall under the retail A/B too); a
+  comparison sheet per slot scene and per-switch pairs are in `yae-engine/build/p48_10/`; the composite's
+  clock at 0 (menu, `--model`) takes 1 s.
+  **48.11:** `--matball-raw` writes, beside the composite frames of the grey card, the albedo ramp and
+  bump-L, the scene (HDR target) and the composite's output (a second draw into RGBA32F — before FXAA and
+  the 8-bit frame) as float32 on a 256² grid over the plane; `matball.json` carries the sha256 of the three
+  shared and the eight ported GLSL files (`core/Sha256.h`, self-test `SHA-256`), `schema` stays
+  `yae.matball/0` (every change additive); `MaterialContract.md` **1.0**; the second handoff in
+  `yae-materials` §0a (CAL-09 on the real switch). Before that — 48.7 (40.1b): the frame as retail shows it
+  behind `r_retail_frame` (saved cvar, an A/B, default 0): exposure 1, no tone map, no SSAO (the original has none; the lightmap bakes
   the occlusion); the original's `r_ll_scale`/`r_ll_scale_value` at the level load (`assets/LightmapScale.h`,
   RE `FUN_10091330`/`FUN_1005ab80`: every lightmap byte and the vertex light of buffers without lightmap UVs
   ⌊clamp(b × 1.5, 0, 255)⌋; seeded from the autorun, `gor`'s `engine.set_var` is the cvar, Q5's fact: the
@@ -1427,7 +1451,7 @@ a coordinator, not the facade.
   --render-cfg`; self-tests `Lightmap scale`, `Matball contract` +retail; contract 0.6; the original's full model
   light (WorldProps `light_hs_up/down_color`, lamps without attenuation, `lint_generic`) read, not reproduced
   (`TODO.md`). 48.8 (40.4.1): the environment specular behind
-  `r_env_spec` (saved cvar, 0 until 48.10) — the split-sum BRDF LUT integrated on the CPU
+  `r_env_spec` (saved cvar, on since 48.10) — the split-sum BRDF LUT integrated on the CPU
   (`render/EnvSpecular`, k = α/2) and read from an SSBO at binding 4 (texture unit 31 is the fragment
   shader's last free one, and the probe holds it), the level's sky captured into a prefiltered cube at load
   (`render/EnvProbe`; 20 of the 25 gate levels have a sky), normalised by the pixel's own lightmap/vertex
@@ -1438,7 +1462,7 @@ a coordinator, not the facade.
   `$white$`/`$black$` built in, a film's name has no still and keeps the mesh's texture under the stream)
   — the projector's live bulb glows, the soda cup is no longer grass; `color4` has **no reader** in the
   original (`model_base` sets white) and is not applied; self-test `Model template diffuse`; gate 0.000;
-  the `cubeman` answer was already in §0a from 48.0/48.5. 48.6 is the switch `r_normal_frame` (saved cvar, 0 until 48.10): the
+  the `cubeman` answer was already in §0a from 48.0/48.5. 48.6 is the switch `r_normal_frame` (saved cvar, on since 48.10): the
   built frames' B turned to −V live in `pbr.frag` (`ITEM_FILE_FRAME` spares the compiler's), and at the
   level load triangle strips get a frame and broken file frames (`def_refl_alpha_Vx`, T = B) are rebuilt
   (`render/LevelTangents`, CPU-tested by `Level tangent frames`); `--cvar name=value` sets such a knob
@@ -1477,8 +1501,8 @@ a coordinator, not the facade.
   (numbers from it, debug views too, are ×0.8 — slot scenes are not affected); `--retail` prints the
   light per slot scene (`scripts/exposure_match.py`): without our composite shop/tunnel/yard are within
   3–15 % of retail, lastzlo 0.68 ≈ 1/1.5; found and fixed on the way: the GL self-test `Grey card`
-  failing since `4471ebe` — a C++ `#include` pasted into its GLSL; M–L; runs **in parallel with the user's Phase 47 testing** — every picture change behind a
-  cvar that stays off until one joint switch in 48.10, engine runs on an isolated root with a copied
+  failing since `4471ebe` — a C++ `#include` pasted into its GLSL; M–L; ran **in parallel with the user's Phase 47 testing** — every picture change behind a
+  cvar that stayed off until one joint switch in 48.10, engine runs on an isolated root with a copied
   `config/`, 47 and 48 in separate commits): it also takes **40.1b** (the frame as retail shows it: the
   same baked lightmaps, output without our exposure 0.7 + Reinhard — the original has no tonemapper,
   and that composite halves mid-tones: 4 of 5 slot scenes are 1.6–2.4× darker than retail, ×1.0–1.5
