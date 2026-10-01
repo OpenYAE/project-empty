@@ -34,7 +34,8 @@ document: an index, then each one's digest — what used to fill this file), **`
   auto-probes `<gameres>/../yae-materials/export/engine/catalog.yaemat` (`--no-materials-catalog` or
   `mat_catalog 0` loads levels vanilla).
 - `scripts/` — the gate scripts behind `build.sh --check`, gameres helpers (`gsf_dump.py`, …), the
-  figure generators; historical plans and audits until 49.1 moves them to `docs/history/`.
+  figure generators. History — the early phase plans, old audits and refactoring docs — is
+  `yae-engine/docs/history/` (49.1).
 - `project-empty/` — the umbrella README of the ecosystem (gitignored here).
 - The SDK (`yae-sdk`) is a separate repository: canonical clone `~/PetProjects/yae-node-converter-claude`.
 
@@ -43,7 +44,8 @@ document: an index, then each one's digest — what used to fill this file), **`
 ```bash
 bash build.sh                       # `dev` preset (RelWithDebInfo, YAE_DEV, self-tests) → yae-engine/build/yae-engine
 bash build.sh --check               # build + gates (warnings, self-tests, size budgets, gameres audit, console
-                                    # reference, SDK conformance, clang-format on changed lines, level smoke) — before committing
+                                    # reference, SDK conformance, clang-format on changed lines, doc links and
+                                    # contents, level smoke) — before committing
 bash build.sh --asan                # `asan` preset → build-asan; --self-test, a parse of med1/meat/gor, 60 frames of each
 bash build.sh --release             # `release` preset (no YAE_DEV, no self-tests) → build-release
 bash run_level.sh -map med1         # a level by stem or map dir; tees to yae-engine.log
@@ -71,8 +73,10 @@ bash scripts/no_change_gate.sh [--quick]                                      # 
 - **`build.sh --check` answers "is the tree still good"**; it fails on an own-code warning, a self-test
   failure, a file past its size budget (`scripts/size_budget.sh` — raise a ceiling on purpose, with a
   reason), an edit to the read-only `gameres/scripts`, a parser disagreeing with the SDK, an unformatted
-  changed line (clang-format **19.1.7** from PyPI in a venv; `scripts/format_check.sh --fix`), or a level
-  that no longer loads cleanly. Missing display / SDK / clang-format → that check says SKIP, loudly.
+  changed line (clang-format **19.1.7** from PyPI in a venv; `scripts/format_check.sh --fix`), a broken
+  relative link or heading anchor in the markdown (`scripts/doc_links.sh`), a stale generated contents
+  (`scripts/doc_toc.sh` — `Invariants.md`'s; a section without `Verified by` fails it too), or a level that
+  no longer loads cleanly. Missing display / SDK / clang-format → that check says SKIP, loudly.
 - **CI:** `.github/workflows/ci.yml` (Ubuntu build, self-tests, `release`, ASan) and `windows.yml` (MSYS2)
   are **manual** since 2026-10-01 (Actions minutes); every push runs only `lint.yml` (size budgets +
   format). The CI has no `gameres`: asset cases SKIP by name.
@@ -140,8 +144,8 @@ Put new subsystems in a coordinator, not the facade.
 - **Measure, then change.** A picture change is shown with a same-config control (the gate's noise floor
   beats most effects); a physics change is checked on `meat`'s crane (golden rule 4).
 - **Where we are (2026-10-01):** Phase 48 closed; **Phase 49 — audit and refactoring —
-  `docs/Phase49_AuditRefactoring.md`** (plan approved; every subphase is judged by "the picture did not
-  change", `scripts/no_change_gate.sh`); then the mini-phase of the user's Phase 47 remarks
+  `docs/Phase49_AuditRefactoring.md`** (49.0 and 49.1 done; every subphase is judged by "the picture did
+  not change", `scripts/no_change_gate.sh`); then the mini-phase of the user's Phase 47 remarks
   (`docs/Phase47_Release1Readiness.md`, `Phase47_UserChecklist.md`), Phase 50 (cleaning for publication).
   The order and every phase's gates: `docs/Roadmap.md`; the index of all phases: `docs/Phases.md`.
 
@@ -149,12 +153,13 @@ Put new subsystems in a coordinator, not the facade.
 
 | Document | What |
 |---|---|
-| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 168 sections, each with `Verified by`. **Read first.** |
+| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 168 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
 | `docs/Phases.md` | every phase: index with status, then the digests (CLAUDE.md's former content, verbatim) |
 | `docs/DevGuide.md` | layout, build, harness and gates — the long version of this file, maintained |
 | `docs/Roadmap.md` | the order of the phases after 46 and their gates |
-| `docs/LevelTestMatrix.md` | which level tests which subsystem, cameras of the gate, verified recipes |
+| `docs/LevelTestMatrix.md` | which level tests which subsystem (the table), then the recipes by level; videos and comics |
 | `docs/TODO.md` | open items by level and `general` |
+| `docs/history/` | what the engine *was*: plans 9–28, refactorings 25/29/31, old audits, old testing guides — not maintained (`history/README.md`) |
 | `docs/RetailSession.md` | the user's retail checks, recordings and decisions |
 | `docs/UserFiles.md`, `docs/SaveFormat.md` | the original's *My Documents* tree; the `.ds2gsf` format |
 | `docs/MaterialSystem.md`, `docs/MaterialContract.md` | where materials are going; what every material field means, in numbers |
