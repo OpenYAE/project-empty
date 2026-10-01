@@ -178,7 +178,12 @@ bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/ga
   level's coefficient (`lights calibrate [target]` prints it; `yae-overlay/authored/levels/<stem>/lights.yae`
   stores it, the exposure and per-lamp overrides), `r_auto_exposure` (off) a histogram exposure,
   `r_shadow_alpha` (on) alpha-tested shadow casters (40.2.2: a grate shadows its texels; `perf counters`
-  prints how many casters bound a texture for it).
+  prints how many casters bound a texture for it). **Brightness by eye (after 48.10):** `r_cvar r_exposure
+  <k>` multiplies the composite's exposure (both profiles; the tone map still rolls highlights off) and
+  `r_cvar r_sky_brightness <k>` the sky's light — live, saved; **3 and 1.5 by default** (the user's picks,
+  2026-10-01: at 1 / 1 the yard and its sky on `slot-yard` read 0.54 of retail, at 3 / 1.5 ~0.9; the
+  legacy-matched exposure had halved the mid-tones). `--matball` pins `r_exposure` to its default and
+  `matball.json` records the exposure the composite applied (`exposure_scale` folded in).
   The contract — pure γ 2.2 decode in the shader, multipliers to the γ, lerps in display space, one
   encode — is `Invariants.md`, "Colour space of authored data"; the identity criterion is
   `reference_scenes.sh --no-post --console "use_lights off"` legacy vs linear at 0.000.
