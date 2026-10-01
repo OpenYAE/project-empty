@@ -1541,6 +1541,13 @@ a coordinator, not the facade.
   sweeps and scene sheets, and the LUT workflow (`lut shot` → grade in an editor → `lut <file>`, `.cube`,
   `render.cfg` `lut_path`/`lut_level_dir`); its figures come from `scripts/tonemap_doc_figures.py`
   (`curves` checks its transcription of `render/ToneMapCurve.h` against the self-test's numbers first).
+- `yae-engine/docs/Phase49_AuditRefactoring.md` — **the next phase: audit and refactoring** (plan 2026-10-01,
+  not started; the user's questions Q1–Q5 open). Every subphase is judged by "the picture did not change"
+  (`scripts/no_change_gate.sh`, 49.0: `--check`, gate 25/25 and scenes 9/9 at 0.000, the crane, smoke shapes,
+  console reference). The reconnaissance numbers: the facade 3597 lines and **39 s to compile** (the
+  build's long pole — ~10 100 lines of console commands live in headers only it includes), 22 headers of
+  500+ lines without a `.cpp`, 317 `dynamic_cast` (~28 per frame), 65 clang-tidy findings and four units
+  clang cannot compile (`SaveLuaValue`), `CLAUDE.md` itself 149 KB.
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
