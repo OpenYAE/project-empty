@@ -184,11 +184,20 @@ bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/ga
   2026-10-01: at 1 / 1 the yard and its sky on `slot-yard` read 0.54 of retail, at 3 / 1.5 ~0.9; the
   legacy-matched exposure had halved the mid-tones). `--matball` pins `r_exposure` to its default and
   `matball.json` records the exposure the composite applied (`exposure_scale` folded in). **The tone curve
-  (2026-10-01):** `r_cvar r_tonemap 0|1|2|3` (none, Reinhard — the default, ACES, and **3: Reinhard in the
-  dark + ACES in the bright**, `render/ToneMapCurve.h` — the user liked ACES's sky but not its toe, which
-  takes shadows to ~0.2 of their light), `r_aces_mix` (ACES's share in the bright, 1) and `r_aces_toe`
-  (the display brightness it starts from, 0.35; 0.3 wide); F7 cycles the four; the level's exposure is
-  solved against `render.cfg`'s `tone_map_mode`, so picking a curve never moves it.
+  (2026-10-01):** `r_cvar r_tonemap 0…5` (none, Reinhard — the default, ACES, **3: Reinhard in the
+  dark + ACES in the bright** — the user liked ACES's sky but not its toe, which takes shadows to ~0.2 of
+  their light — **4: GT** (Uchimura) and **5: AgX**), `r_aces_mix`/`r_aces_toe` shape 3 (1, 0.35; 0.3
+  wide), `r_tm_gt_*` (max, contrast, linear_start/length, black, pedestal) and `r_tm_agx_*` (slope, power,
+  sat — "punchy" is power 1.35, sat 1.4) shape 4 and 5, all live and saved; formulas and the cvar table in
+  `render/ToneMapCurve.h`, the CPU mirror the GL self-test holds the shader to; F7 cycles the six; the
+  level's exposure is solved against `render.cfg`'s `tone_map_mode`, so picking a curve never moves it —
+  `r_exposure` is the brightness knob. **The colour grade:** a 3D LUT on display values after the tone map
+  (`render/ColorLut.h`: a strip N²×N, a `.cube`, any N 2…128), off by default; console `lut` —
+  `lut shot` (the frame + the active LUT's strip in its top-left corner) → grade the PNG with global
+  adjustments → `lut <graded.png>` → `lut save x.cube`; `render.cfg` `lut_path`/`color_grading_enabled`, and
+  `lut_level_dir` for `<level>.cube|.png` per level. The SDK's tool for both is a `yae-sdk` TODO item.
+  **The user guide to both is `yae-engine/docs/ToneMapAndLUT.md`** (Russian, with figures in
+  `docs/images/tonemap-lut/`, rebuilt by `scripts/tonemap_doc_figures.py`).
   The contract — pure γ 2.2 decode in the shader, multipliers to the γ, lerps in display space, one
   encode — is `Invariants.md`, "Colour space of authored data"; the identity criterion is
   `reference_scenes.sh --no-post --console "use_lights off"` legacy vs linear at 0.000.
@@ -1527,6 +1536,11 @@ a coordinator, not the facade.
   baked light is directional; ours becomes so in 40.5.3), 40.4.1 before 40.3.1; the `cubeman` question (by `--dump`, the ward floor is
   `plitkaromb`, not `plitkashahmatorez`), C10 (a model template's own `diffuse_texture`/`color4`), and
   the handoff that unblocks `yae-materials` CAL-05+.
+- `yae-engine/docs/ToneMapAndLUT.md` — **the guide to tuning the picture** (after 48.10): exposure and sky
+  brightness, the six tone curves (`r_tonemap`, `r_aces_*`, `r_tm_gt_*`, `r_tm_agx_*`) with plots, colour
+  sweeps and scene sheets, and the LUT workflow (`lut shot` → grade in an editor → `lut <file>`, `.cube`,
+  `render.cfg` `lut_path`/`lut_level_dir`); its figures come from `scripts/tonemap_doc_figures.py`
+  (`curves` checks its transcription of `render/ToneMapCurve.h` against the self-test's numbers first).
 - `yae-engine/docs/console/` — two files: `CONSOLE_ARCHITECTURE.md` (how it is built, how to add a
   command) and `CONSOLE_COMMANDS.md`, **generated** from the registry by `bash scripts/console_reference.sh`
   (`--check` says whether it is stale). `bash scripts/stats.sh` prints the numbers README no longer stores.
