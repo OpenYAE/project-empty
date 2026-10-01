@@ -183,7 +183,12 @@ bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/ga
   `r_cvar r_sky_brightness <k>` the sky's light — live, saved; **3 and 1.5 by default** (the user's picks,
   2026-10-01: at 1 / 1 the yard and its sky on `slot-yard` read 0.54 of retail, at 3 / 1.5 ~0.9; the
   legacy-matched exposure had halved the mid-tones). `--matball` pins `r_exposure` to its default and
-  `matball.json` records the exposure the composite applied (`exposure_scale` folded in).
+  `matball.json` records the exposure the composite applied (`exposure_scale` folded in). **The tone curve
+  (2026-10-01):** `r_cvar r_tonemap 0|1|2|3` (none, Reinhard — the default, ACES, and **3: Reinhard in the
+  dark + ACES in the bright**, `render/ToneMapCurve.h` — the user liked ACES's sky but not its toe, which
+  takes shadows to ~0.2 of their light), `r_aces_mix` (ACES's share in the bright, 1) and `r_aces_toe`
+  (the display brightness it starts from, 0.35; 0.3 wide); F7 cycles the four; the level's exposure is
+  solved against `render.cfg`'s `tone_map_mode`, so picking a curve never moves it.
   The contract — pure γ 2.2 decode in the shader, multipliers to the γ, lerps in display space, one
   encode — is `Invariants.md`, "Colour space of authored data"; the identity criterion is
   `reference_scenes.sh --no-post --console "use_lights off"` legacy vs linear at 0.000.
