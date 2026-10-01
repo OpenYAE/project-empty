@@ -57,6 +57,7 @@ bash scripts/reference_scenes.sh [--record|--retail|--view albedo] [scene…]  #
 bash scripts/conformance.sh                                                   # our parsers vs the SDK's (~60 s)
 bash scripts/campaign_stitches.sh [--chain]                                   # campaign stitches through their exit triggers
 bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/gameres   # runs on a copy with its own config/
+bash scripts/no_change_gate.sh [--quick]                                      # Phase 49: one verdict "the picture did not change"
 ```
 
 - **Isolated root — always, when the user may be playing.** Every engine run writes `config/settings.cfg`
@@ -87,6 +88,10 @@ bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/ga
   yae-materials/export/engine/catalog.yaemat` and sets the `cvar.*` lines of `settings.cfg` aside; a
   `--fixed-dt` run is deterministic (Invariants.md) — a new wall-clock or `random_device` user in
   gameplay breaks the gate on `gor`/`metro` first. A refactor proves itself with noise 0.000.
+- **No-change gate (49.0):** `scripts/no_change_gate.sh` — `--check`, smoke warning shapes equal to the
+  baseline both ways, 25 shots + 9 scenes at worst tile 0.000, the `meat` crane line by line against
+  `scripts/crane_baseline.txt`, the console reference; one line `no-change: OK` or the list. `--quick` —
+  no scenes, no crane. Every Phase 49 subphase is handed in with it.
 - **Self-tests** run at every windowed start and as a gate: `./yae-engine/build/yae-engine --self-test`
   (no window, no GL — GL cases SKIP; ~0.6 s; `--root <gameres>` for the asset cases). Run order is the
   explicit list in `tests/TestRegistry.cpp` — add a case there and in `SelfTestCases.h`.
@@ -171,4 +176,5 @@ anti-patterns. `bash scripts/stats.sh` prints the project's numbers.
    old ones — as long as the untouched originals keep loading.
 3. **Preserve the deterministic frame order** (see Invariants.md) — reordering breaks game logic.
 4. Physically-sensitive changes: verify on **m02/meat** (crane/joints/ropes) — see LevelTestMatrix.md; the
-   crane reads `bodyDist=197.3/197.4/197.9/197.9 hingeAngle=+6.1°` (`--frames 900`).
+   crane reads `bodyDist=197.3/197.4/197.9/197.9 hingeAngle=+6.1°` (`--frames 900`); the whole swing at
+   `--fixed-dt`, line by line — `scripts/crane_baseline.txt` (`no_change_gate.sh --record-crane`).
