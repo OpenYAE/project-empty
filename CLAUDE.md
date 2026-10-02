@@ -85,7 +85,8 @@ bash scripts/no_change_gate.sh [--quick]                                      # 
   `scripts/tidy.sh` runs the small clang-tidy set — not a gate.
 - **Smoke:** `smoke_levels.sh` loads the 25 golden levels for 120 frames; fails on `[ERROR]`, on a
   warning shape new against `scripts/smoke_baseline.txt` (a count fails only when it doubled and grew
-  by 5+), and on a log saying `self-test summary: … FAILED` (the GL self-tests run only in windowed runs).
+  by 5+), and on a log saying `self-test summary: … FAILED`. Hidden window (`--offscreen`, desk input
+  dropped) since 49.10, like the shots.
 - **Picture gate:** `smoke_levels.sh --shots` — each level at frame 240, fixed camera, `--fixed-dt`,
   hidden window (`--offscreen WxH`, desk input dropped), 160-px tiles against local baselines
   (`--record-shots`, gitignored; last re-recorded in 48.10). A gate run pins `--materials-catalog
@@ -97,8 +98,11 @@ bash scripts/no_change_gate.sh [--quick]                                      # 
   `scripts/crane_baseline.txt`, the console reference; one line `no-change: OK` or the list. `--quick` —
   no scenes, no crane. Every Phase 49 subphase is handed in with it.
 - **Self-tests** run at every windowed start and as a gate: `./yae-engine/build/yae-engine --self-test`
-  (no window, no GL — GL cases SKIP; ~0.6 s; `--root <gameres>` for the asset cases). Run order is the
-  explicit list in `tests/TestRegistry.cpp` — add a case there and in `SelfTestCases.h`.
+  (no window, no GL — GL cases SKIP; ~0.75 s; `--root <gameres>` for the asset cases); `--gl` runs them
+  with the GL cases in a hidden window (`--check` step 2 does both). `--self-test-list`, `-filter <glob>`,
+  `-order reverse|shuffle:<n>`, `-csv <file>`. A case is a row of `kCases` (`tests/TestRegistry.cpp`, flags
+  `GL`/`ASSET`/`PART`) and a line in `SelfTestCases.h`; it must leave the process as it found it
+  (`Self-test isolation`, Invariants.md) and declare what it reads under the asset root (`Asset declarations`).
 - **Shaders** live in `yae-engine/shaders/` (`#include "x.glsl"`, one level); `--shader-dir
   yae-engine/shaders` + `shader reload` for live work. No GLSL in C++ (`grep -rl '^#version'
   yae-engine/src yae-engine/app` → nothing).
@@ -150,7 +154,7 @@ in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — th
 - **Measure, then change.** A picture change is shown with a same-config control (the gate's noise floor
   beats most effects); a physics change is checked on `meat`'s crane (golden rule 4).
 - **Where we are (2026-10-01):** Phase 48 closed; **Phase 49 — audit and refactoring —
-  `docs/Phase49_AuditRefactoring.md`** (49.0–49.9 done; every subphase is judged by "the picture did
+  `docs/Phase49_AuditRefactoring.md`** (49.0–49.10 done; every subphase is judged by "the picture did
   not change", `scripts/no_change_gate.sh`); then the mini-phase of the user's Phase 47 remarks
   (`docs/Phase47_Release1Readiness.md`, `Phase47_UserChecklist.md`), Phase 50 (cleaning for publication).
   The order and every phase's gates: `docs/Roadmap.md`; the index of all phases: `docs/Phases.md`.
@@ -159,7 +163,7 @@ in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — th
 
 | Document | What |
 |---|---|
-| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 168 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
+| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 169 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
 | `docs/Phases.md` | every phase: index with status, then the digests (CLAUDE.md's former content, verbatim) |
 | `docs/DevGuide.md` | layout, build, harness and gates — the long version of this file, maintained |
 | `docs/Roadmap.md` | the order of the phases after 46 and their gates |
