@@ -136,7 +136,8 @@ DebugCoordinator, PhysicsCoordinator, EffectCoordinator, GameLuaBinder, PlayerCo
 Put new subsystems in a coordinator, not the facade. Console commands: registered in
 `game/GameConsoleSetup.cpp` (a friend of the facade; order = the reference's order), families as
 `game/<Family>Commands.{h,cpp}` — `docs/console/CONSOLE_ARCHITECTURE.md`. A saved knob (`r_cvar`) is one
-row of `game/RenderCvars.cpp`.
+row of `game/RenderCvars.cpp`. The player's Lua glue is `game/PlayerLuaBridge`, the carry between levels (and
+in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — the facade's last member (49.6).
 
 ## How work is done here
 
@@ -147,7 +148,7 @@ row of `game/RenderCvars.cpp`.
 - **Measure, then change.** A picture change is shown with a same-config control (the gate's noise floor
   beats most effects); a physics change is checked on `meat`'s crane (golden rule 4).
 - **Where we are (2026-10-01):** Phase 48 closed; **Phase 49 — audit and refactoring —
-  `docs/Phase49_AuditRefactoring.md`** (49.0–49.5 done; every subphase is judged by "the picture did
+  `docs/Phase49_AuditRefactoring.md`** (49.0–49.6 done; every subphase is judged by "the picture did
   not change", `scripts/no_change_gate.sh`); then the mini-phase of the user's Phase 47 remarks
   (`docs/Phase47_Release1Readiness.md`, `Phase47_UserChecklist.md`), Phase 50 (cleaning for publication).
   The order and every phase's gates: `docs/Roadmap.md`; the index of all phases: `docs/Phases.md`.
