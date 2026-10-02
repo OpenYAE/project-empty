@@ -117,14 +117,16 @@ bash scripts/no_change_gate.sh [--quick]                                      # 
 
 ## Engine source map (`yae-engine/src/`)
 
-`core` (Types/Logger/CoordConvert/PerfTimers) · `entity` (Entity + `EntityKind`, actors, doors, triggers,
-joints, ropes, FSM, I/O; the inventory container, the hitscan trace and the explosion sink) · `render`
+`core` (Types/Logger/CoordConvert/PerfTimers) · `entity` (Entity + `EntityKind` — cast with `entityCast<T>`, a
+class marks its kind with `YAE_ENTITY_KIND`; actors, doors, triggers, joints, ropes, FSM, I/O; the inventory
+container, the hitscan trace, the explosion sink and the effect host; **no `game/` includes**) · `render`
 (GL4 renderer, shaders, post-process, decals; the frame is a `RenderScene` filled by producers and drawn by
 `GLRenderer::submit`) · `physics` (Jolt wrapper, ragdoll; **no `game/` or `render/` includes**) ·
 `scripting` (Lua 5.4 bindings, the Lua 5.0 compatibility layer) · `ai` (combat loop, goals, perception) ·
 `game` (the `GameRulesYAE` facade and its coordinators) · `assets` (`.ds2/.ds2md/.ds2cm/.ds2edf` parsers) ·
 `audio` · `animation` · `navigation` · `ui` (also the comics player) · `scene` · `resource` (VFS) ·
-`camera` · `input` · `video` (AVI cutscenes) · `effects` (PAPI particles, effect instances, flares; templates
+`camera` (no `game/` includes: the cutscene director's hold on the player is callbacks, `game/CutsceneWiring.h`) ·
+`input` · `video` (AVI cutscenes) · `effects` (PAPI particles, effect instances, flares; templates
 parsed in `assets/EffectTemplate*`, instances owned by `game/EffectCoordinator`).
 
 Input routing: `app/AppEventRouter` owns the SDL event chain (console → video → comics → cutscene →
@@ -148,7 +150,7 @@ in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — th
 - **Measure, then change.** A picture change is shown with a same-config control (the gate's noise floor
   beats most effects); a physics change is checked on `meat`'s crane (golden rule 4).
 - **Where we are (2026-10-01):** Phase 48 closed; **Phase 49 — audit and refactoring —
-  `docs/Phase49_AuditRefactoring.md`** (49.0–49.7 done; every subphase is judged by "the picture did
+  `docs/Phase49_AuditRefactoring.md`** (49.0–49.8 done; every subphase is judged by "the picture did
   not change", `scripts/no_change_gate.sh`); then the mini-phase of the user's Phase 47 remarks
   (`docs/Phase47_Release1Readiness.md`, `Phase47_UserChecklist.md`), Phase 50 (cleaning for publication).
   The order and every phase's gates: `docs/Roadmap.md`; the index of all phases: `docs/Phases.md`.
