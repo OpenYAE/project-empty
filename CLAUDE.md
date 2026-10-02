@@ -135,7 +135,8 @@ that list, do not bury a new `if` inside one. The frame is `app/FramePipeline`, 
 DebugCoordinator, PhysicsCoordinator, EffectCoordinator, GameLuaBinder, PlayerController, NPCSpawner).
 Put new subsystems in a coordinator, not the facade. Console commands: registered in
 `game/GameConsoleSetup.cpp` (a friend of the facade; order = the reference's order), families as
-`game/<Family>Commands.{h,cpp}` — `docs/console/CONSOLE_ARCHITECTURE.md`.
+`game/<Family>Commands.{h,cpp}` — `docs/console/CONSOLE_ARCHITECTURE.md`. A saved knob (`r_cvar`) is one
+row of `game/RenderCvars.cpp`.
 
 ## How work is done here
 
@@ -146,7 +147,7 @@ Put new subsystems in a coordinator, not the facade. Console commands: registere
 - **Measure, then change.** A picture change is shown with a same-config control (the gate's noise floor
   beats most effects); a physics change is checked on `meat`'s crane (golden rule 4).
 - **Where we are (2026-10-01):** Phase 48 closed; **Phase 49 — audit and refactoring —
-  `docs/Phase49_AuditRefactoring.md`** (49.0–49.4 done; every subphase is judged by "the picture did
+  `docs/Phase49_AuditRefactoring.md`** (49.0–49.5 done; every subphase is judged by "the picture did
   not change", `scripts/no_change_gate.sh`); then the mini-phase of the user's Phase 47 remarks
   (`docs/Phase47_Release1Readiness.md`, `Phase47_UserChecklist.md`), Phase 50 (cleaning for publication).
   The order and every phase's gates: `docs/Roadmap.md`; the index of all phases: `docs/Phases.md`.
