@@ -56,6 +56,7 @@ bash run_level.sh -map med1         # a level by stem or map dir; tees to yae-en
 ./yae-engine/build/yae-engine --level … --cvar r_normal_frame=1               # a render cvar for this run only
 bash scripts/smoke_levels.sh [--shots] [level…]                               # smoke pass / picture gate (25 levels)
 bash scripts/reference_scenes.sh [--record|--retail|--view albedo] [scene…]  # the 9 reference scenes (+ `calib` by name)
+bash scripts/menu_shots.sh [--retail] [state…]                               # the menu, state by state by clicks, ours | retail (47b.0)
 bash scripts/conformance.sh                                                   # our parsers vs the SDK's (~60 s)
 bash scripts/campaign_stitches.sh [--chain]                                   # campaign stitches through their exit triggers
 bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/gameres   # runs on a copy with its own config/
