@@ -157,8 +157,8 @@ in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — th
   beats most effects); a physics change is checked on `meat`'s crane (golden rule 4).
 - **Where we are (2026-10-03):** Phase 49 — audit and refactoring — closed
   (`docs/Phase49_AuditRefactoring.md`; a refactor still proves itself with `scripts/no_change_gate.sh`);
-  next the mini-phase of the user's Phase 47 remarks (`docs/Phase47_Release1Readiness.md`,
-  `Phase47_UserChecklist.md`), then Phase 50 (cleaning for publication).
+  next Phase 47b — the user's release blockers (`docs/Phase47b_ReleaseBlockers.md`: menu, options,
+  console, video on Windows, sound; plan approved 2026-10-03), then Phase 50 (cleaning for publication).
   The order and every phase's gates: `docs/Roadmap.md`; the index of all phases: `docs/Phases.md`.
 
 ## Docs (`yae-engine/docs/`)
