@@ -117,7 +117,7 @@ bash scripts/no_change_gate.sh [--quick]                                      # 
   authored data"; the material contract — `docs/MaterialContract.md`.
 - **Perf:** `perf` in the console (`perf gpu`, `counters`, `vram`); `--frames N` prints it at exit. A doc
   that closes a perf item quotes the numbers before and after.
-- **Menu/UI:** `YAE_SKIP_INTRO=1`; console `ui list|show|dump|trace`; `YAE_CONSOLE="cmd; wait 2; cmd"`
+- **Menu/UI:** `YAE_SKIP_INTRO=1`; console `ui list|show|dump|click|key|trace`; `YAE_CONSOLE="cmd; wait 2; cmd"`
   scripts the console (menu included). Harness hooks and recipes: `docs/DevGuide.md`, `LevelTestMatrix.md`.
 
 ## Engine source map (`yae-engine/src/`)
