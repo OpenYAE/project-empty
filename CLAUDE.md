@@ -32,9 +32,10 @@ document: an index, then each one's digest — what used to fill this file), **`
   `docs/GenerationPipeline.md`, the three-repo calibration plan `docs/MaterialCalibration.md` §0a). Its
   `export/` and `baked/` are derived (`npm run bake -- --all && npm run export-engine`); the engine
   auto-probes `<gameres>/../yae-materials/export/engine/catalog.yaemat` (`--no-materials-catalog` or
-  `mat_catalog 0` loads levels vanilla).
+  `r_cvar mat_catalog 0` loads levels vanilla).
 - `scripts/` — the gate scripts behind `build.sh --check`, gameres helpers (`gsf_dump.py`, …), the
-  figure generators; historical plans and audits until 49.1 moves them to `docs/history/`.
+  figure generators. History — the early phase plans, old audits and refactoring docs — is
+  `yae-engine/docs/history/` (49.1).
 - `project-empty/` — the umbrella README of the ecosystem (gitignored here).
 - The SDK (`yae-sdk`) is a separate repository: canonical clone `~/PetProjects/yae-node-converter-claude`.
 
@@ -43,7 +44,8 @@ document: an index, then each one's digest — what used to fill this file), **`
 ```bash
 bash build.sh                       # `dev` preset (RelWithDebInfo, YAE_DEV, self-tests) → yae-engine/build/yae-engine
 bash build.sh --check               # build + gates (warnings, self-tests, size budgets, gameres audit, console
-                                    # reference, SDK conformance, clang-format on changed lines, level smoke) — before committing
+                                    # reference, SDK conformance, clang-format on changed lines, doc links and
+                                    # contents, level smoke) — before committing
 bash build.sh --asan                # `asan` preset → build-asan; --self-test, a parse of med1/meat/gor, 60 frames of each
 bash build.sh --release             # `release` preset (no YAE_DEV, no self-tests) → build-release
 bash run_level.sh -map med1         # a level by stem or map dir; tees to yae-engine.log
@@ -57,6 +59,7 @@ bash scripts/reference_scenes.sh [--record|--retail|--view albedo] [scene…]  #
 bash scripts/conformance.sh                                                   # our parsers vs the SDK's (~60 s)
 bash scripts/campaign_stitches.sh [--chain]                                   # campaign stitches through their exit triggers
 bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/gameres   # runs on a copy with its own config/
+bash scripts/no_change_gate.sh [--quick]                                      # Phase 49: one verdict "the picture did not change"
 ```
 
 - **Isolated root — always, when the user may be playing.** Every engine run writes `config/settings.cfg`
@@ -70,8 +73,10 @@ bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/ga
 - **`build.sh --check` answers "is the tree still good"**; it fails on an own-code warning, a self-test
   failure, a file past its size budget (`scripts/size_budget.sh` — raise a ceiling on purpose, with a
   reason), an edit to the read-only `gameres/scripts`, a parser disagreeing with the SDK, an unformatted
-  changed line (clang-format **19.1.7** from PyPI in a venv; `scripts/format_check.sh --fix`), or a level
-  that no longer loads cleanly. Missing display / SDK / clang-format → that check says SKIP, loudly.
+  changed line (clang-format **19.1.7** from PyPI in a venv; `scripts/format_check.sh --fix`), a broken
+  relative link or heading anchor in the markdown (`scripts/doc_links.sh`), a stale generated contents
+  (`scripts/doc_toc.sh` — `Invariants.md`'s; a section without `Verified by` fails it too), or a level that
+  no longer loads cleanly. Missing display / SDK / clang-format → that check says SKIP, loudly.
 - **CI:** `.github/workflows/ci.yml` (Ubuntu build, self-tests, `release`, ASan) and `windows.yml` (MSYS2)
   are **manual** since 2026-10-01 (Actions minutes); every push runs only `lint.yml` (size budgets +
   format). The CI has no `gameres`: asset cases SKIP by name.
@@ -80,16 +85,24 @@ bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/ga
   `scripts/tidy.sh` runs the small clang-tidy set — not a gate.
 - **Smoke:** `smoke_levels.sh` loads the 25 golden levels for 120 frames; fails on `[ERROR]`, on a
   warning shape new against `scripts/smoke_baseline.txt` (a count fails only when it doubled and grew
-  by 5+), and on a log saying `self-test summary: … FAILED` (the GL self-tests run only in windowed runs).
+  by 5+), and on a log saying `self-test summary: … FAILED`. Hidden window (`--offscreen`, desk input
+  dropped) since 49.10, like the shots.
 - **Picture gate:** `smoke_levels.sh --shots` — each level at frame 240, fixed camera, `--fixed-dt`,
   hidden window (`--offscreen WxH`, desk input dropped), 160-px tiles against local baselines
   (`--record-shots`, gitignored; last re-recorded in 48.10). A gate run pins `--materials-catalog
   yae-materials/export/engine/catalog.yaemat` and sets the `cvar.*` lines of `settings.cfg` aside; a
   `--fixed-dt` run is deterministic (Invariants.md) — a new wall-clock or `random_device` user in
   gameplay breaks the gate on `gor`/`metro` first. A refactor proves itself with noise 0.000.
+- **No-change gate (49.0):** `scripts/no_change_gate.sh` — `--check`, smoke warning shapes equal to the
+  baseline both ways, 25 shots + 9 scenes at worst tile 0.000, the `meat` crane line by line against
+  `scripts/crane_baseline.txt`, the console reference; one line `no-change: OK` or the list. `--quick` —
+  no scenes, no crane. Every Phase 49 subphase is handed in with it.
 - **Self-tests** run at every windowed start and as a gate: `./yae-engine/build/yae-engine --self-test`
-  (no window, no GL — GL cases SKIP; ~0.6 s; `--root <gameres>` for the asset cases). Run order is the
-  explicit list in `tests/TestRegistry.cpp` — add a case there and in `SelfTestCases.h`.
+  (no window, no GL — GL cases SKIP; ~0.75 s; `--root <gameres>` for the asset cases); `--gl` runs them
+  with the GL cases in a hidden window (`--check` step 2 does both). `--self-test-list`, `-filter <glob>`,
+  `-order reverse|shuffle:<n>`, `-csv <file>`. A case is a row of `kCases` (`tests/TestRegistry.cpp`, flags
+  `GL`/`ASSET`/`PART`) and a line in `SelfTestCases.h`; it must leave the process as it found it
+  (`Self-test isolation`, Invariants.md) and declare what it reads under the asset root (`Asset declarations`).
 - **Shaders** live in `yae-engine/shaders/` (`#include "x.glsl"`, one level); `--shader-dir
   yae-engine/shaders` + `shader reload` for live work. No GLSL in C++ (`grep -rl '^#version'
   yae-engine/src yae-engine/app` → nothing).
@@ -108,14 +121,16 @@ bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/ga
 
 ## Engine source map (`yae-engine/src/`)
 
-`core` (Types/Logger/CoordConvert/PerfTimers) · `entity` (Entity + `EntityKind`, actors, doors, triggers,
-joints, ropes, FSM, I/O; the inventory container, the hitscan trace and the explosion sink) · `render`
+`core` (Types/Logger/CoordConvert/PerfTimers) · `entity` (Entity + `EntityKind` — cast with `entityCast<T>`, a
+class marks its kind with `YAE_ENTITY_KIND`; actors, doors, triggers, joints, ropes, FSM, I/O; the inventory
+container, the hitscan trace, the explosion sink and the effect host; **no `game/` includes**) · `render`
 (GL4 renderer, shaders, post-process, decals; the frame is a `RenderScene` filled by producers and drawn by
 `GLRenderer::submit`) · `physics` (Jolt wrapper, ragdoll; **no `game/` or `render/` includes**) ·
 `scripting` (Lua 5.4 bindings, the Lua 5.0 compatibility layer) · `ai` (combat loop, goals, perception) ·
 `game` (the `GameRulesYAE` facade and its coordinators) · `assets` (`.ds2/.ds2md/.ds2cm/.ds2edf` parsers) ·
 `audio` · `animation` · `navigation` · `ui` (also the comics player) · `scene` · `resource` (VFS) ·
-`camera` · `input` · `video` (AVI cutscenes) · `effects` (PAPI particles, effect instances, flares; templates
+`camera` (no `game/` includes: the cutscene director's hold on the player is callbacks, `game/CutsceneWiring.h`) ·
+`input` · `video` (AVI cutscenes) · `effects` (PAPI particles, effect instances, flares; templates
 parsed in `assets/EffectTemplate*`, instances owned by `game/EffectCoordinator`).
 
 Input routing: `app/AppEventRouter` owns the SDL event chain (console → video → comics → cutscene →
@@ -124,7 +139,13 @@ that list, do not bury a new `if` inside one. The frame is `app/FramePipeline`, 
 
 `GameRulesYAE` is the top-level facade; it delegates to coordinators (LevelLoader, WeaponCoordinator,
 DebugCoordinator, PhysicsCoordinator, EffectCoordinator, GameLuaBinder, PlayerController, NPCSpawner).
-Put new subsystems in a coordinator, not the facade.
+Put new subsystems in a coordinator, not the facade. Console commands: registered in
+`game/GameConsoleSetup.cpp` (a friend of the facade; order = the reference's order), families as
+`game/<Family>Commands.{h,cpp}` — `docs/console/CONSOLE_ARCHITECTURE.md`. A saved knob (`r_cvar`) is one
+row of `game/RenderCvars.cpp`. The player's Lua glue is `game/PlayerLuaBridge`, the carry between levels (and
+in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — the facade's last member (49.6).
+`PhysicsCoordinator` is three files by task (49.11): the frame, `…Bodies.cpp` (what a level load creates),
+`…Joints.cpp` (joints and the meat crane); `WeaponCoordinator` likewise: the rest, `…Inventory.cpp`, `…Pickups.cpp`.
 
 ## How work is done here
 
@@ -134,22 +155,23 @@ Put new subsystems in a coordinator, not the facade.
   `RetailSession.md`; contracts the work establishes go into `Invariants.md` with a `Verified by` line.
 - **Measure, then change.** A picture change is shown with a same-config control (the gate's noise floor
   beats most effects); a physics change is checked on `meat`'s crane (golden rule 4).
-- **Where we are (2026-10-01):** Phase 48 closed; **Phase 49 — audit and refactoring —
-  `docs/Phase49_AuditRefactoring.md`** (plan approved; every subphase is judged by "the picture did not
-  change", `scripts/no_change_gate.sh`); then the mini-phase of the user's Phase 47 remarks
-  (`docs/Phase47_Release1Readiness.md`, `Phase47_UserChecklist.md`), Phase 50 (cleaning for publication).
+- **Where we are (2026-10-03):** Phase 49 — audit and refactoring — closed
+  (`docs/Phase49_AuditRefactoring.md`; a refactor still proves itself with `scripts/no_change_gate.sh`);
+  next the mini-phase of the user's Phase 47 remarks (`docs/Phase47_Release1Readiness.md`,
+  `Phase47_UserChecklist.md`), then Phase 50 (cleaning for publication).
   The order and every phase's gates: `docs/Roadmap.md`; the index of all phases: `docs/Phases.md`.
 
 ## Docs (`yae-engine/docs/`)
 
 | Document | What |
 |---|---|
-| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 168 sections, each with `Verified by`. **Read first.** |
+| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 169 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
 | `docs/Phases.md` | every phase: index with status, then the digests (CLAUDE.md's former content, verbatim) |
 | `docs/DevGuide.md` | layout, build, harness and gates — the long version of this file, maintained |
 | `docs/Roadmap.md` | the order of the phases after 46 and their gates |
-| `docs/LevelTestMatrix.md` | which level tests which subsystem, cameras of the gate, verified recipes |
+| `docs/LevelTestMatrix.md` | which level tests which subsystem (the table), then the recipes by level; videos and comics |
 | `docs/TODO.md` | open items by level and `general` |
+| `docs/history/` | what the engine *was*: plans 9–28, refactorings 25/29/31, old audits, old testing guides — not maintained (`history/README.md`) |
 | `docs/RetailSession.md` | the user's retail checks, recordings and decisions |
 | `docs/UserFiles.md`, `docs/SaveFormat.md` | the original's *My Documents* tree; the `.ds2gsf` format |
 | `docs/MaterialSystem.md`, `docs/MaterialContract.md` | where materials are going; what every material field means, in numbers |
@@ -171,4 +193,5 @@ anti-patterns. `bash scripts/stats.sh` prints the project's numbers.
    old ones — as long as the untouched originals keep loading.
 3. **Preserve the deterministic frame order** (see Invariants.md) — reordering breaks game logic.
 4. Physically-sensitive changes: verify on **m02/meat** (crane/joints/ropes) — see LevelTestMatrix.md; the
-   crane reads `bodyDist=197.3/197.4/197.9/197.9 hingeAngle=+6.1°` (`--frames 900`).
+   crane reads `bodyDist=197.3/197.4/197.9/197.9 hingeAngle=+6.1°` (`--frames 900`); the whole swing at
+   `--fixed-dt`, line by line — `scripts/crane_baseline.txt` (`no_change_gate.sh --record-crane`).
