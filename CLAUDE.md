@@ -12,7 +12,8 @@ document: an index, then each one's digest — what used to fill this file), **`
 
 ## Layout
 
-- `yae-engine/` — the new engine (C++20, SDL3, OpenGL 4.5, Jolt, Lua 5.4). Main work happens here.
+- `yae-engine/` — the new engine (C++20, SDL3, OpenGL 4.5, Jolt, Lua 5.4; libavcodec for the films, built from
+  source by `cmake/Libav.cmake`). Main work happens here.
   `src/` is the engine library, `app/` the thin executable, `tests/` the startup self-tests,
   `shaders/` the GLSL (embedded at build time), `docs/` the documentation.
 - `yae-game/gameres/` — original game assets (levels, models, scripts, textures). **Read-only.**
@@ -166,7 +167,7 @@ in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — th
 
 | Document | What |
 |---|---|
-| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 173 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
+| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 175 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
 | `docs/Phases.md` | every phase: index with status, then the digests (CLAUDE.md's former content, verbatim) |
 | `docs/DevGuide.md` | layout, build, harness and gates — the long version of this file, maintained |
 | `docs/Roadmap.md` | the order of the phases after 46 and their gates |
