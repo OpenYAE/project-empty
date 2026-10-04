@@ -110,9 +110,11 @@ bash scripts/no_change_gate.sh [--quick]                                      # 
   yae-engine/src yae-engine/app` → nothing).
 - **Graphics A/B:** the reference scenes are the A/B for every shader change (`--console "cmd; cmd"`,
   `--tag`, `--args`, `--no-post`, `--view <debug_view>`); `debug_view <albedo|normal|…|tangent>` shows one
-  quantity untonemapped. Defaults (48.10): `linear` colour pipeline, `r_normal_frame`, `r_env_spec` on (the
+  quantity untonemapped. Defaults (48.10, 47b.8): `linear` colour pipeline, `r_normal_frame`, `r_env_spec` on (the
   user's choice — remind them before changing it), relief gain 2, `r_retail_frame 0` (an A/B; the goal is a
-  better picture, not retail's), `r_exposure 3`, `r_sky_brightness 1.5`, tone curve Reinhard. Curves
+  better picture, not retail's), `r_exposure 3`, `r_sky_brightness 3`, tone curve GT (`r_tonemap 4`), the
+  unset lamps lit (`r_dlights_unset 50` × `r_dlights_unset_scale 0.3`), shadows: 15 live, maps × 3
+  (`r_shadow_res`), filter radius 4 (`r_shadow_soft`), `shadow_sphere 4000`, `shadow_dist 10` (D21). Curves
   (`r_tonemap 0…5`, `r_aces_*`, `r_tm_*`) and the colour grade (`lut`, `render.cfg` `lut_path`,
   `lut_level_dir`) — `docs/ToneMapAndLUT.md`. The colour contract — `Invariants.md`, "Colour space of
   authored data"; the material contract — `docs/MaterialContract.md`.
@@ -157,17 +159,18 @@ in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — th
   `RetailSession.md`; contracts the work establishes go into `Invariants.md` with a `Verified by` line.
 - **Measure, then change.** A picture change is shown with a same-config control (the gate's noise floor
   beats most effects); a physics change is checked on `meat`'s crane (golden rule 4).
-- **Where we are (2026-10-03):** Phase 49 — audit and refactoring — closed
-  (`docs/Phase49_AuditRefactoring.md`; a refactor still proves itself with `scripts/no_change_gate.sh`);
-  next Phase 47b — the user's release blockers (`docs/Phase47b_ReleaseBlockers.md`: menu, options,
-  console, video on Windows, sound; plan approved 2026-10-03), then Phase 50 (cleaning for publication).
+- **Where we are (2026-10-04):** Phase 47b — the user's release blockers — closed
+  (`docs/Phase47b_ReleaseBlockers.md`: menu, options, gamma, key binds, console, films by libavcodec,
+  sound by the original's rules, the light and shadow defaults D21; the user's checklist U1–U12 is in it);
+  Phase 49 (audit and refactoring) before it — a refactor still proves itself with
+  `scripts/no_change_gate.sh`; next Phase 50 (cleaning for publication).
   The order and every phase's gates: `docs/Roadmap.md`; the index of all phases: `docs/Phases.md`.
 
 ## Docs (`yae-engine/docs/`)
 
 | Document | What |
 |---|---|
-| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 177 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
+| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 178 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
 | `docs/Phases.md` | every phase: index with status, then the digests (CLAUDE.md's former content, verbatim) |
 | `docs/DevGuide.md` | layout, build, harness and gates — the long version of this file, maintained |
 | `docs/Roadmap.md` | the order of the phases after 46 and their gates |
