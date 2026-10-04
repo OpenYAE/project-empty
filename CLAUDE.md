@@ -12,7 +12,8 @@ document: an index, then each one's digest — what used to fill this file), **`
 
 ## Layout
 
-- `yae-engine/` — the new engine (C++20, SDL3, OpenGL 4.5, Jolt, Lua 5.4). Main work happens here.
+- `yae-engine/` — the new engine (C++20, SDL3, OpenGL 4.5, Jolt, Lua 5.4; libavcodec for the films, built from
+  source by `cmake/Libav.cmake`). Main work happens here.
   `src/` is the engine library, `app/` the thin executable, `tests/` the startup self-tests,
   `shaders/` the GLSL (embedded at build time), `docs/` the documentation.
 - `yae-game/gameres/` — original game assets (levels, models, scripts, textures). **Read-only.**
@@ -31,8 +32,9 @@ document: an index, then each one's digest — what used to fill this file), **`
 - `yae-materials/` — the community PBR catalog over the original textures (`PLAN.md`,
   `docs/GenerationPipeline.md`, the three-repo calibration plan `docs/MaterialCalibration.md` §0a). Its
   `export/` and `baked/` are derived (`npm run bake -- --all && npm run export-engine`); the engine
-  auto-probes `<gameres>/../yae-materials/export/engine/catalog.yaemat` (`--no-materials-catalog` or
-  `r_cvar mat_catalog 0` loads levels vanilla).
+  takes `--materials-catalog <file>`, else `render.cfg`'s `materials_catalog` (47b.9), else probes
+  `<gameres>/../yae-materials/.yae/workbench/exports/current.json`, then `…/export/engine/catalog.yaemat`
+  (`--no-materials-catalog` or `r_cvar mat_catalog 0` loads levels vanilla).
 - `scripts/` — the gate scripts behind `build.sh --check`, gameres helpers (`gsf_dump.py`, …), the
   figure generators. History — the early phase plans, old audits and refactoring docs — is
   `yae-engine/docs/history/` (49.1).
@@ -56,6 +58,7 @@ bash run_level.sh -map med1         # a level by stem or map dir; tees to yae-en
 ./yae-engine/build/yae-engine --level … --cvar r_normal_frame=1               # a render cvar for this run only
 bash scripts/smoke_levels.sh [--shots] [level…]                               # smoke pass / picture gate (25 levels)
 bash scripts/reference_scenes.sh [--record|--retail|--view albedo] [scene…]  # the 9 reference scenes (+ `calib` by name)
+bash scripts/menu_shots.sh [--retail] [state…]                               # the menu, state by state by clicks, ours | retail (47b.0)
 bash scripts/conformance.sh                                                   # our parsers vs the SDK's (~60 s)
 bash scripts/campaign_stitches.sh [--chain]                                   # campaign stitches through their exit triggers
 bash scripts/isolated_root.sh && export YAE_GAMERES=$PWD/yae-engine/build/iso/gameres   # runs on a copy with its own config/
@@ -108,15 +111,17 @@ bash scripts/no_change_gate.sh [--quick]                                      # 
   yae-engine/src yae-engine/app` → nothing).
 - **Graphics A/B:** the reference scenes are the A/B for every shader change (`--console "cmd; cmd"`,
   `--tag`, `--args`, `--no-post`, `--view <debug_view>`); `debug_view <albedo|normal|…|tangent>` shows one
-  quantity untonemapped. Defaults (48.10): `linear` colour pipeline, `r_normal_frame`, `r_env_spec` on (the
+  quantity untonemapped. Defaults (48.10, 47b.8): `linear` colour pipeline, `r_normal_frame`, `r_env_spec` on (the
   user's choice — remind them before changing it), relief gain 2, `r_retail_frame 0` (an A/B; the goal is a
-  better picture, not retail's), `r_exposure 3`, `r_sky_brightness 1.5`, tone curve Reinhard. Curves
+  better picture, not retail's), `r_exposure 3`, `r_sky_brightness 3`, tone curve GT (`r_tonemap 4`), the
+  unset lamps lit (`r_dlights_unset 50` × `r_dlights_unset_scale 0.3`), shadows: 15 live, maps × 3
+  (`r_shadow_res`), filter radius 4 (`r_shadow_soft`), `shadow_sphere 4000`, `shadow_dist 10` (D21). Curves
   (`r_tonemap 0…5`, `r_aces_*`, `r_tm_*`) and the colour grade (`lut`, `render.cfg` `lut_path`,
   `lut_level_dir`) — `docs/ToneMapAndLUT.md`. The colour contract — `Invariants.md`, "Colour space of
   authored data"; the material contract — `docs/MaterialContract.md`.
 - **Perf:** `perf` in the console (`perf gpu`, `counters`, `vram`); `--frames N` prints it at exit. A doc
   that closes a perf item quotes the numbers before and after.
-- **Menu/UI:** `YAE_SKIP_INTRO=1`; console `ui list|show|dump|trace`; `YAE_CONSOLE="cmd; wait 2; cmd"`
+- **Menu/UI:** `YAE_SKIP_INTRO=1`; console `ui list|show|dump|click|key|trace`; `YAE_CONSOLE="cmd; wait 2; cmd"`
   scripts the console (menu included). Harness hooks and recipes: `docs/DevGuide.md`, `LevelTestMatrix.md`.
 
 ## Engine source map (`yae-engine/src/`)
@@ -155,17 +160,18 @@ in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — th
   `RetailSession.md`; contracts the work establishes go into `Invariants.md` with a `Verified by` line.
 - **Measure, then change.** A picture change is shown with a same-config control (the gate's noise floor
   beats most effects); a physics change is checked on `meat`'s crane (golden rule 4).
-- **Where we are (2026-10-03):** Phase 49 — audit and refactoring — closed
-  (`docs/Phase49_AuditRefactoring.md`; a refactor still proves itself with `scripts/no_change_gate.sh`);
-  next Phase 47b — the user's release blockers (`docs/Phase47b_ReleaseBlockers.md`: menu, options,
-  console, video on Windows, sound; plan approved 2026-10-03), then Phase 50 (cleaning for publication).
+- **Where we are (2026-10-04):** Phase 47b — the user's release blockers — closed
+  (`docs/Phase47b_ReleaseBlockers.md`: menu, options, gamma, key binds, console, films by libavcodec,
+  sound by the original's rules, the light and shadow defaults D21; the user's checklist U1–U12 is in it);
+  Phase 49 (audit and refactoring) before it — a refactor still proves itself with
+  `scripts/no_change_gate.sh`; next Phase 50 (cleaning for publication).
   The order and every phase's gates: `docs/Roadmap.md`; the index of all phases: `docs/Phases.md`.
 
 ## Docs (`yae-engine/docs/`)
 
 | Document | What |
 |---|---|
-| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 169 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
+| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 178 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
 | `docs/Phases.md` | every phase: index with status, then the digests (CLAUDE.md's former content, verbatim) |
 | `docs/DevGuide.md` | layout, build, harness and gates — the long version of this file, maintained |
 | `docs/Roadmap.md` | the order of the phases after 46 and their gates |
