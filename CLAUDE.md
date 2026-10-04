@@ -32,8 +32,9 @@ document: an index, then each one's digest — what used to fill this file), **`
 - `yae-materials/` — the community PBR catalog over the original textures (`PLAN.md`,
   `docs/GenerationPipeline.md`, the three-repo calibration plan `docs/MaterialCalibration.md` §0a). Its
   `export/` and `baked/` are derived (`npm run bake -- --all && npm run export-engine`); the engine
-  auto-probes `<gameres>/../yae-materials/export/engine/catalog.yaemat` (`--no-materials-catalog` or
-  `r_cvar mat_catalog 0` loads levels vanilla).
+  takes `--materials-catalog <file>`, else `render.cfg`'s `materials_catalog` (47b.9), else probes
+  `<gameres>/../yae-materials/.yae/workbench/exports/current.json`, then `…/export/engine/catalog.yaemat`
+  (`--no-materials-catalog` or `r_cvar mat_catalog 0` loads levels vanilla).
 - `scripts/` — the gate scripts behind `build.sh --check`, gameres helpers (`gsf_dump.py`, …), the
   figure generators. History — the early phase plans, old audits and refactoring docs — is
   `yae-engine/docs/history/` (49.1).
