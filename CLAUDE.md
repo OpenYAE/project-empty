@@ -164,8 +164,9 @@ in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — th
 - **Measure, then change.** A picture change is shown with a same-config control (the gate's noise floor
   beats most effects); a physics change is checked on `meat`'s crane (golden rule 4).
 - **Where we are (2026-10-05):** Phase 50 (cleaning for publication, `docs/Phase50_Cleaning.md`) —
-  50.0 (the publication audit and purge list), 50.1 (code and strings) and 50.2 (EN-first reference docs,
-  `docs/Decisions.md`, the READMEs, the portal) done; next 50.3 (licences and notices).
+  50.0 (the publication audit and purge list), 50.1 (code and strings), 50.2 (EN-first reference docs,
+  `docs/Decisions.md`, the READMEs, the portal) and 50.3 (LICENSE/NOTICE, `YAE_PORTABLE_PATHS`, FFmpeg's
+  LGPL §6) done; next 50.4 (release presets, the package, CI, `project-empty` as the starter repository).
   Phase 47b — the user's release blockers — closed
   (`docs/Phase47b_ReleaseBlockers.md`: menu, options, gamma, key binds, console, films by libavcodec,
   sound by the original's rules, the light and shadow defaults D21; the user's checklist U1–U12 is in it);
