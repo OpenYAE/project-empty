@@ -58,7 +58,7 @@ bash run_level.sh -map med1         # a level by stem or map dir; tees to yae-en
 ./yae-engine/build/yae-engine --dump <asset> --root yae-game/gameres          # the parse as canonical JSON
 ./yae-engine/build/yae-engine --level … --frames 240                          # N frames, then a `perf` summary; exit 1 on [ERROR]
 ./yae-engine/build/yae-engine --level … --cvar r_normal_frame=1               # a render cvar for this run only
-bash scripts/smoke_levels.sh [--shots] [level…]                               # smoke pass / picture gate (25 levels)
+bash scripts/smoke_levels.sh [--shots] [level…]                               # smoke pass / picture gate (24 levels)
 bash scripts/reference_scenes.sh [--record|--retail|--view albedo] [scene…]  # the 9 reference scenes (+ `calib` by name)
 bash scripts/menu_shots.sh [--retail] [state…]                               # the menu, state by state by clicks, ours | retail (47b.0)
 bash scripts/conformance.sh                                                   # our parsers vs the SDK's (~60 s)
@@ -88,7 +88,8 @@ bash scripts/no_change_gate.sh [--quick]                                      # 
 - **Presets** (`yae-engine/CMakePresets.json`): `dev`, `release`, `asan` (Jolt asserts logged as
   `[ERROR]`), `mingw` (Windows cross-build with llvm-mingw 20 + wine — `docs/WindowsBuild.md`).
   `scripts/tidy.sh` runs the small clang-tidy set — not a gate.
-- **Smoke:** `smoke_levels.sh` loads the 25 golden levels for 120 frames; fails on `[ERROR]`, on a
+- **Smoke:** `smoke_levels.sh` loads the 24 golden levels for 120 frames (the private maps of
+  `scripts/private_maps.txt` are in no test or gate, D33); fails on `[ERROR]`, on a
   warning shape new against `scripts/smoke_baseline.txt` (a count fails only when it doubled and grew
   by 5+), and on a log saying `self-test summary: … FAILED`. Hidden window (`--offscreen`, desk input
   dropped) since 49.10, like the shots.
@@ -162,18 +163,20 @@ in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — th
   `RetailSession.md`; contracts the work establishes go into `Invariants.md` with a `Verified by` line.
 - **Measure, then change.** A picture change is shown with a same-config control (the gate's noise floor
   beats most effects); a physics change is checked on `meat`'s crane (golden rule 4).
-- **Where we are (2026-10-04):** Phase 47b — the user's release blockers — closed
+- **Where we are (2026-10-05):** Phase 50 (cleaning for publication, `docs/Phase50_Cleaning.md`) —
+  50.0 (the publication audit and purge list) and 50.1 (code and strings) done; next 50.2 (EN-first docs).
+  Phase 47b — the user's release blockers — closed
   (`docs/Phase47b_ReleaseBlockers.md`: menu, options, gamma, key binds, console, films by libavcodec,
   sound by the original's rules, the light and shadow defaults D21; the user's checklist U1–U12 is in it);
   Phase 49 (audit and refactoring) before it — a refactor still proves itself with
-  `scripts/no_change_gate.sh`; next Phase 50 (cleaning for publication).
+  `scripts/no_change_gate.sh`.
   The order and every phase's gates: `docs/Roadmap.md`; the index of all phases: `docs/Phases.md`.
 
 ## Docs (`yae-engine/docs/`)
 
 | Document | What |
 |---|---|
-| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 178 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
+| `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 180 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
 | `docs/Phases.md` | every phase: index with status, then the digests (CLAUDE.md's former content, verbatim) |
 | `docs/DevGuide.md` | layout, build, harness and gates — the long version of this file, maintained |
 | `docs/Roadmap.md` | the order of the phases after 46 and their gates |
