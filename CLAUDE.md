@@ -164,7 +164,8 @@ in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — th
 - **Measure, then change.** A picture change is shown with a same-config control (the gate's noise floor
   beats most effects); a physics change is checked on `meat`'s crane (golden rule 4).
 - **Where we are (2026-10-05):** Phase 50 (cleaning for publication, `docs/Phase50_Cleaning.md`) —
-  50.0 (the publication audit and purge list) and 50.1 (code and strings) done; next 50.2 (EN-first docs).
+  50.0 (the publication audit and purge list), 50.1 (code and strings) and 50.2 (EN-first reference docs,
+  `docs/Decisions.md`, the READMEs, the portal) done; next 50.3 (licences and notices).
   Phase 47b — the user's release blockers — closed
   (`docs/Phase47b_ReleaseBlockers.md`: menu, options, gamma, key binds, console, films by libavcodec,
   sound by the original's rules, the light and shadow defaults D21; the user's checklist U1–U12 is in it);
@@ -177,6 +178,7 @@ in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — th
 | Document | What |
 |---|---|
 | `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 180 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
+| `docs/Decisions.md` | what the decision and checklist codes mean (D1–D33, U1–U12, K1–K7), each with its date and phase |
 | `docs/Phases.md` | every phase: index with status, then the digests (CLAUDE.md's former content, verbatim) |
 | `docs/DevGuide.md` | layout, build, harness and gates — the long version of this file, maintained |
 | `docs/Roadmap.md` | the order of the phases after 46 and their gates |
