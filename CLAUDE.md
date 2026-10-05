@@ -86,7 +86,8 @@ bash scripts/no_change_gate.sh [--quick]                                      # 
   are **manual** since 2026-10-01 (Actions minutes); every push runs only `lint.yml` (size budgets +
   format). The CI has no `gameres`: asset cases SKIP by name.
 - **Presets** (`yae-engine/CMakePresets.json`): `dev`, `release`, `asan` (Jolt asserts logged as
-  `[ERROR]`), `mingw` (Windows cross-build with llvm-mingw 20 + wine — `docs/WindowsBuild.md`).
+  `[ERROR]`), `mingw` (Windows cross-build with llvm-mingw 20 + wine — `docs/WindowsBuild.md`), `mingw-release` (the
+  Windows release, `-static`); `bash scripts/package.sh <build dir>` makes the Release 1 package (50.4).
   `scripts/tidy.sh` runs the small clang-tidy set — not a gate.
 - **Smoke:** `smoke_levels.sh` loads the 24 golden levels for 120 frames (the private maps of
   `scripts/private_maps.txt` are in no test or gate, D33); fails on `[ERROR]`, on a
@@ -165,8 +166,11 @@ in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — th
   beats most effects); a physics change is checked on `meat`'s crane (golden rule 4).
 - **Where we are (2026-10-05):** Phase 50 (cleaning for publication, `docs/Phase50_Cleaning.md`) —
   50.0 (the publication audit and purge list), 50.1 (code and strings), 50.2 (EN-first reference docs,
-  `docs/Decisions.md`, the READMEs, the portal) and 50.3 (LICENSE/NOTICE, `YAE_PORTABLE_PATHS`, FFmpeg's
-  LGPL §6) done; next 50.4 (release presets, the package, CI, `project-empty` as the starter repository).
+  `docs/Decisions.md`, the READMEs, the portal), 50.3 (LICENSE/NOTICE, `YAE_PORTABLE_PATHS`, FFmpeg's
+  LGPL §6) and 50.4 (release presets, `scripts/package.sh`, the public CI, `project-empty` as the starter
+  repository) done; 50.5 prepared locally — `scripts/publication/make_public.sh` makes every public copy
+  (audit 0), `scripts/publication/PUBLISHING.md` is the maintainer's step-by-step; the maintainer creates the
+  repositories and pushes (D37).
   Phase 47b — the user's release blockers — closed
   (`docs/Phase47b_ReleaseBlockers.md`: menu, options, gamma, key binds, console, films by libavcodec,
   sound by the original's rules, the light and shadow defaults D21; the user's checklist U1–U12 is in it);
@@ -179,7 +183,7 @@ in a save) `game/PlayerCarry`, the pre-destroy hook `game/EntityTeardown` — th
 | Document | What |
 |---|---|
 | `docs/Invariants.md` | the contracts: coordinates, frame order, ownership and init, state that outlives a level, … — 180 sections, each with `Verified by`, a generated contents at the top. **Read first.** |
-| `docs/Decisions.md` | what the decision and checklist codes mean (D1–D33, U1–U12, K1–K7), each with its date and phase |
+| `docs/Decisions.md` | what the decision and checklist codes mean (D1–D40, U1–U12, K1–K7), each with its date and phase |
 | `docs/Phases.md` | every phase: index with status, then the digests (CLAUDE.md's former content, verbatim) |
 | `docs/DevGuide.md` | layout, build, harness and gates — the long version of this file, maintained |
 | `docs/Roadmap.md` | the order of the phases after 46 and their gates |
