@@ -1,0 +1,24 @@
+# The workspace's other repositories — bootstrap.sh clones them here; each is a
+# git repository of its own.
+yae-engine/
+yae-sdk/
+yae-materials/
+yae-docs/
+yae-research/
+yae-research-private/
+yae-viewer/
+yae-QindieGL/
+yae-dcc-plugins/
+yae-level-converter/
+yae-dlss5/
+
+# Your copy of the game, and what the engine writes beside it.
+yae-game/
+
+# Logs, caches, local configuration.
+*.log
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+.claude/settings.local.json
